@@ -21,7 +21,7 @@ __pycache__/
 
 # فایل‌های مدیا و استاتیک تولید شده
 media/
-static/
+static_files/
 collected_static/
 
 # فایل‌های سیستمی
