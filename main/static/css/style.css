@@ -1030,6 +1030,28 @@ body.scrolled .nav-shell {
   width: 54px;
   height: 54px;
 }
+.brand-mark.has-img {
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;  flex-shrink: 0;
+}
+.brand-mark.has-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 0;
+  filter: none;
+  background: transparent;
+  display: block;
+}
+.brand-mark.big.has-img img {
+  border-radius: 8px;
+}
 .brand-text {
   display: flex;
   flex-direction: column;

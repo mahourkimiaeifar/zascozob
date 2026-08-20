@@ -51,7 +51,6 @@ class SiteSetting(models.Model):
     address_rd = models.TextField('آدرس واحد تحقیقات و فناوری')
     link_whatsapp = models.URLField('لینک واتساپ', blank=True)
     link_instagram = models.URLField('لینک اینستاگرام', blank=True)
-    link_eitaa = models.URLField('لینک ایتا', blank=True)
     footer_title = models.CharField('عنوان فوتر', max_length=150)
     footer_description = models.TextField('توضیحات زیر عنوان فوتر')
     newsletter_text = models.CharField('متن خبرنامه', max_length=200,
