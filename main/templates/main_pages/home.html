@@ -1,451 +1,319 @@
-{% extends 'layouts/base.html' %}
-{% load static %}
+{% extends 'layouts/base.html' %} {% load static %} {% block title %}زاسکو ذوب |
+ریخته‌گری قطعات صنعتی با دقت مهندسی{% endblock %} {% block content %}
 
-{% block title %}خانه | زاسکو ذوب - پیشرو در صنعت متالورژی{% endblock %}
+<div id="loader">
+  <div class="loader-word">زاسکو ذوب</div>
+  <div class="loader-bar"><span></span></div>
+  <p class="loader-caption">ریخته‌گری قطعات صنعتی</p>
+</div>
 
-{% block extra_head %}
-<!-- GSAP برای انیمیشن‌های پیشرفته -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<style>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  body {
-    font-family: "Vazirmatn", sans-serif;
-    background: #050505;
-    color: #ffffff;
-    overflow-x: hidden;
-  }
+<canvas id="three-canvas"></canvas>
+<div id="vignette"></div>
+<div id="scroll-progress"><div id="scroll-progress-fill"></div></div>
+<div id="scroll-space"></div>
 
-  /* کانتینر اصلی Three.js */
-  #canvas-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  /* بخش‌های اسکرول */
-  .scroll-section {
-    position: relative;
-    height: 100vh;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    perspective: 1000px;
-  }
-
-  /* هیرو سکشن */
-  .hero-section {
-    background: radial-gradient(circle at center, rgba(10,10,12,0.3) 0%, rgba(5,5,5,0.9) 100%);
-  }
-
-  .hero-content {
-    text-align: center;
-    max-width: 900px;
-    padding: 0 40px;
-    transform-style: preserve-3d;
-  }
-
-  .hero-badge {
-    display: inline-block;
-    padding: 8px 24px;
-    background: rgba(255, 107, 0, 0.15);
-    border: 1px solid rgba(255, 107, 0, 0.4);
-    border-radius: 30px;
-    color: #ff6b00;
-    font-size: 0.95rem;
-    font-weight: 700;
-    margin-bottom: 30px;
-    backdrop-filter: blur(10px);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.4); }
-    50% { box-shadow: 0 0 0 10px rgba(255, 107, 0, 0); }
-  }
-
-  .hero-title {
-    font-size: 4rem;
-    font-weight: 900;
-    line-height: 1.2;
-    margin-bottom: 24px;
-    text-shadow: 0 0 40px rgba(255, 107, 0, 0.5);
-  }
-
-  .hero-title .highlight {
-    background: linear-gradient(135deg, #ff6b00 0%, #ffaa00 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero-subtitle {
-    font-size: 1.3rem;
-    color: #a0a0b0;
-    margin-bottom: 40px;
-    line-height: 1.8;
-  }
-
-  .hero-buttons {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  /* دکمه‌های سه‌بعدی */
-  .btn-3d {
-    position: relative;
-    padding: 18px 40px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s;
-    transform-style: preserve-3d;
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    overflow: hidden;
-  }
-
-  .btn-primary-3d {
-    background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
-    color: white;
-    box-shadow: 0 10px 30px rgba(255, 107, 0, 0.4), 
-                0 0 60px rgba(255, 107, 0, 0.2);
-  }
-
-  .btn-primary-3d::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    transition: left 0.5s;
-  }
-
-  .btn-primary-3d:hover::before {
-    left: 100%;
-  }
-
-  .btn-primary-3d:hover {
-    transform: translateY(-5px) translateZ(20px);
-    box-shadow: 0 20px 40px rgba(255, 107, 0, 0.5),
-                0 0 80px rgba(255, 107, 0, 0.3);
-  }
-
-  .btn-secondary-3d {
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
-    border: 2px solid rgba(255, 107, 0, 0.5);
-    backdrop-filter: blur(10px);
-  }
-
-  .btn-secondary-3d:hover {
-    background: rgba(255, 107, 0, 0.1);
-    border-color: #ff6b00;
-    transform: translateY(-5px) translateZ(20px);
-    box-shadow: 0 20px 40px rgba(255, 107, 0, 0.3);
-  }
-
-  /* بخش CTA نهایی - فوق‌العاده جذاب */
-  .final-cta-section {
-    position: relative;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(circle at center, rgba(255,107,0,0.1) 0%, rgba(5,5,5,1) 70%);
-    overflow: hidden;
-  }
-
-  .final-cta-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff6b00' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    opacity: 0.3;
-  }
-
-  .cta-container {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    max-width: 1000px;
-    padding: 60px 40px;
-    background: rgba(20, 20, 25, 0.6);
-    border: 1px solid rgba(255, 107, 0, 0.3);
-    border-radius: 30px;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5),
-                inset 0 0 60px rgba(255, 107, 0, 0.1);
-    transform-style: preserve-3d;
-  }
-
-  .cta-glow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 120%;
-    height: 120%;
-    background: radial-gradient(circle, rgba(255,107,0,0.2) 0%, transparent 70%);
-    animation: glowPulse 3s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  @keyframes glowPulse {
-    0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-    50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
-  }
-
-  .cta-icon {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 30px;
-    background: linear-gradient(135deg, #ff6b00 0%, #ffaa00 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 20px 60px rgba(255, 107, 0, 0.5);
-    animation: float 3s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
-  }
-
-  .cta-icon svg {
-    width: 50px;
-    height: 50px;
-    fill: white;
-  }
-
-  .cta-title {
-    font-size: 2.8rem;
-    font-weight: 900;
-    margin-bottom: 20px;
-    background: linear-gradient(135deg, #ffffff 0%, #ffaa00 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .cta-text {
-    font-size: 1.2rem;
-    color: #b0b0c0;
-    margin-bottom: 40px;
-    line-height: 1.9;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .cta-phone {
-    display: inline-block;
-    font-size: 2rem;
-    font-weight: 800;
-    color: #ff6b00;
-    margin-bottom: 30px;
-    text-decoration: none;
-    text-shadow: 0 0 30px rgba(255, 107, 0, 0.5);
-    animation: phonePulse 2s infinite;
-  }
-
-  @keyframes phonePulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-  }
-
-  .cta-button-large {
-    display: inline-block;
-    padding: 24px 60px;
-    background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%);
-    color: white;
-    font-size: 1.3rem;
-    font-weight: 800;
-    border-radius: 15px;
-    text-decoration: none;
-    box-shadow: 0 20px 60px rgba(255, 107, 0, 0.5),
-                0 0 100px rgba(255, 107, 0, 0.3);
-    transition: all 0.4s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .cta-button-large::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-  }
-
-  .cta-button-large:hover::before {
-    width: 300px;
-    height: 300px;
-  }
-
-  .cta-button-large:hover {
-    transform: translateY(-8px) scale(1.05);
-    box-shadow: 0 30px 80px rgba(255, 107, 0, 0.6),
-                0 0 120px rgba(255, 107, 0, 0.4);
-  }
-
-  .cta-button-large svg {
-    margin-right: 10px;
-    vertical-align: middle;
-  }
-
-  /* نشانگر اسکرول */
-  .scroll-indicator {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 20;
-    animation: bounce 2s infinite;
-  }
-
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-    40% { transform: translateX(-50%) translateY(-20px); }
-    60% { transform: translateX(-50%) translateY(-10px); }
-  }
-
-  .scroll-indicator svg {
-    width: 40px;
-    height: 40px;
-    fill: #ff6b00;
-  }
-
-  /* ریسپانسیو */
-  @media (max-width: 768px) {
-    .hero-title { font-size: 2.5rem; }
-    .cta-title { font-size: 2rem; }
-    .cta-text { font-size: 1rem; }
-    .cta-phone { font-size: 1.5rem; }
-    .btn-3d { padding: 14px 28px; font-size: 1rem; }
-  }
-</style>
-{% endblock %}
-
-{% block content %}
-<!-- کانتینر Three.js -->
-<div id="canvas-container"></div>
-
-<!-- بخش ۱: هیرو -->
-<section class="scroll-section hero-section" data-section="0">
-  <div class="hero-content">
-    <div class="hero-badge">🔥 پیشرو در فناوری‌های نوین ذوب</div>
+<!-- ═══ ۱) هیرو ═══ -->
+<section class="z-section" data-z="0">
+  <div class="z-inner">
+    <span class="glass-pill">کارخانه ریخته‌گری قطعات صنعتی</span>
     <h1 class="hero-title">
-      آینده صنعت ذوب <br>
-      <span class="highlight">در دستان ماست</span>
+      <span class="grad-text">ریخته‌گری قطعات</span><br />صنعتی با دقت مهندسی
     </h1>
     <p class="hero-subtitle">
-      ارائه دهنده پیشرفته‌ترین راهکارهای مهندسی، طراحی و اجرای پروژه‌های صنعتی 
-      با بالاترین استانداردهای جهانی متالورژی و ریخته‌گری
+      زاسکو ذوب؛ تولیدکننده قطعات ریخته‌گری از آلیاژهای آهنی و غیرآهنی — از
+      طراحی قالب تا تحویل نهایی، همراه صنعت شما.
     </p>
     <div class="hero-buttons">
-      <a href="/contact-us/" class="btn-3d btn-primary-3d">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-        شروع همکاری و مشاوره رایگان
-      </a>
-      <a href="/portfolio/" class="btn-3d btn-secondary-3d">مشاهده نمونه‌کارها</a>
+      <a href="/contact-us/" class="btn-solid">درخواست استعلام قیمت</a>
+      <a href="/portfolio/" class="btn-line">توانمندی‌های ما</a>
     </div>
-  </div>
-  
-  <div class="scroll-indicator">
-    <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
   </div>
 </section>
 
-<!-- بخش ۲: ویژگی‌ها -->
-<section class="scroll-section" data-section="1">
-  <div class="container" style="text-align: center;">
-    <h2 style="font-size: 2.5rem; margin-bottom: 60px;">
-      چرا <span class="highlight">زاسکو ذوب</span>؟
+<!-- ═══ ) توانمندی‌ها — باز، بدون جعبه ═══ -->
+<section class="z-section" data-z="-30">
+  <div class="z-inner">
+    <div class="eyebrow">توانمندی‌های تولید</div>
+    <h2 class="section-title">
+      ریخته‌گری قطعات در <span class="grad-text">سه تخصص اصلی</span>
     </h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
-      <div style="padding: 40px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(255,107,0,0.2);">
-        <div style="font-size: 3rem; margin-bottom: 20px;">⚙️</div>
-        <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: #ff6b00;">فناوری پیشرفته</h3>
-        <p style="color: #a0a0b0; line-height: 1.8;">استفاده از جدیدترین کوره‌های القایی و خطوط تولید اتوماتیک</p>
+    <div class="cap-rows">
+      <div class="cap-row">
+        <span class="cap-num">۰۱</span>
+        <div>
+          <h3>ریخته‌گری قطعات چدنی و فولادی</h3>
+          <p>
+            تولید قطعات ریخته‌گری از انواع چدن خاکستری، داکتیل و فولادهای کربنی
+            و آلیاژی، بر اساس نقشه فنی مشتری.
+          </p>
+        </div>
       </div>
-      <div style="padding: 40px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(255,107,0,0.2);">
-        <div style="font-size: 3rem; margin-bottom: 20px;">🛡️</div>
-        <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: #ff6b00;">کیفیت تضمین‌شده</h3>
-        <p style="color: #a0a0b0; line-height: 1.8;">کنترل کیفیت چندمرحله‌ای و گواهینامه‌های استاندارد بین‌المللی</p>
+      <div class="cap-row">
+        <span class="cap-num">۰۲</span>
+        <div>
+          <h3>ریخته‌گری قطعات استیل و برنز</h3>
+          <p>
+            ریخته‌گری قطعات مقاوم به خوردگی از استیل‌های ۳۰۴، ۳۱۶ و ۴۲۰ و
+            آلیاژهای برنز برای صنایع حساس.
+          </p>
+        </div>
       </div>
-      <div style="padding: 40px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(255,107,0,0.2);">
-        <div style="font-size: 3rem; margin-bottom: 20px;">🤝</div>
-        <h3 style="font-size: 1.5rem; margin-bottom: 15px; color: #ff6b00;">پشتیبانی ۲۴/۷</h3>
-        <p style="color: #a0a0b0; line-height: 1.8;">تیم مهندسی ما در تمام مراحل پروژه در کنار شماست</p>
+      <div class="cap-row">
+        <span class="cap-num">۰۳</span>
+        <div>
+          <h3>ماشین‌کاری و عملیات حرارتی</h3>
+          <p>
+            تکمیل قطعات ریخته‌گری با عملیات حرارتی، ماشین‌کاری دقیق و کنترل
+            کیفیت ابعادی و متالورژیکی.
+          </p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- بخش ۳: CTA نهایی - فوق‌العاده جذاب -->
-<section class="scroll-section final-cta-section" data-section="2">
-  <div class="cta-container">
-    <div class="cta-glow"></div>
-    
-    <div class="cta-icon">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.72-.01-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.57c.25-.29.36-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
-      </svg>
+<!-- ═══ ) تصویر + متن ══ -->
+<section class="z-section" data-z="-60">
+  <div class="z-inner">
+    <div class="split">
+      <div class="split-text">
+        <div class="eyebrow">تجهیزات و فناوری</div>
+        <h2 class="section-title">ذوب و ریخته‌گری، تحت کنترل کامل</h2>
+        <p class="split-para">
+          در زاسکو ذوب، هر قطعه ریخته‌گری پیش از تولید، از مسیر آنالیز فنی،
+          شبیه‌سازی انجماد و کنترل کیفیت متالورژی عبور می‌کند. کوره‌های القایی
+          مدرن و تیم متخصص ما تضمین می‌کنند که قطعه نهایی، دقیقاً همانی باشد که
+          نقشه شما می‌گوید.
+        </p>
+      </div>
+      <div class="split-media liquid-glass">
+        <img
+          src="{% static 'img/foundry-pour.jpg' %}"
+          alt="ریخته‌گری قطعات صنعتی در زاسکو ذوب"
+          onerror="this.classList.add('img-missing')"
+        />
+        <span class="glass-pill media-caption"
+          >خط ذوب و ریخته‌گری زاسکو ذوب</span
+        >
+      </div>
     </div>
-    
-    <h2 class="cta-title">همین حالا برای استعلام قیمت تماس بگیرید</h2>
-    
-    <p class="cta-text">
-      برای دریافت مشاوره تخصصی، استعلام قیمت و ثبت سفارش، همین حالا با کارشناسان ما تماس بگیرید. 
-      ما در زاسکو ذوب، کیفیت و دقت را برای شما به ارمغان می‌آوریم.
-    </p>
-    
-    <a href="tel:09134430259" class="cta-phone" dir="ltr">09134430259</a>
-    
-    <br>
-    
-    <a href="/contact-us/" class="cta-button-large">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-        <path d="M14.05 2a9 9 0 0 1 8 7.94M14.05 2A9 9 0 0 0 6.11 4.5"/>
-      </svg>
-      ثبت سفارش و مشاوره رایگان
-    </a>
   </div>
 </section>
-{% endblock %}
 
-{% block three_js %}
+<!-- ═══ ۴) آمار — باز ═══ -->
+<section class="z-section" data-z="-90">
+  <div class="z-inner">
+    <div class="eyebrow">سابقه و اعتماد</div>
+    <h2 class="section-title">
+      تجربه ما در <span class="grad-text">ریخته‌گری قطعات</span>
+    </h2>
+    <div class="stats-row">
+      <div class="stat"><span>+۱۵</span><small>سال تجربه ریخته‌گری</small></div>
+      <div class="stat"><span>+۵۰۰</span><small>پروژه تحویل‌شده</small></div>
+      <div class="stat"><span>+۲۰۰</span><small>مشتری فعال صنعتی</small></div>
+      <div class="stat"><span>۲۴/۷</span><small>پشتیبانی فنی</small></div>
+    </div>
+  </div>
+</section>
+
+<div id="scroll-hint">
+  <div class="hint-line"><span></span></div>
+  اسکرول کنید
+</div>
+
+<!-- ═══════════ محتوای متنی — اسکرول Y ═══════════ -->
+<div id="y-content">
+  <!-- شروع محتوای Y — با عنوان بزرگ -->
+  <div class="y-intro">
+    <div class="container">
+      <h2 class="y-intro-title">
+        آشنایی با <span class="grad-text">زاسکو ذوب</span>
+      </h2>
+      <p>هر آنچه باید درباره ریخته‌گری قطعات صنعتی و توان تولید ما بدانید.</p>
+      <div class="rule"></div>
+    </div>
+  </div>
+  <!-- دانش فنی + تصویر -->
+  <section class="y-section">
+    <div class="container">
+      <div class="editorial-grid">
+        <div class="editorial">
+          <div class="eyebrow">دانش فنی</div>
+          <h2>ریخته‌گری قطعات صنعتی؛ از نقشه تا قطعه نهایی</h2>
+          <p>
+            زاسکو ذوب با بیش از یک دهه تجربه در حوزه
+            <strong>ریخته‌گری قطعات</strong> صنعتی، یکی از پیشگامان صنعت
+            ریخته‌گری در ایران است. ما با بهره‌گیری از کوره‌های القایی مدرن و
+            نیروهای متخصص، آماده ارائه خدمات جامع در زمینه تولید انواع قطعات
+            صنعتی سفارشی هستیم.
+          </p>
+          <p>
+            تخصص اصلی ما <strong>ریخته‌گری قطعات</strong> با آلیاژهای آهنی و
+            غیرآهنی، با دقت و کیفیت بین‌المللی است. از بررسی نقشه فنی و ساخت
+            قالب اختصاصی، تا ذوب و ریخته‌گری تحت نظارت کارشناسان متالورژی و در
+            نهایت عملیات حرارتی و ماشین‌کاری — تمام مراحل تولید قطعه در زاسکو
+            ذوب کنترل‌شده و مستند انجام می‌شود.
+          </p>
+          <ul class="editorial-list">
+            <li>
+              ریخته‌گری قطعات با آلیاژهای چدن، فولاد، استیل، برنز و آلومینیوم
+            </li>
+            <li>کنترل کیفیت دقیق متالورژیکی و ابعادی در هر مرحله از تولید</li>
+            <li>تحویل به‌موقع قطعات با بسته‌بندی استاندارد صنعتی</li>
+            <li>مشاوره مهندسی رایگان برای بهینه‌سازی طراحی قطعه</li>
+          </ul>
+        </div>
+        <div class="editorial-media liquid-glass">
+          <img
+            src="{% static 'img/cnc-machining.jpg' %}"
+            alt="ماشین‌کاری قطعات ریخته‌گری"
+            onerror="this.classList.add('img-missing')"
+          />
+          <span class="glass-pill media-caption">ماشین‌کاری دقیق قطعات</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- نوار تمام‌عرض تصویر -->
+  <div class="kb-band">
+    <img
+      src="{% static 'img/cast-parts.jpg' %}"
+      alt="قطعات ریخته‌گری زاسکو ذوب"
+      onerror="this.classList.add('img-missing')"
+    />
+    <div class="kb-overlay">
+      <h2>هر قطعه، یک تعهد</h2>
+      <p>ریخته‌گری قطعات با کیفیت بین‌المللی، تحویل ایرانی</p>
+    </div>
+  </div>
+
+  <!-- فرآیند — خط زمانی باز -->
+  <section class="y-section">
+    <div class="container">
+      <div class="y-head">
+        <h2>فرآیند <span class="grad-text">ریخته‌گری قطعات</span></h2>
+      </div>
+      <div class="timeline">
+        <div class="t-step">
+          <span class="t-dot"></span>
+          <h3>بررسی نقشه فنی</h3>
+          <p>نیازسنجی و انتخاب متریال</p>
+        </div>
+        <div class="t-step">
+          <span class="t-dot"></span>
+          <h3>طراحی و ساخت قالب</h3>
+          <p>قالب اختصاصی ریخته‌گری</p>
+        </div>
+        <div class="t-step">
+          <span class="t-dot"></span>
+          <h3>ذوب و ریخته‌گری</h3>
+          <p>نظارت مستقیم متالورژی</p>
+        </div>
+        <div class="t-step">
+          <span class="t-dot"></span>
+          <h3>عملیات حرارتی</h3>
+          <p>ماشین‌کاری و پرداخت</p>
+        </div>
+        <div class="t-step">
+          <span class="t-dot"></span>
+          <h3>کنترل کیفیت و ارسال</h3>
+          <p>بازرسی QC</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- آلیاژها — ابرِ چیپس باز -->
+  <section class="y-section alt">
+    <div class="container">
+      <div class="y-head">
+        <h2>آلیاژهای <span class="grad-text">ریخته‌گری قطعات</span></h2>
+      </div>
+      <div class="chip-cloud">
+        <span class="chip">چدن خاکستری</span><span class="chip">چدن داکتیل</span
+        ><span class="chip">چدن نشکن</span> <span class="chip">استیل 304</span
+        ><span class="chip">استیل 316</span><span class="chip">استیل 420</span
+        ><span class="chip">استیل 430</span> <span class="chip">برنز فسفری</span
+        ><span class="chip">برنز آلومینیومی</span>
+        <span class="chip">فولاد کربنی</span
+        ><span class="chip">فولاد آلیاژی</span
+        ><span class="chip">فولاد ابزاری</span>
+        <span class="chip">آلومینیوم</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- نمونه‌کارها -->
+  {% if latest_works %}
+  <section class="y-section">
+    <div class="container">
+      <div class="y-head">
+        <h2>نمونه‌کارهای <span class="grad-text">ریخته‌گری قطعات</span></h2>
+        <a class="y-link" href="/portfolio/">مشاهده همه ←</a>
+      </div>
+      <div class="work-grid">
+        {% for item in latest_works %}
+        <a href="/portfolio/" class="work-card">
+          {% if item.cover %}<img
+            src="{{ item.cover.url }}"
+            alt="ریخته‌گری قطعات {{ item.title }}"
+          />{% endif %}
+          <div class="work-body">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.excerpt|truncatechars:70 }}</p>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- وبلاگ -->
+  {% if latest_posts %}
+  <section class="y-section alt">
+    <div class="container">
+      <div class="y-head">
+        <h2>مقالات <span class="grad-text">ریخته‌گری قطعات</span></h2>
+        <a class="y-link" href="/blog/">مشاهده همه ←</a>
+      </div>
+      <div class="post-grid">
+        {% for post in latest_posts %}
+        <a href="/blog/" class="work-card">
+          {% if post.featured_image %}<img
+            src="{{ post.featured_image.url }}"
+            alt="{{ post.title }}"
+          />{% endif %}
+          <div class="work-body">
+            <span class="post-date">{{ post.publish_date|date:"Y/m/d" }}</span>
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.excerpt|truncatechars:80 }}</p>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ═══ CTA نهایی — آخر اسکرول Y ═══ -->
+  <section class="cta-final">
+    <div class="liquid-glass cta-glass">
+      <div class="eyebrow">استعلام قیمت ریخته‌گری قطعات</div>
+      <h2 class="cta-title">همین حالا برای استعلام قیمت تماس بگیرید</h2>
+      <p class="cta-text">
+        برای دریافت مشاوره تخصصی، استعلام قیمت و ثبت سفارش، همین حالا با
+        کارشناسان ما تماس بگیرید. ما در زاسکو ذوب، کیفیت و دقت را برای شما به
+        ارمغان می‌آوریم.
+      </p>
+      <a href="tel:09134302591" class="cta-phone" dir="ltr">0913 430 2591</a>
+      <div>
+        <a href="/contact-us/" class="btn-solid btn-huge">ثبت سفارش</a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %} {% block three_js %}
 <script src="{% static 'three/zscroll.js' %}"></script>
 {% endblock %}

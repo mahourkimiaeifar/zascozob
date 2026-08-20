@@ -1,37 +1,33 @@
 {% load static %}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}زاسکو ذوب{% endblock %}</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}زاسکو ذوب{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
 
-    <!-- فونت فارسی وزیرمتن -->
-    <link
-      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"
-      rel="stylesheet"
-      type="text/css"
-    />
+  <!-- ذرات محیطی (کل صفحات) -->
+  <canvas id="ambient-canvas"></canvas>
 
-    <!-- استایل اصلی -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  {% include 'partials/navbar.html' %}
 
-    <!-- کتابخانه Three.js از CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <main>{% block content %}{% endblock %}</main>
 
-    {% block extra_head %}{% endblock %}
-  </head>
-  <body>
-    {% include 'partials/navbar.html' %}
+  {% include 'partials/footer.html' %}
 
-    <main>{% block content %} {% endblock %}</main>
+  <!-- دکمه بازگشت به بالا -->
+  <button id="back-to-top" aria-label="بازگشت به بالا">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+  </button>
 
-    {% include 'partials/footer.html' %}
-
-    <!-- جاوااسکریپت معمولی (منو، اسکرول و ...) -->
-    <script src="{% static 'js/main.js' %}"></script>
-
-    <!-- جاوااسکریپت Three.js (فقط در صفحاتی که نیاز دارند لود می‌شود) -->
-    {% block three_js %}{% endblock %}
-  </body>
+  <script src="{% static 'js/main.js' %}"></script>
+  <script src="{% static 'js/ambient.js' %}"></script>
+  {% block three_js %}{% endblock %}
+</body>
 </html>
