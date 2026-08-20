@@ -76,6 +76,22 @@ class SiteSetting(models.Model):
         return obj
 
     def __str__(self): return self.site_title
+    
+# ═══ مدل پیام‌های تماس با ما ═══
+class ContactMessage(models.Model):
+    name = models.CharField('نام و نام خانوادگی', max_length=150)
+    phone = models.CharField('شماره تماس', max_length=20)
+    message = models.TextField('متن پیام')
+    created_at = models.DateTimeField('تاریخ ثبت', auto_now_add=True)
+    is_read = models.BooleanField('خوانده شده', default=False)
+
+    class Meta:
+        verbose_name = 'پیام تماس'
+        verbose_name_plural = 'پیام‌های تماس'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'پیام از {self.name} - {self.created_at.strftime("%Y/%m/%d")}'
 
 
 # 🔒 قفل حذف حتی از طریق کوئری‌ست

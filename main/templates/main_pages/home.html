@@ -1,0 +1,42 @@
+{% extends 'layouts/base.html' %} {% load static %} {% block title %}خانه |
+زاسکو ذوب{% endblock %} {% block content %}
+<!-- کانتینر مخصوص Three.js -->
+<div id="three-canvas-container"></div>
+
+<!-- محتوای رویی (Overlay) -->
+<div class="hero-overlay">
+  <div class="container hero-content">
+    <h1 class="hero-title">
+      آینده صنعت ذوب <br />
+      <span class="highlight">در دستان ماست</span>
+    </h1>
+    <p class="hero-subtitle">
+      ارائه دهنده پیشرفته‌ترین راهکارهای مهندسی، نمونه‌کارهای صنعتی و فناوری‌های
+      نوین ذوب فلزات.
+    </p>
+
+    <div class="hero-buttons">
+      <!-- دکمه‌ای که مستقیم به صفحه تماس با ما می‌رود -->
+      <a href="/contact-us/" class="btn-primary btn-large">
+        شروع همکاری و تماس با ما
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+      </a>
+      <a href="/portfolio/" class="btn-secondary btn-large"
+        >مشاهده نمونه‌کارها</a
+      >
+    </div>
+  </div>
+</div>
+{% endblock %} {% block three_js %}
+<!-- اسکریپت اختصاصی Three.js برای صفحه اصلی -->
+<script src="{% static 'three/foundry.js' %}"></script>
+{% endblock %}

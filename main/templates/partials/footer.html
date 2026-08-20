@@ -1,0 +1,31 @@
+{% load static %}
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-col">
+      <h3>زاسکو ذوب</h3>
+      <p>
+        {{ site_settings.footer_description|default:"پیشرو در صنعت ذوب و
+        فناوری‌های نوین" }}
+      </p>
+    </div>
+    <div class="footer-col">
+      <h4>دسترسی سریع</h4>
+      <ul>
+        <li><a href="/">خانه</a></li>
+        <li><a href="/about-us/">درباره ما</a></li>
+        <li><a href="/contact-us/">تماس با ما</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>ارتباط با ما</h4>
+      <p>📞 {{ site_settings.phone_mobile|default:"۰۹۱۲۳۴۵۶۷۸۹" }}</p>
+      <p>📧 {{ site_settings.email|default:"info@zascozob.com" }}</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>
+      {{ site_settings.copyright_text|default:"© ۱۴۰۳ زاسکو ذوب. تمامی حقوق
+      محفوظ است." }}
+    </p>
+  </div>
+</footer>
