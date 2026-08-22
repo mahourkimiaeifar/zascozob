@@ -79,8 +79,10 @@ class SiteSetting(models.Model):
 # ═══ مدل پیام‌های تماس با ما ═══
 class ContactMessage(models.Model):
     name = models.CharField('نام و نام خانوادگی', max_length=150)
+    email = models.EmailField('ایمیل', max_length=254, blank=True, null=True)
     phone = models.CharField('شماره تماس', max_length=20)
     message = models.TextField('متن پیام')
+    attachment = models.FileField('فایل پیوست', upload_to='contact_attachments/%Y/%m/', blank=True, null=True)
     created_at = models.DateTimeField('تاریخ ثبت', auto_now_add=True)
     is_read = models.BooleanField('خوانده شده', default=False)
 
