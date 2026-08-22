@@ -1,0 +1,123 @@
+<header class="panel-header">
+    <div class="header-right">
+        <button class="menu-toggle" id="menuToggle" aria-label="منو">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+        </button>
+        
+        <div class="page-title-wrap">
+            <h1 class="page-title">{% block page_title %}داشبورد{% endblock %}</h1>
+            {% block page_subtitle %}{% endblock %}
+        </div>
+    </div>
+
+    <div class="header-left">
+        <a href="/" target="_blank" class="header-icon-btn" title="مشاهده سایت">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+            </svg>
+        </a>
+
+        <div class="user-menu" id="userMenu">
+            <button class="user-btn">
+                <div class="user-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <div class="user-info">
+                    <strong>{{ request.user.username }}</strong>
+                    <small>مدیر سیستم</small>
+                </div>
+                <svg class="user-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9l6 6 6-6"/>
+                </svg>
+            </button>
+            <div class="user-dropdown">
+                <a href="#" class="dropdown-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    پروفایل من
+                </a>
+                <a href="#" class="dropdown-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/>
+                    </svg>
+                    تنظیمات
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="{% url 'panel:logout' %}" class="dropdown-item logout">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                    </svg>
+                    خروج از حساب
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="panel-header">
+    <div class="header-right">
+        <button class="menu-toggle" id="menuToggle" aria-label="منو">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+        </button>
+        
+        <div class="page-title-wrap">
+            <h1 class="page-title">{% block page_title %}داشبورد{% endblock %}</h1>
+            {% block page_subtitle %}{% endblock %}
+        </div>
+    </div>
+
+    <div class="header-left">
+        <a href="/" target="_blank" class="header-icon-btn" title="مشاهده سایت">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+            </svg>
+        </a>
+
+        <div class="user-menu" id="userMenu">
+            <button class="user-btn">
+                <div class="user-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <div class="user-info">
+                    <strong>{{ request.user.username }}</strong>
+                    <small>مدیر سیستم</small>
+                </div>
+                <svg class="user-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9l6 6 6-6"/>
+                </svg>
+            </button>
+            <div class="user-dropdown">
+                <a href="#" class="dropdown-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    پروفایل من
+                </a>
+                <a href="#" class="dropdown-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83"/>
+                    </svg>
+                    تنظیمات
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="{% url 'panel:logout' %}" class="dropdown-item logout">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                    </svg>
+                    خروج از حساب
+                </a>
+            </div>
+        </div>
+    </div>
+</header>

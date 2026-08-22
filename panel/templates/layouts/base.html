@@ -1,0 +1,48 @@
+{% load static %}
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}پنل مدیریت{% endblock %} | زاسکو ذوب</title>
+    
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/panel/style.css' %}">
+    {% block extra_css %}{% endblock %}
+    
+    <!-- CKEditor 5 -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/translations/fa.js"></script>
+</head>
+<body>
+
+    <!-- Sidebar Mobile Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="panel-wrapper">
+        
+        <!-- Sidebar -->
+        {% include 'partials/sidebar.html' %}
+
+        <!-- Main Content Area -->
+        <div class="panel-main">
+            
+            <!-- Header -->
+            {% include 'partials/header.html' %}
+
+            <!-- Page Content -->
+            <main class="panel-content">
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- Footer -->
+            {% include 'partials/footer.html' %}
+
+        </div>
+    </div>
+
+    <script src="{% static 'js/panel/panel.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,233 @@
+{% extends 'panel/layouts/base.html' %}
+{% load static %}
+
+{% block title %}پیام‌های تماس{% endblock %}
+{% block page_title %}پیام‌های تماس{% endblock %}
+{% block page_subtitle %}<p class="page-subtitle">مدیریت پیام‌های دریافتی از فرم تماس با ما</p>{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'panel/css/main/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="contact-manager">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-right">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input type="text" id="searchInput" placeholder="جستجو در پیام‌ها...">
+            </div>
+            <select class="filter-select" id="filterStatus">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="unread">خوانده نشده</option>
+                <option value="read">خوانده شده</option>
+                <option value="answered">پاسخ داده شده</option>
+            </select>
+        </div>
+        <div class="toolbar-left">
+            <span class="count-badge">{{ messages.count|default:0 }} پیام</span>
+            <button class="btn-ghost" id="refreshBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Messages Table -->
+    <div class="card">
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>نام</th>
+                        <th>ایمیل</th>
+                        <th>تلفن</th>
+                        <th>پیام</th>
+                        <th>پیوست</th>
+                        <th>تاریخ</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody id="messagesTableBody">
+                    {% for msg in messages %}
+                    <tr class="msg-row" data-id="{{ msg.id }}" data-status="{% if msg.is_read %}read{% else %}unread{% endif %}">
+                        <td class="cell-name">
+                            <div class="name-cell">
+                                <div class="avatar-sm">{{ msg.name|slice:":1" }}</div>
+                                <strong>{{ msg.name }}</strong>
+                            </div>
+                        </td>
+                        <td class="cell-email"><a href="mailto:{{ msg.email }}">{{ msg.email|default:"—" }}</a></td>
+                        <td class="cell-phone" dir="ltr">{{ msg.phone|default:"—" }}</td>
+                        <td class="cell-message">
+                            <div class="message-preview">{{ msg.message|truncatechars:80 }}</div>
+                        </td>
+                        <td class="cell-file">
+                            {% if msg.attachment %}
+                            <a href="{{ msg.attachment.url }}" target="_blank" class="file-badge" title="{{ msg.attachment.name }}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <path d="M14 2v6h6"/>
+                                </svg>
+                            </a>
+                            {% else %}
+                            <span class="no-file">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="cell-date">
+                            <div class="date-cell">
+                                <span>{{ msg.created_at|date:"Y/m/d" }}</span>
+                                <small>{{ msg.created_at|time:"H:i" }}</small>
+                            </div>
+                        </td>
+                        <td class="cell-status">
+                            {% if msg.is_read %}
+                            <span class="status-badge status-read">خوانده شده</span>
+                            {% else %}
+                            <span class="status-badge status-unread">جدید</span>
+                            {% endif %}
+                        </td>
+                        <td class="cell-actions">
+                            <button class="icon-btn view-btn" data-id="{{ msg.id }}" title="مشاهده">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                            <button class="icon-btn reply-btn" data-id="{{ msg.id }}" title="پاسخ">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 17l-5-5 5-5M20 18v-2a4 4 0 0 0-4-4H4"/>
+                                </svg>
+                            </button>
+                            <button class="icon-btn delete-btn danger" data-id="{{ msg.id }}" title="حذف">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="empty-row">
+                            <div class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                                <p>هیچ پیامی وجود ندارد</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal: مشاهده پیام -->
+<div class="modal" id="viewModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>جزئیات پیام</h3>
+                <button class="modal-close" data-close>×</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <label>نام:</label>
+                        <span id="viewName"></span>
+                    </div>
+                    <div class="detail-item">
+                        <label>ایمیل:</label>
+                        <span id="viewEmail"></span>
+                    </div>
+                    <div class="detail-item">
+                        <label>تلفن:</label>
+                        <span id="viewPhone" dir="ltr"></span>
+                    </div>
+                    <div class="detail-item">
+                        <label>تاریخ:</label>
+                        <span id="viewDate"></span>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <label>متن پیام:</label>
+                    <div class="message-full" id="viewMessage"></div>
+                </div>
+                <div class="detail-section" id="viewAttachmentWrap" style="display:none;">
+                    <label>فایل پیوست:</label>
+                    <a href="#" id="viewAttachment" target="_blank" class="attachment-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <path d="M14 2v6h6"/>
+                        </svg>
+                        <span id="viewAttachmentName"></span>
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" data-close>بستن</button>
+                <button class="btn-primary" id="viewReplyBtn">پاسخ به پیام</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: پاسخ با CKEditor -->
+<div class="modal modal-large" id="replyModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>پاسخ به <span id="replyName"></span></h3>
+                <button class="modal-close" data-close>×</button>
+            </div>
+            <form method="POST" action="{% url 'panel:main_contact_reply' %}" id="replyForm">
+                {% csrf_token %}
+                <input type="hidden" name="message_id" id="replyMessageId">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>گیرنده:</label>
+                        <input type="email" id="replyEmail" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>موضوع:</label>
+                        <input type="text" name="subject" id="replySubject" required placeholder="موضوع پاسخ">
+                    </div>
+                    <div class="form-group">
+                        <label>متن پاسخ:</label>
+                        <textarea name="body" id="replyBody" rows="10" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-ghost" data-close>انصراف</button>
+                    <button type="submit" class="btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                        ارسال ایمیل
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'panel/js/main/contact.js' %}"></script>
+{% endblock %}
