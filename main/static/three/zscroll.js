@@ -154,9 +154,5 @@
     readScroll();
   });
 
-  window.addEventListener('load', function () {
-    setTimeout(function () { document.body.classList.add('loaded'); }, 600);
-  });
-
   console.log('✅ کریدور مهندسی فعال شد');
 })();

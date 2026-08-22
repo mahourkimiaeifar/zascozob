@@ -1,33 +1,58 @@
 {% load static %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}زاسکو ذوب{% endblock %}</title>
-  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
-  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  {% block extra_head %}{% endblock %}
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}زاسکو ذوب{% endblock %}</title>
+    {% block meta %}
+    <meta
+      name="description"
+      content="کارخانه ریخته گری زاسکو ذوب؛ ریخته‌گری قطعات صنعتی از آلیاژهای آهنی و غیرآهنی، ماشین‌کاری و قالب‌سازی پیشرفته در اصفهان."
+    />
+    <meta property="og:site_name" content="زاسکو ذوب" />
+    <meta property="og:type" content="website" />
+    {% endblock %}
+    <link
+      href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body>
+      <!-- لودینگ (همه صفحات) -->
+  <div id="loader">
+    <div class="loader-word">زاسکو ذوب</div>
+    <div class="loader-bar"><span></span></div>
+    <p class="loader-caption">ریخته‌گری قطعات صنعتی</p>
+  </div>
 
-  <!-- ذرات محیطی (کل صفحات) -->
-  <canvas id="ambient-canvas"></canvas>
+    <!-- ذرات محیطی (کل صفحات) -->
+    <canvas id="ambient-canvas"></canvas>
 
-  {% include 'partials/navbar.html' %}
+    {% include 'partials/navbar.html' %}
 
-  <main>{% block content %}{% endblock %}</main>
+    <main>{% block content %}{% endblock %}</main>
 
-  {% include 'partials/footer.html' %}
+    {% include 'partials/footer.html' %}
 
-  <!-- دکمه بازگشت به بالا -->
-  <button id="back-to-top" aria-label="بازگشت به بالا">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-  </button>
+    <!-- دکمه بازگشت به بالا -->
+    <button id="back-to-top" aria-label="بازگشت به بالا">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+      >
+        <path d="M12 19V5M5 12l7-7 7 7" />
+      </svg>
+    </button>
 
-  <script src="{% static 'js/main.js' %}"></script>
-  <script src="{% static 'js/ambient.js' %}"></script>
-  {% block three_js %}{% endblock %}
-</body>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/ambient.js' %}"></script>
+    {% block three_js %}{% endblock %}
+  </body>
 </html>

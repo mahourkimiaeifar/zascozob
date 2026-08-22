@@ -1,6 +1,30 @@
-/* ═══ زاسکو ذوب — ذرات، بازگشت‌به‌بالا، شناوری ورود، پارالاکس ═══ */
+/* ═══ زاسکو ذوب — لودینگ، ذرات، بازگشت‌به‌بالا، شناوری ورود، پارالاکس ═══ */
 (function () {
   "use strict";
+
+  /* ── ۰) لودینگ (ضد گیر کردن - با timeout اضطراری) ── */
+  let loaderHidden = false;
+  function hideLoader() {
+    if (loaderHidden) return;
+    loaderHidden = true;
+    document.body.classList.add("loaded");
+  }
+  
+  // اولویت ۱: DOM آماده شد
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+    setTimeout(hideLoader, 400);
+  } else {
+    document.addEventListener("DOMContentLoaded", function () {
+      setTimeout(hideLoader, 400);
+    });
+  }
+  
+  // اولویت ۲: همه چیز لود شد
+  window.addEventListener("load", hideLoader);
+  
+  // 🛡️ اضطراری: حداکثر ۳ ثانیه بعد، هر طور شده لودینگ رو ببند
+  // این از گیر کردن به خاطر تصاویر 404 یا CDN کند جلوگیری می‌کنه
+  setTimeout(hideLoader, 3000);
 
   /* ── ۱) ذرات بالارونده ── */
   const canvas = document.getElementById("ambient-canvas");
@@ -70,9 +94,9 @@
     });
   }
 
-  /* ── ۳) ورود شناوری پلکانی (خودکار، بدون تغییر HTML) ── */
+  /* ── ۳) ورود شناوری پلکانی (خانه + درباره ما) ── */
   const REVEAL_SEL =
-    ".y-intro-title, .y-intro p, .y-intro .rule, .y-head, .editorial h2, .editorial p, .editorial-list li, .editorial-media, .t-step, .chip, .work-card, .cta-glass, .contact-ribbon";
+    ".y-intro-title, .y-intro p, .y-intro .rule, .y-head, .editorial h2, .editorial p, .editorial-list li, .editorial-media, .t-step, .chip, .work-card, .cta-glass, .contact-ribbon, .about-title, .breadcrumb, .section-h2, .section-intro, .intro-main p, .side-card, .about-story p, .mission-card, .infra-card, .benefit-item, .process-step, .vision-box";
 
   if ("IntersectionObserver" in window) {
     const io = new IntersectionObserver(
@@ -89,7 +113,9 @@
     );
 
     document
-      .querySelectorAll(".y-section, .y-intro, .cta-final")
+      .querySelectorAll(
+        ".y-section, .y-intro, .cta-final, .about-section, .about-hero",
+      )
       .forEach(function (scope) {
         scope.querySelectorAll(REVEAL_SEL).forEach(function (el, i) {
           el.style.setProperty("--d", (Math.min(i, 8) * 0.09).toFixed(2) + "s");
