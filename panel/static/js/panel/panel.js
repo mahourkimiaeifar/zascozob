@@ -9,13 +9,15 @@
     var sidebarClose = document.getElementById('sidebarClose');
 
     function openSidebar() {
+        if (!sidebar) return;
         sidebar.classList.add('active');
-        overlay.classList.add('active');
+        if (overlay) overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
     function closeSidebar() {
+        if (!sidebar) return;
         sidebar.classList.remove('active');
-        overlay.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
         document.body.style.overflow = '';
     }
 
@@ -27,28 +29,49 @@
     var userMenu = document.getElementById('userMenu');
     if (userMenu) {
         var userBtn = userMenu.querySelector('.user-btn');
-        userBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            userMenu.classList.toggle('open');
-        });
+        if (userBtn) {
+            userBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                userMenu.classList.toggle('open');
+            });
+        }
         document.addEventListener('click', function () {
             userMenu.classList.remove('open');
         });
     }
 
+    // ── 📅 تاریخ جلالی + ساعت زنده ──
+    function updateClock() {
+        var now = new Date();
+        var dateEl = document.getElementById('jalaliDate');
+        var timeEl = document.getElementById('liveTime');
+        if (dateEl) {
+            dateEl.textContent = new Intl.DateTimeFormat('fa-IR', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            }).format(now);
+        }
+        if (timeEl) {
+            timeEl.textContent = new Intl.DateTimeFormat('fa-IR', {
+                hour: '2-digit', minute: '2-digit'
+            }).format(now);
+        }
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
     // ── Modals ──
     document.querySelectorAll('[data-close]').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            btn.closest('.modal').classList.remove('active');
+            var m = btn.closest('.modal');
+            if (m) m.classList.remove('active');
         });
     });
-
     document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
         backdrop.addEventListener('click', function () {
-            backdrop.closest('.modal').classList.remove('active');
+            var m = backdrop.closest('.modal');
+            if (m) m.classList.remove('active');
         });
     });
-
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal.active').forEach(function (m) {
@@ -57,7 +80,7 @@
         }
     });
 
-    // ── Toast notifications ──
+    // ── Toast ─
     window.showToast = function (message, type) {
         type = type || 'info';
         var container = document.getElementById('toastContainer');
@@ -68,7 +91,6 @@
         container.appendChild(toast);
         setTimeout(function () {
             toast.style.opacity = '0';
-            toast.style.transform = 'translateX(-20px)';
             setTimeout(function () { toast.remove(); }, 400);
         }, 4000);
     };
