@@ -1,14 +1,14 @@
-{% extends 'layouts/base.html' %}
+{% extends 'layouts/blog_base.html' %}
 {% load static jalali %}
 
 {% block title %}وبلاگ ریخته‌گری{% endblock %}
-{% block meta_description %}مقالات تخصصی ریخته‌گری قطعات صنعتی، آلیاژها و فناوری‌های نوین{% endblock %}
 
 {% block content %}
 <section class="blog-hero">
     <div class="container">
+        <span class="hero-pill">دانش فنی و تجربه صنعت</span>
         <h1>وبلاگ <span class="grad-text">زاسکو ذوب</span></h1>
-        <p>دانش فنی، تجربه صنعت و آخرین اخبار ریخته‌گری</p>
+        <p>مقالات تخصصی ریخته‌گری، آلیاژها و فناوری‌های نوین صنعتی</p>
     </div>
 </section>
 
@@ -16,7 +16,6 @@
     <div class="container">
         <div class="blog-layout">
             
-            <!-- Sidebar -->
             <aside class="blog-sidebar">
                 <div class="sidebar-box">
                     <h3>جستجو</h3>
@@ -37,7 +36,6 @@
                 </div>
             </aside>
             
-            <!-- Posts Grid -->
             <div class="posts-grid">
                 {% for post in posts %}
                 <article class="post-card">
@@ -51,7 +49,7 @@
                         <span class="post-category">{{ post.category.title }}</span>
                         {% endif %}
                         <h2><a href="{% url 'blog:post_detail' post.slug %}">{{ post.title }}</a></h2>
-                        <p>{{ post.excerpt|default:post.content|truncatechars:150 }}</p>
+                        <p class="post-excerpt">{{ post.excerpt|default:post.content|truncatechars:150 }}</p>
                         <div class="post-meta">
                             <span>📅 {{ post.publish_date|jdate }}</span>
                             <span>⏱ {{ post.read_time }} دقیقه</span>
@@ -61,7 +59,7 @@
                         <a href="{% url 'blog:post_detail' post.slug %}" class="read-more">ادامه مطلب ←</a>
                     </div>
                 </article>
-                                {% empty %}
+                {% empty %}
                 <div class="empty-state">
                     <div class="empty-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">

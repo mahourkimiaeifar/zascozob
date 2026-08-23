@@ -1,7 +1,6 @@
 <section class="comments-section" id="comments">
     <h2>نظرات <span class="comment-count">({{ total_comments }})</span></h2>
     
-    <!-- Comment Form -->
     <div class="comment-form-wrap">
         <h3>نظر خود را بنویسید</h3>
         <form id="commentForm" class="comment-form">
@@ -16,7 +15,6 @@
         </form>
     </div>
     
-    <!-- Comments List -->
     <div class="comments-list" id="commentsList">
         {% for comment in comments %}
         <div class="comment-card" data-id="{{ comment.id }}">
@@ -24,7 +22,7 @@
                 <div class="comment-avatar">{{ comment.name|slice:":1" }}</div>
                 <div class="comment-info">
                     <strong>{{ comment.name }}</strong>
-                    <small>{{ comment.created|jdate:"%Y/%m/%d" }}</small>
+                    <small>{{ comment.created|jdate }}</small>
                 </div>
             </div>
             <div class="comment-body">{{ comment.text }}</div>

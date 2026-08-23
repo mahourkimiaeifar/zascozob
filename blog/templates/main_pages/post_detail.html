@@ -1,14 +1,12 @@
-{% extends 'layouts/base.html' %}
+{% extends 'layouts/blog_base.html' %}
 {% load static jalali %}
 
 {% block title %}{{ post.title }}{% endblock %}
-{% block meta_description %}{{ post.excerpt|default:post.content|truncatechars:160 }}{% endblock %}
 
 {% block content %}
 <article class="post-detail">
     <div class="container">
         
-        <!-- Header -->
         <header class="post-header">
             {% if post.category %}
             <span class="post-category">{{ post.category.title }}</span>
@@ -22,19 +20,16 @@
             </div>
         </header>
         
-        <!-- Featured Image -->
         {% if post.featured_image %}
         <div class="post-image-wrap">
             <img src="{{ post.featured_image.url }}" alt="{{ post.title }}">
         </div>
         {% endif %}
         
-        <!-- Content -->
         <div class="post-body">
             {{ post.content|linebreaks }}
         </div>
         
-        <!-- Actions -->
         <div class="post-actions">
             <button class="action-btn like-btn" data-id="{{ post.id }}">
                 <span class="icon">❤</span>
@@ -45,12 +40,10 @@
             {% include 'partials/share_buttons.html' %}
         </div>
         
-        <!-- Related Posts -->
         {% if related_posts %}
         {% include 'partials/related_posts.html' %}
         {% endif %}
         
-        <!-- Comments -->
         {% include 'partials/comments.html' %}
         
     </div>

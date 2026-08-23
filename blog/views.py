@@ -6,20 +6,14 @@ from .models import Post, Category, Comment
 
 
 def post_list(request):
-    """صفحه اصلی بلاگ — لیست مقالات"""
     posts = Post.objects.filter(published=True, is_deleted=False).select_related('category')
     categories = Category.objects.filter(posts__published=True).distinct()
-    
-    # فیلتر بر اساس دسته‌بندی
     category_slug = request.GET.get('category')
     if category_slug:
         posts = posts.filter(category__slug=category_slug)
-    
-    # جستجو
     search_query = request.GET.get('q', '').strip()
     if search_query:
         posts = posts.filter(Q(title__icontains=search_query) | Q(content__icontains=search_query))
-    
     return render(request, 'main_pages/post_list.html', {
         'posts': posts,
         'categories': categories,
@@ -29,25 +23,15 @@ def post_list(request):
 
 
 def post_detail(request, slug):
-    """صفحه تک مقاله"""
     post = get_object_or_404(Post, slug=slug, published=True, is_deleted=False)
-    
-    # کامنت‌های تایید شده
-    comments = post.comments.filter(approved=True, is_deleted=False)[:5]  # ۵ تا اول
-    
-    # پست‌های مرتبط (هم دسته‌بندی)
+    comments = post.comments.filter(approved=True, is_deleted=False)[:5]
     related_posts = Post.objects.filter(
-        category=post.category,
-        published=True,
-        is_deleted=False
+        category=post.category, published=True, is_deleted=False
     ).exclude(id=post.id)[:3]
-    
-    # افزایش views
     if not request.session.get(f'viewed_post_{post.id}'):
         post.views += 1
         post.save(update_fields=['views'])
         request.session[f'viewed_post_{post.id}'] = True
-    
     return render(request, 'main_pages/post_detail.html', {
         'post': post,
         'comments': comments,
@@ -58,50 +42,34 @@ def post_detail(request, slug):
 
 @require_POST
 def load_more_comments(request, post_id):
-    """لود کامنت‌های بیشتر"""
     post = get_object_or_404(Post, id=post_id)
     offset = int(request.POST.get('offset', 0))
-    limit = 5
-    
-    comments = post.comments.filter(approved=True, is_deleted=False)[offset:offset + limit]
-    
-    comments_data = []
-    for comment in comments:
-        comments_data.append({
-            'name': comment.name,
-            'text': comment.text,
-            'likes': comment.likes,
-            'dislikes': comment.dislikes,
-            'created': comment.created.strftime('%Y/%m/%d - %H:%M'),
-            'id': comment.id,
-        })
-    
+    comments = post.comments.filter(approved=True, is_deleted=False)[offset:offset + 5]
+    data = [{
+        'name': c.name, 'text': c.text, 'likes': c.likes, 'dislikes': c.dislikes,
+        'created': c.created.strftime('%Y/%m/%d - %H:%M'), 'id': c.id,
+    } for c in comments]
     return JsonResponse({
-        'comments': comments_data,
-        'has_more': post.comments.filter(approved=True, is_deleted=False).count() > offset + limit,
+        'comments': data,
+        'has_more': post.comments.filter(approved=True, is_deleted=False).count() > offset + 5,
     })
 
 
 @require_POST
 def submit_comment(request, post_id):
-    """ثبت کامنت جدید"""
     post = get_object_or_404(Post, id=post_id)
     name = request.POST.get('name', '').strip()
     text = request.POST.get('text', '').strip()
-    
     if not name or not text:
-        return JsonResponse({'success': False, 'error': 'نام و متن کامنت اجباری است'})
-    
+        return JsonResponse({'success': False, 'error': 'نام و متن اجباری است'})
     if len(text) < 10:
-        return JsonResponse({'success': False, 'error': 'متن کامنت باید حداقل ۱۰ کاراکتر باشد'})
-    
+        return JsonResponse({'success': False, 'error': 'متن باید حداقل ۱۰ کاراکتر باشد'})
     Comment.objects.create(post=post, name=name, text=text)
-    return JsonResponse({'success': True, 'message': 'کامنت شما پس از تایید ادمین نمایش داده خواهد شد'})
+    return JsonResponse({'success': True, 'message': 'کامنت شما پس از تایید ادمین نمایش داده می‌شود'})
 
 
 @require_POST
 def like_post(request, post_id):
-    """لایک مقاله"""
     post = get_object_or_404(Post, id=post_id)
     post.likes += 1
     post.save(update_fields=['likes'])
@@ -110,17 +78,15 @@ def like_post(request, post_id):
 
 @require_POST
 def like_comment(request, comment_id):
-    """لایک کامنت"""
-    comment = get_object_or_404(Comment, id=comment_id)
-    comment.likes += 1
-    comment.save(update_fields=['likes'])
-    return JsonResponse({'success': True, 'likes': comment.likes})
+    c = get_object_or_404(Comment, id=comment_id)
+    c.likes += 1
+    c.save(update_fields=['likes'])
+    return JsonResponse({'success': True, 'likes': c.likes})
 
 
 @require_POST
 def dislike_comment(request, comment_id):
-    """دیسلایک کامنت"""
-    comment = get_object_or_404(Comment, id=comment_id)
-    comment.dislikes += 1
-    comment.save(update_fields=['dislikes'])
-    return JsonResponse({'success': True, 'dislikes': comment.dislikes})
+    c = get_object_or_404(Comment, id=comment_id)
+    c.dislikes += 1
+    c.save(update_fields=['dislikes'])
+    return JsonResponse({'success': True, 'dislikes': c.dislikes})
