@@ -77,7 +77,7 @@ def main_contact(request):
     all_messages = ContactMessage.objects.all().order_by('-created_at')
     unread = ContactMessage.objects.filter(is_read=False).count()
     
-    return render(request, 'main_pages/panel/main/contact.html', {
+    return render(request, 'main_pages/main/contact.html', {
         'messages': all_messages,
         'unread_messages': unread,
     })

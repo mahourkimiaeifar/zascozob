@@ -1,6 +1,10 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/main/style.css' %}">
+{% endblock %}
+
 {% block title %}تماس با ما | کارخانه ریخته گری زاسکو ذوب{% endblock %}
 
 {% block meta %}
@@ -161,10 +165,13 @@
                     </div>
                     <p class="co-address-text">اصفهان، نجف‌آباد، شهرک صنعتی منتظریه، ابتدای خیابان قادری شمالی، ضلع غربی
                         پلاک ۲، کد پستی: 130</p>
+                    <iframe class="co-map"
+                        src="https://maps.google.com/maps?q=32.6778939033521,51.41027391111399&z=15&hl=fa&output=embed"
+                        loading="lazy" title="نقشه کارخانه زاسکو ذوب"></iframe>
                     <p class="co-address-hint">📍 توضیحات مسیر: بعد از گیت ورودی، اولین ساختمان دست چپ ابتدای خیابان
                         قادری</p>
-                    <a href="https://maps.google.com/?q=32.6361,51.3647" class="co-address-link">مشاهده روی نقشه
-                        <span>←</span></a>
+                    <a href="https://maps.google.com/?q=32.6778939033521,51.41027391111399" target="_blank"
+                        class="co-address-link">مسیریابی در گوگل مپ <span>←</span></a>
                 </div>
 
                 <div class="co-address-card co-reveal">
@@ -176,10 +183,13 @@
                         </div>
                     </div>
                     <p class="co-address-text">اصفهان، نجف‌آباد، دانشگاه آزاد اسلامی، ساختمان علم و فناوری، اتاق ۳۰۲</p>
+                    <iframe class="co-map"
+                        src="https://maps.google.com/maps?q=32.66321392115827,51.39499908285877&z=15&hl=fa&output=embed"
+                        loading="lazy" title="نقشه واحد تحقیقات زاسکو ذوب"></iframe>
                     <p class="co-address-hint">💡 این واحد محل حضور مستمر تیم تحقیق و توسعه است و فضایی برای هم‌افزایی
                         علم و صنعت فراهم آورده است.</p>
-                    <a href="https://maps.google.com/?q=32.6361,51.3647" class="co-address-link">مشاهده روی نقشه
-                        <span>←</span></a>
+                    <a href="https://maps.google.com/?q=32.66321392115827,51.39499908285877" target="_blank"
+                        class="co-address-link">مسیریابی در گوگل مپ <span>←</span></a>
                 </div>
             </div>
         </div>
@@ -448,6 +458,10 @@
 
 </main>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/main/contact.js' %}"></script>
 {% endblock %}
 
 {% block three_js %}
