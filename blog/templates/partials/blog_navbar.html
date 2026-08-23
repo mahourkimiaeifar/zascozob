@@ -1,44 +1,12 @@
-{% load static %}
-<nav class="navbar">
-  <div class="nav-shell">
-    <a href="/" class="brand">
-      <span class="brand-mark has-img">
-        <img src="{% static 'img/logo-tak.png' %}" alt="لوگو زاسکو ذوب" />
-      </span>
-      <span class="brand-text">
-        <strong>زاسکو ذوب</strong>
-        <small>قطعه ریزان ذوب آرای سپاهان</small>
-      </span>
-    </a>
-
-    <ul class="nav-links">
-      <li><a href="{% url 'main:home' %}" class="nav-link">خانه</a></li>
-      <li><a href="{% url 'main:about' %}" class="nav-link">درباره ما</a></li>
-      <li><a href="/portfolio/" class="nav-link">نمونه‌کارها</a></li>
-      <li><a href="/gallery/" class="nav-link">گالری تصاویر</a></li>
-      <li><a href="{% url 'blog:post_list' %}" class="nav-link">وبلاگ</a></li>
-      <li><a href="{% url 'contact' %}" class="nav-link">تماس با ما</a></li>
-      {% if request.user.is_authenticated and request.user.is_staff %}
-      <li class="nav-item">
-        <a href="{% url 'panel:dashboard' %}" class="nav-link admin-link" title="پنل مدیریت">
-          <span class="admin-icon">⚙</span>
-          <span class="admin-text">پنل مدیریت</span>
-        </a>
-      </li>
-      {% endif %}
-    </ul>
-
-    <div class="nav-actions">
-      <a href="tel:09134302591" class="nav-cta">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path
-            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
-        </svg>
-        <span dir="ltr">0913 430 2591</span>
-      </a>
-      <button class="mobile-menu-btn" aria-label="منو">
-        <span></span><span></span><span></span>
-      </button>
+<nav class="blog-navbar">
+    <div class="nav-container">
+        <a href="/" class="logo">زاسکو <span class="highlight">ذوب</span></a>
+        <ul class="nav-links">
+            <li><a href="/">خانه</a></li>
+            <li><a href="/about/">درباره ما</a></li>
+            <li><a href="{% url 'blog:post_list' %}" class="active">وبلاگ</a></li>
+            <li><a href="/portfolio/">نمونه‌کارها</a></li>
+            <li><a href="/contact/">تماس با ما</a></li>
+        </ul>
     </div>
-  </div>
 </nav>
