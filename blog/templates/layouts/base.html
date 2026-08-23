@@ -1,6 +1,7 @@
 {% load static %}
 <!doctype html>
 <html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,16 +11,17 @@
     <link rel="stylesheet" href="{% static 'css/blog.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
-    {% include 'partials/navbar.html' %}
-    
+    {% include 'partials/blog_navbar.html' %}
+
     <main class="blog-main">
         {% block content %}{% endblock %}
     </main>
-    
-    {% include 'partials/footer.html' %}
-    
+
+    {% include 'partials/blog_footer.html' %}
     <script src="{% static 'js/blog.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>
