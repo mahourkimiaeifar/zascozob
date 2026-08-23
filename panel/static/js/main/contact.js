@@ -1,178 +1,104 @@
-/* ═══ صفحه مدیریت پیام‌ها ═══ */
+/* ═══ مدیریت پیام‌های تماس ═══ */
 (function () {
     "use strict";
 
-    // ── Search & Filter ──
+    function getCookie(n) { var v = '; ' + document.cookie; var p = v.split('; ' + n + '='); if (p.length === 2) return p.pop().split(';').shift(); return ''; }
+
+    /* جستجو و فیلتر */
     var searchInput = document.getElementById('searchInput');
     var filterSelect = document.getElementById('filterStatus');
-    var rows = Array.from(document.querySelectorAll('.msg-row'));
-
+    var rows = Array.prototype.slice.call(document.querySelectorAll('.msg-row'));
     function filterRows() {
-        var q = (searchInput ? searchInput.value : '').toLowerCase();
-        var status = filterSelect ? filterSelect.value : '';
-        rows.forEach(function (row) {
-            var text = row.textContent.toLowerCase();
-            var rowStatus = row.dataset.status || '';
-            var matchText = !q || text.indexOf(q) > -1;
-            var matchStatus = !status || rowStatus === status;
-            row.style.display = matchText && matchStatus ? '' : 'none';
+        var q = searchInput ? searchInput.value.toLowerCase() : '';
+        var st = filterSelect ? filterSelect.value : '';
+        rows.forEach(function (r) {
+            var okText = !q || r.textContent.toLowerCase().indexOf(q) > -1;
+            var okStatus = !st || r.dataset.status === st;
+            r.style.display = (okText && okStatus) ? '' : 'none';
         });
     }
     if (searchInput) searchInput.addEventListener('input', filterRows);
     if (filterSelect) filterSelect.addEventListener('change', filterRows);
 
-    // ── Refresh ──
     var refreshBtn = document.getElementById('refreshBtn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', function () {
-            location.reload();
-        });
-    }
+    if (refreshBtn) refreshBtn.addEventListener('click', function () { location.reload(); });
 
-    // ── View Modal ──
+    /* مودال مشاهده */
     var viewModal = document.getElementById('viewModal');
-    var currentMsgId = null;
-
+    var currentId = null;
     document.querySelectorAll('.view-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var row = btn.closest('.msg-row');
             document.getElementById('viewName').textContent = row.querySelector('.name-cell strong').textContent;
             document.getElementById('viewEmail').textContent = row.querySelector('.cell-email a').textContent;
-            document.getElementById('viewPhone').textContent = row.querySelector('.cell-phone').textContent;
+            document.getElementById('viewPhone').textContent = row.querySelector('.cell-phone').textContent.trim();
             document.getElementById('viewDate').textContent = row.querySelector('.date-cell').textContent.trim();
             document.getElementById('viewMessage').textContent = row.querySelector('.message-preview').textContent;
-
-            var fileBadge = row.querySelector('.file-badge');
+            var fb = row.querySelector('.file-badge');
             var wrap = document.getElementById('viewAttachmentWrap');
-            if (fileBadge) {
-                document.getElementById('viewAttachment').href = fileBadge.href;
-                document.getElementById('viewAttachmentName').textContent = 'دانلود فایل پیوست';
-                wrap.style.display = '';
-            } else {
-                wrap.style.display = 'none';
-            }
-
-            currentMsgId = btn.dataset.id;
+            if (fb) { document.getElementById('viewAttachment').href = fb.href; wrap.style.display = ''; }
+            else wrap.style.display = 'none';
+            currentId = btn.dataset.id;
             viewModal.classList.add('active');
-
-            // Mark as read
-            fetch('/panel/api/mark-read/' + currentMsgId + '/', {
-                method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken') }
-            }).then(function () {
-                row.dataset.status = 'read';
-                var badge = row.querySelector('.status-badge');
-                if (badge) {
-                    badge.textContent = 'خوانده شده';
-                    badge.className = 'status-badge status-read';
-                }
-            });
+            fetch('/zasco-admin-x9k2p/api/mark-read/' + currentId + '/', { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } })
+                .then(function () { row.dataset.status = 'read'; var b = row.querySelector('.status-badge'); if (b) { b.textContent = 'خوانده شده'; b.className = 'status-badge status-read'; } });
         });
     });
 
-    // ── Reply Modal + CKEditor ──
+    /* مودال پاسخ + CKEditor */
     var replyModal = document.getElementById('replyModal');
-    var ckeditorInstance = null;
-
-    function initCKEditor() {
-        if (ckeditorInstance) return;
-        if (typeof ClassicEditor === 'undefined') return;
-
-        ClassicEditor
-            .create(document.getElementById('replyBody'), {
-                language: 'fa',
-                toolbar: [
-                    'heading', '|',
-                    'bold', 'italic', 'underline', 'strikethrough', '|',
-                    'bulletedList', 'numberedList', '|',
-                    'link', 'blockQuote', 'insertTable', 'imageUpload', '|',
-                    'alignment', 'outdent', 'indent', '|',
-                    'undo', 'redo'
-                ],
-                placeholder: 'متن پاسخ را اینجا بنویسید...'
-            })
-            .then(function (editor) {
-                ckeditorInstance = editor;
-            })
-            .catch(function (err) { console.error(err); });
+    var editor = null;
+    function initEditor() {
+        if (editor || typeof ClassicEditor === 'undefined') return;
+        ClassicEditor.create(document.getElementById('replyBody'), {
+            language: 'fa',
+            toolbar: ['heading', '|', 'bold', 'italic', 'underline', '|', 'bulletedList', 'numberedList', '|', 'link', 'insertTable', 'imageUpload', '|', 'alignment', 'undo', 'redo']
+        }).then(function (e) { editor = e; }).catch(function (err) { console.error(err); });
     }
-
+    function openReply(row) {
+        document.getElementById('replyName').textContent = row.querySelector('.name-cell strong').textContent;
+        document.getElementById('replyEmail').value = row.querySelector('.cell-email a').textContent;
+        document.getElementById('replyMessageId').value = row.querySelector('.reply-btn').dataset.id;
+        document.getElementById('replySubject').value = 'پاسخ به پیام شما - زاسکو ذوب';
+        replyModal.classList.add('active');
+        setTimeout(initEditor, 200);
+    }
     document.querySelectorAll('.reply-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var row = btn.closest('.msg-row');
-            document.getElementById('replyName').textContent = row.querySelector('.name-cell strong').textContent;
-            document.getElementById('replyEmail').value = row.querySelector('.cell-email a').textContent;
-            document.getElementById('replyMessageId').value = btn.dataset.id;
-            document.getElementById('replySubject').value = 'پاسخ به پیام شما';
-
-            replyModal.classList.add('active');
-            setTimeout(initCKEditor, 200);
-        });
+        btn.addEventListener('click', function () { openReply(btn.closest('.msg-row')); });
     });
-
-    document.getElementById('viewReplyBtn').addEventListener('click', function () {
-        document.querySelector('[data-id="' + currentMsgId + '"] .reply-btn').click();
+    var viewReplyBtn = document.getElementById('viewReplyBtn');
+    if (viewReplyBtn) viewReplyBtn.addEventListener('click', function () {
         viewModal.classList.remove('active');
+        var row = document.querySelector('.msg-row[data-id="' + currentId + '"]');
+        if (row) openReply(row);
     });
 
-    // ── Delete ──
+    /* حذف */
     document.querySelectorAll('.delete-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             if (!confirm('آیا از حذف این پیام مطمئن هستید؟')) return;
             var row = btn.closest('.msg-row');
-            fetch('/panel/api/delete/' + btn.dataset.id + '/', {
-                method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken') }
-            }).then(function (r) {
-                if (r.ok) {
-                    row.style.opacity = '0';
-                    setTimeout(function () { row.remove(); }, 300);
-                    showToast('پیام با موفقیت حذف شد', 'success');
-                }
-            });
+            fetch('/zasco-admin-x9k2p/api/delete/' + btn.dataset.id + '/', { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } })
+                .then(function (r) { if (r.ok) { row.style.opacity = '0'; setTimeout(function () { row.remove(); }, 300); showToast('پیام حذف شد', 'success'); } });
         });
     });
 
-    // ── Reply Form ──
+    /* ارسال پاسخ */
     var replyForm = document.getElementById('replyForm');
-    if (replyForm) {
-        replyForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            var body = ckeditorInstance ? ckeditorInstance.getData() : document.getElementById('replyBody').value;
-            if (!body) {
-                showToast('متن پاسخ نمی‌تواند خالی باشد', 'error');
-                return;
-            }
-
-            var formData = new FormData(replyForm);
-            formData.set('body', body);
-
-            fetch(replyForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-CSRFToken': getCookie('csrftoken') }
-            })
+    if (replyForm) replyForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var body = editor ? editor.getData() : document.getElementById('replyBody').value;
+        if (!body || body === '<p>&nbsp;</p>') { showToast('متن پاسخ خالی است', 'error'); return; }
+        var fd = new FormData(replyForm);
+        fd.set('body', body);
+        fetch(replyForm.action, { method: 'POST', body: fd, headers: { 'X-CSRFToken': getCookie('csrftoken') } })
             .then(function (r) { return r.json(); })
-            .then(function (data) {
-                if (data.success) {
-                    showToast('پاسخ با موفقیت ارسال شد', 'success');
-                    replyModal.classList.remove('active');
-                    if (ckeditorInstance) ckeditorInstance.setData('');
-                } else {
-                    showToast('خطا: ' + data.error, 'error');
-                }
+            .then(function (d) {
+                if (d.success) { showToast('پاسخ با موفقیت ارسال شد', 'success'); replyModal.classList.remove('active'); if (editor) editor.setData(''); setTimeout(function () { location.reload(); }, 800); }
+                else showToast('خطا: ' + d.error, 'error');
             })
             .catch(function () { showToast('خطا در ارسال', 'error'); });
-        });
-    }
-
-    // ── CSRF Helper ──
-    function getCookie(name) {
-        var value = '; ' + document.cookie;
-        var parts = value.split('; ' + name + '=');
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return '';
-    }
+    });
 
     console.log('✅ Contact page initialized');
 })();

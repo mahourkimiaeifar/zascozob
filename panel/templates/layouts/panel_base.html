@@ -1,6 +1,7 @@
 {% load static %}
 <!doctype html>
 <html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,19 +13,19 @@
     <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
     <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/translations/fa.js"></script>
 </head>
-<body data-page-title="{% block page_title_var %}داشبورد{% endblock %}">
+
+<body>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="panel-wrapper">
         {% include 'partials/sidebar.html' %}
         <div class="panel-main">
             {% include 'partials/header.html' %}
-            <main class="panel-content">
-                {% block content %}{% endblock %}
-            </main>
+            <main class="panel-content">{% block content %}{% endblock %}</main>
             {% include 'partials/panel_footer.html' %}
         </div>
     </div>
     <script src="{% static 'js/panel/panel.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>
