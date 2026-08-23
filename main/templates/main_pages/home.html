@@ -1,36 +1,26 @@
 {% extends 'layouts/base.html' %} {% load static %} {% block title %}ریخته‌گری
 قطعات صنعتی | کارخانه ریخته گری زاسکو ذوب{% endblock %} {% block meta %}
-<meta
-  name="description"
-  content="کارخانه ریخته گری زاسکو ذوب؛ تولیدکننده قطعات ریخته‌گری از آلیاژهای آهنی و غیرآهنی با قالب‌سازی و ماشین‌کاری پیشرفته در اصفهان. استعلام قیمت: ۰۹۱۳۴۳۰۲۵۹۱"
-/>
-<meta
-  property="og:title"
-  content="کارخانه ریخته گری زاسکو ذوب | ریخته‌گری قطعات صنعتی"
-/>
-<meta
-  property="og:description"
-  content="تولیدکننده قطعات ریخته‌گری از آلیاژهای آهنی و غیرآهنی در اصفهان."
-/>
+<meta name="description"
+  content="کارخانه ریخته گری زاسکو ذوب؛ تولیدکننده قطعات ریخته‌گری از آلیاژهای آهنی و غیرآهنی با قالب‌سازی و ماشین‌کاری پیشرفته در اصفهان. استعلام قیمت: ۰۹۱۳۴۳۰۲۵۹۱" />
+<meta property="og:title" content="کارخانه ریخته گری زاسکو ذوب | ریخته‌گری قطعات صنعتی" />
+<meta property="og:description" content="تولیدکننده قطعات ریخته‌گری از آلیاژهای آهنی و غیرآهنی در اصفهان." />
 <meta property="og:url" content="https://zascozob.com/" />
 {% endblock %} {% block content %}
 
 <canvas id="three-canvas"></canvas>
 <div id="vignette"></div>
-<div id="scroll-progress"><div id="scroll-progress-fill"></div></div>
+<div id="scroll-progress">
+  <div id="scroll-progress-fill"></div>
+</div>
 <div id="scroll-space"></div>
 
 <!-- ═══ ۱) هیرو ═══ -->
 <section class="z-section" data-z="0">
   <div class="z-inner">
     <span class="glass-pill">کارخانه ریخته‌گری قطعات صنعتی</span>
-    <h1 class="hero-title">
-      <span class="grad-text">ریخته‌گری قطعات</span><br />صنعتی با دقت مهندسی
-    </h1>
-    <p class="hero-subtitle">
-      زاسکو ذوب؛ تولیدکننده قطعات ریخته‌گری از آلیاژهای آهنی و غیرآهنی — از
-      طراحی قالب تا تحویل نهایی، همراه صنعت شما.
-    </p>
+    <h1 class="hero-title">{{ site.site_title }}</h1>
+    <p class="hero-subtitle">{{ site.subtitle }}</p>
+    <p class="hero-about">{{ site.about_text }}</p>
     <div class="hero-buttons">
       <a href="/contact-us/" class="btn-solid">درخواست استعلام قیمت</a>
       <a href="/portfolio/" class="btn-line">توانمندی‌های ما</a>
@@ -95,14 +85,9 @@
         </p>
       </div>
       <div class="split-media liquid-glass">
-        <img
-          src="{% static 'img/foundry-pour.jpg' %}"
-          alt="ریخته‌گری قطعات صنعتی در زاسکو ذوب"
-          onerror="this.classList.add('img-missing')"
-        />
-        <span class="glass-pill media-caption"
-          >خط ذوب و ریخته‌گری زاسکو ذوب</span
-        >
+        <img src="{% static 'img/foundry-pour.jpg' %}" alt="ریخته‌گری قطعات صنعتی در زاسکو ذوب"
+          onerror="this.classList.add('img-missing')" />
+        <span class="glass-pill media-caption">خط ذوب و ریخته‌گری زاسکو ذوب</span>
       </div>
     </div>
   </div>
@@ -174,11 +159,8 @@
           </ul>
         </div>
         <div class="editorial-media liquid-glass">
-          <img
-            src="{% static 'img/cnc-machining.jpg' %}"
-            alt="ماشین‌کاری قطعات ریخته‌گری"
-            onerror="this.classList.add('img-missing')"
-          />
+          <img src="{% static 'img/cnc-machining.jpg' %}" alt="ماشین‌کاری قطعات ریخته‌گری"
+            onerror="this.classList.add('img-missing')" />
           <span class="glass-pill media-caption">ماشین‌کاری دقیق قطعات</span>
         </div>
       </div>
@@ -187,11 +169,8 @@
 
   <!-- نوار تمام‌عرض تصویر -->
   <div class="kb-band">
-    <img
-      src="{% static 'img/cast-parts.jpg' %}"
-      alt="قطعات ریخته‌گری زاسکو ذوب"
-      onerror="this.classList.add('img-missing')"
-    />
+    <img src="{% static 'img/cast-parts.jpg' %}" alt="قطعات ریخته‌گری زاسکو ذوب"
+      onerror="this.classList.add('img-missing')" />
     <div class="kb-overlay">
       <h2>هر قطعه، یک تعهد</h2>
       <p>ریخته‌گری قطعات با کیفیت بین‌المللی، تحویل ایرانی</p>
@@ -241,14 +220,11 @@
         <h2>آلیاژهای <span class="grad-text">ریخته‌گری قطعات</span></h2>
       </div>
       <div class="chip-cloud">
-        <span class="chip">چدن خاکستری</span><span class="chip">چدن داکتیل</span
-        ><span class="chip">چدن نشکن</span> <span class="chip">استیل 304</span
-        ><span class="chip">استیل 316</span><span class="chip">استیل 420</span
-        ><span class="chip">استیل 430</span> <span class="chip">برنز فسفری</span
-        ><span class="chip">برنز آلومینیومی</span>
-        <span class="chip">فولاد کربنی</span
-        ><span class="chip">فولاد آلیاژی</span
-        ><span class="chip">فولاد ابزاری</span>
+        <span class="chip">چدن خاکستری</span><span class="chip">چدن داکتیل</span><span class="chip">چدن نشکن</span>
+        <span class="chip">استیل 304</span><span class="chip">استیل 316</span><span class="chip">استیل 420</span><span
+          class="chip">استیل 430</span> <span class="chip">برنز فسفری</span><span class="chip">برنز آلومینیومی</span>
+        <span class="chip">فولاد کربنی</span><span class="chip">فولاد آلیاژی</span><span class="chip">فولاد
+          ابزاری</span>
         <span class="chip">آلومینیوم</span>
       </div>
     </div>
@@ -265,10 +241,7 @@
       <div class="work-grid">
         {% for item in latest_works %}
         <a href="/portfolio/" class="work-card">
-          {% if item.cover %}<img
-            src="{{ item.cover.url }}"
-            alt="ریخته‌گری قطعات {{ item.title }}"
-          />{% endif %}
+          {% if item.cover %}<img src="{{ item.cover.url }}" alt="ریخته‌گری قطعات {{ item.title }}" />{% endif %}
           <div class="work-body">
             <h3>{{ item.title }}</h3>
             <p>{{ item.excerpt|truncatechars:70 }}</p>
@@ -291,10 +264,7 @@
       <div class="post-grid">
         {% for post in latest_posts %}
         <a href="/blog/" class="work-card">
-          {% if post.featured_image %}<img
-            src="{{ post.featured_image.url }}"
-            alt="{{ post.title }}"
-          />{% endif %}
+          {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" />{% endif %}
           <div class="work-body">
             <span class="post-date">{{ post.publish_date|date:"Y/m/d" }}</span>
             <h3>{{ post.title }}</h3>

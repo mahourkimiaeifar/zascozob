@@ -12,4 +12,5 @@ urlpatterns = [
     path('main/contact/reply/', views.main_contact_reply, name='main_contact_reply'),
     path('api/mark-read/<int:pk>/', views.mark_read, name='mark_read'),
     path('api/delete/<int:pk>/', views.delete_message, name='delete_message'),
+    path('main/settings/', views.site_settings, name='site_settings'),
 ]

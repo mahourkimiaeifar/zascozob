@@ -42,25 +42,51 @@ class SoftDeleteModel(models.Model):
 
 # ═══ تنظیمات سایت — فقط ویرایش، هرگز حذف ═══
 class SiteSetting(models.Model):
+    # ═══ عمومی ═══
     site_title = models.CharField('عنوان اصلی سایت', max_length=100, default='زاسکو ذوب',
         help_text='در هر صفحه جلوی آن می‌آید؛ مثل «زاسکو ذوب - درباره ما»')
-    phone_mobile = models.CharField('شماره موبایل شرکت', max_length=20)
-    phone_office = models.CharField('شماره تلفن ثابت شرکت', max_length=20)
-    email = models.EmailField('ایمیل شرکت')
-    address_factory = models.TextField('آدرس کارخانه')
-    address_rd = models.TextField('آدرس واحد تحقیقات و فناوری')
-    link_whatsapp = models.URLField('لینک واتساپ', blank=True)
-    link_instagram = models.URLField('لینک اینستاگرام', blank=True)
-    footer_title = models.CharField('عنوان فوتر', max_length=150)
-    footer_description = models.TextField('توضیحات زیر عنوان فوتر')
+    subtitle = models.CharField('زیرعنوان سایت', max_length=150, default='قطعه ریزان ذوب آرای سپاهان',
+        help_text='در هدر یا هیرو نمایش داده می‌شود')
+    about_text = models.TextField('متن توضیح کلی شرکت',
+        default='کارخانه ریخته‌گری زاسکو ذوب فعال در زمینه‌های ریخته‌گری آلیاژهای آهنی و غیرآهنی...')
+
+    # ═══ اطلاعات شرکت (ستون اول فوتر) ═══
+    footer_title_company = models.CharField('سرعنوان: اطلاعات شرکت', max_length=100, default='اطلاعات شرکت')
+    phone_mobile = models.CharField('شماره موبایل شرکت', max_length=20, default='+989134302591')
+    phone_office = models.CharField('شماره تلفن ثابت شرکت', max_length=20, default='031-42318530')
+    email = models.EmailField('ایمیل شرکت', default='zascozob@gmail.com')
+    address_factory = models.TextField('آدرس کارخانه',
+        default='اصفهان، نجف‌آباد، شهرک صنعتی منتظریه، ابتدای خیابان قادری شمالی، ضلع غربی، پلاک ۲، کد ۱۳۰')
+    address_rd = models.TextField('آدرس واحد تحقیقات و فناوری',
+        default='اصفهان، نجف‌آباد، دانشگاه آزاد اسلامی، ساختمان علم و فناوری، اتاق ۳۰۲')
+
+    # ═══ دیگر صفحات (ستون دوم فوتر) ═══
+    footer_title_pages = models.CharField('سرعنوان: دیگر صفحات', max_length=100, default='دیگر صفحات')
+    footer_description = models.TextField('توضیحات زیر عنوان فوتر (بالای کپی‌رایت)', blank=True)
+    catalog_link = models.URLField('لینک کاتالوگ', blank=True)
+    catalog_qr = models.ImageField('تصویر QR کاتالوگ', upload_to='catalog/', blank=True)
+
+    # ═══ خبرنامه (ستون سوم فوتر) ═══
+    footer_title_newsletter = models.CharField('سرعنوان: خبرنامه', max_length=100, default='خبرنامه')
     newsletter_text = models.CharField('متن خبرنامه', max_length=200,
         default='با عضویت در خبرنامه سریع‌تر در جریان اخبار قرار بگیرید')
-    copyright_text = models.TextField('متن کپی‌رایت')
-    catalog_qr = models.ImageField('تصویر QR کاتالوگ', upload_to='catalog/', blank=True)
-    catalog_link = models.URLField('لینک کاتالوگ', blank=True)
+    newsletter_button_text = models.CharField('متن دکمه خبرنامه', max_length=50, default='مشترک شدن')
+
+    # ═══ شبکه‌های اجتماعی (۶ لینک) ═══
+    link_whatsapp = models.URLField('لینک واتساپ', blank=True)
+    link_instagram = models.URLField('لینک اینستاگرام', blank=True)
+    link_telegram = models.URLField('لینک تلگرام', blank=True)
+    link_linkedin = models.URLField('لینک لینکدین', blank=True)
+    link_aparat = models.URLField('لینک آپارات', blank=True)
+    link_youtube = models.URLField('لینک یوتیوب', blank=True)
+
+    # ═══ کپی‌رایت ═══
+    copyright_text = models.TextField('متن کپی‌رایت',
+        default='تمامی منابع، تصاویر، حقوق و مطالب موجود در این وبسایت متعلق به قطعه ریزان ذوب آرای سپاهان است و هرگونه کپی‌برداری از آن پیگرد قانونی دارد © ۱۴۰۵')
 
     class Meta:
-        verbose_name = 'تنظیمات سایت'; verbose_name_plural = 'تنظیمات سایت'
+        verbose_name = 'تنظیمات سایت'
+        verbose_name_plural = 'تنظیمات سایت'
 
     def save(self, *args, **kwargs):
         self.pk = 1
@@ -74,7 +100,20 @@ class SiteSetting(models.Model):
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
 
-    def __str__(self): return self.site_title
+    def social_links(self):
+        """لیست شبکه‌های اجتماعی پر شده"""
+        items = [
+            ('واتساپ', self.link_whatsapp, 'whatsapp'),
+            ('اینستاگرام', self.link_instagram, 'instagram'),
+            ('تلگرام', self.link_telegram, 'telegram'),
+            ('لینکدین', self.link_linkedin, 'linkedin'),
+            ('آپارات', self.link_aparat, 'aparat'),
+            ('یوتیوب', self.link_youtube, 'youtube'),
+        ]
+        return [{'name': n, 'url': u, 'icon': i} for n, u, i in items if u]
+
+    def __str__(self):
+        return self.site_title
     
 # ═══ مدل پیام‌های تماس با ما ═══
 class ContactMessage(models.Model):

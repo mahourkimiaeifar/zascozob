@@ -1,3 +1,5 @@
 from .models import SiteSetting
+
 def site_settings(request):
-    return {'SITE': SiteSetting.load()}
+    """تنظیمات سایت در همه تمپلیت‌ها در دسترس"""
+    return {'site': SiteSetting.load()}

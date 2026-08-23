@@ -10,7 +10,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.views.decorators.http import require_POST
 from django.core.mail.backends.smtp import EmailBackend
-from main.models import ContactMessage, ReplyAttachment
+from main.models import ContactMessage, ReplyAttachment, SiteSetting
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
@@ -199,3 +199,38 @@ def _check_lockout(request):
         request.session.pop('locked_until', None)
         request.session['login_attempts'] = 0
     return {'locked': False, 'wait_minutes': 0}
+
+@login_required
+def site_settings(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    setting = SiteSetting.load()
+    if request.method == 'POST':
+        from django import forms
+        
+        class SettingsForm(forms.ModelForm):
+            class Meta:
+                model = SiteSetting
+                fields = '__all__'
+        
+        form = SettingsForm(request.POST, request.FILES, instance=setting)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ تنظیمات سایت با موفقیت ذخیره شد')
+            return redirect('panel:site_settings')
+    else:
+        from django import forms
+        class SettingsForm(forms.ModelForm):
+            class Meta:
+                model = SiteSetting
+                fields = '__all__'
+                widgets = {
+                    'about_text': forms.Textarea(attrs={'rows': 4}),
+                    'address_factory': forms.Textarea(attrs={'rows': 2}),
+                    'address_rd': forms.Textarea(attrs={'rows': 2}),
+                    'footer_description': forms.Textarea(attrs={'rows': 3}),
+                    'copyright_text': forms.Textarea(attrs={'rows': 2}),
+                }
+        form = SettingsForm(instance=setting)
+    
+    return render(request, 'main_pages/main/site_settings.html', {'form': form, 'setting': setting})
