@@ -1,0 +1,50 @@
+<section class="comments-section" id="comments">
+    <h2>نظرات <span class="comment-count">({{ total_comments }})</span></h2>
+    
+    <!-- Comment Form -->
+    <div class="comment-form-wrap">
+        <h3>نظر خود را بنویسید</h3>
+        <form id="commentForm" class="comment-form">
+            {% csrf_token %}
+            <div class="form-row">
+                <input type="text" name="name" placeholder="نام شما" required>
+            </div>
+            <div class="form-row">
+                <textarea name="text" placeholder="متن نظر شما..." rows="4" required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">ارسال نظر</button>
+        </form>
+    </div>
+    
+    <!-- Comments List -->
+    <div class="comments-list" id="commentsList">
+        {% for comment in comments %}
+        <div class="comment-card" data-id="{{ comment.id }}">
+            <div class="comment-header">
+                <div class="comment-avatar">{{ comment.name|slice:":1" }}</div>
+                <div class="comment-info">
+                    <strong>{{ comment.name }}</strong>
+                    <small>{{ comment.created|jdate:"%Y/%m/%d" }}</small>
+                </div>
+            </div>
+            <div class="comment-body">{{ comment.text }}</div>
+            <div class="comment-actions">
+                <button class="comment-action like-comment-btn" data-id="{{ comment.id }}">
+                    👍 <span>{{ comment.likes }}</span>
+                </button>
+                <button class="comment-action dislike-comment-btn" data-id="{{ comment.id }}">
+                    👎 <span>{{ comment.dislikes }}</span>
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <p class="no-comments">هنوز نظری ثبت نشده است. اولین نفر باشید!</p>
+        {% endfor %}
+    </div>
+    
+    {% if total_comments > 5 %}
+    <button class="load-more-btn" id="loadMoreBtn" data-offset="5">
+        بارگذاری نظرات بیشتر
+    </button>
+    {% endif %}
+</section>

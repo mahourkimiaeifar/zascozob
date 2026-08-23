@@ -1,0 +1,7 @@
+<div class="share-buttons">
+    <span>اشتراک‌گذاری:</span>
+    <a href="https://wa.me/?text={{ request.build_absolute_uri }}" target="_blank" class="share-btn whatsapp">واتساپ</a>
+    <a href="https://t.me/share/url?url={{ request.build_absolute_uri }}&text={{ post.title }}" target="_blank" class="share-btn telegram">تلگرام</a>
+    <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title }}" target="_blank" class="share-btn twitter">توییتر</a>
+    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" target="_blank" class="share-btn linkedin">لینکدین</a>
+</div>

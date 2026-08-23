@@ -20,12 +20,12 @@
                 <div class="footer-col">
                     <h3 class="footer-col-title">{{ site.footer_title_pages }}</h3>
                     <ul class="footer-links">
-                        <li><a href="{% url 'home' %}">خانه</a></li>
-                        <li><a href="{% url 'about' %}">درباره ما</a></li>
-                        <li><a href="{% url 'contact' %}">تماس با ما</a></li>
+                        <li><a href="{% url 'main:home' %}">خانه</a></li>
+                        <li><a href="{% url 'main:about' %}">درباره ما</a></li>
+                        <li><a href="{% url 'main:contact' %}">تماس با ما</a></li>
                         <li><a href="/portfolio/">نمونه‌کارها</a></li>
                         <li><a href="/portfolio/gallery/">گالری تصاویر</a></li>
-                        <li><a href="{% url 'blog:post_list' %}">وبلاگ</a></li>
+                        <li><a href="{% url 'post_list' %}">وبلاگ</a></li>
                         {% if site.catalog_link %}
                         <li><a href="{{ site.catalog_link }}" target="_blank">کاتالوگ ما <span
                                     class="arrow">←</span></a></li>

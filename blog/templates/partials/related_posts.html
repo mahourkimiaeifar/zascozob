@@ -1,0 +1,19 @@
+<section class="related-posts">
+    <h2>مقالات مرتبط</h2>
+    <div class="related-grid">
+        {% for post in related_posts %}
+        <article class="related-card">
+            {% if post.featured_image %}
+            <a href="{% url 'blog:post_detail' post.slug %}" class="related-image">
+                <img src="{{ post.featured_image.url }}" alt="{{ post.title }}">
+            </a>
+            {% endif %}
+            <div class="related-content">
+                <h3><a href="{% url 'blog:post_detail' post.slug %}">{{ post.title }}</a></h3>
+                <p>{{ post.excerpt|default:post.content|truncatechars:80 }}</p>
+                <span class="related-date">{{ post.publish_date|jdate }}</span>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</section>

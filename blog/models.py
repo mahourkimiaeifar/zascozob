@@ -43,6 +43,7 @@ class Comment(SoftDeleteModel):
     post = models.ForeignKey(Post, verbose_name='مقاله', on_delete=models.CASCADE, related_name='comments')
     name = models.CharField('نام', max_length=100)          # بدون لاگین، خود کاربر اسمش رو می‌نویسه
     text = models.TextField('متن کامنت')
+    views = models.PositiveIntegerField('بازدیدها', default=0)
     likes = models.PositiveIntegerField('لایک', default=0)
     dislikes = models.PositiveIntegerField('دیسلایک', default=0)
     approved = models.BooleanField('تایید شده', default=False)   # تا تایید نشه نمایش داده نمی‌شه

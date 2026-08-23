@@ -1,0 +1,84 @@
+{% extends 'layouts/base.html' %}
+{% load static jalali %}
+
+{% block title %}وبلاگ ریخته‌گری{% endblock %}
+{% block meta_description %}مقالات تخصصی ریخته‌گری قطعات صنعتی، آلیاژها و فناوری‌های نوین{% endblock %}
+
+{% block content %}
+<section class="blog-hero">
+    <div class="container">
+        <h1>وبلاگ <span class="grad-text">زاسکو ذوب</span></h1>
+        <p>دانش فنی، تجربه صنعت و آخرین اخبار ریخته‌گری</p>
+    </div>
+</section>
+
+<section class="blog-content">
+    <div class="container">
+        <div class="blog-layout">
+            
+            <!-- Sidebar -->
+            <aside class="blog-sidebar">
+                <div class="sidebar-box">
+                    <h3>جستجو</h3>
+                    <form method="GET" class="search-form">
+                        <input type="text" name="q" value="{{ search_query }}" placeholder="جستجو در مقالات...">
+                        <button type="submit">🔍</button>
+                    </form>
+                </div>
+                
+                <div class="sidebar-box">
+                    <h3>دسته‌بندی‌ها</h3>
+                    <ul class="category-list">
+                        <li><a href="{% url 'blog:post_list' %}" {% if not current_category %}class="active"{% endif %}>همه مقالات</a></li>
+                        {% for cat in categories %}
+                        <li><a href="?category={{ cat.slug }}" {% if current_category == cat.slug %}class="active"{% endif %}>{{ cat.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </aside>
+            
+            <!-- Posts Grid -->
+            <div class="posts-grid">
+                {% for post in posts %}
+                <article class="post-card">
+                    {% if post.featured_image %}
+                    <a href="{% url 'blog:post_detail' post.slug %}" class="post-image">
+                        <img src="{{ post.featured_image.url }}" alt="{{ post.title }}">
+                    </a>
+                    {% endif %}
+                    <div class="post-content">
+                        {% if post.category %}
+                        <span class="post-category">{{ post.category.title }}</span>
+                        {% endif %}
+                        <h2><a href="{% url 'blog:post_detail' post.slug %}">{{ post.title }}</a></h2>
+                        <p>{{ post.excerpt|default:post.content|truncatechars:150 }}</p>
+                        <div class="post-meta">
+                            <span>📅 {{ post.publish_date|jdate }}</span>
+                            <span>⏱ {{ post.read_time }} دقیقه</span>
+                            <span>👁 {{ post.views }}</span>
+                            <span>❤ {{ post.likes }}</span>
+                        </div>
+                        <a href="{% url 'blog:post_detail' post.slug %}" class="read-more">ادامه مطلب ←</a>
+                    </div>
+                </article>
+                                {% empty %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+                        </svg>
+                    </div>
+                    <h3>هنوز مقاله‌ای منتشر نشده</h3>
+                    <p>به‌زودی مقالات تخصصی در حوزه ریخته‌گری، آلیاژها و فناوری‌های صنعتی را اینجا خواهید دید.</p>
+                    <a href="/" class="empty-cta">
+                        بازگشت به صفحه اصلی
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
