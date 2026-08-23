@@ -12,6 +12,7 @@ from main.models import ContactMessage
 
 
 def panel_login(request):
+    """ورود به پنل با قفل زمانی"""
     if request.user.is_authenticated and request.user.is_staff:
         return redirect('panel:dashboard')
 
@@ -51,6 +52,7 @@ def panel_logout(request):
 
 @login_required
 def dashboard(request):
+    """داشبورد اصلی پنل"""
     if not request.user.is_staff:
         return redirect('panel:login')
     
@@ -71,6 +73,7 @@ def dashboard(request):
 
 @login_required
 def main_contact(request):
+    """مدیریت پیام‌های تماس"""
     if not request.user.is_staff:
         return redirect('panel:login')
     
@@ -86,6 +89,7 @@ def main_contact(request):
 @login_required
 @require_POST
 def main_contact_reply(request):
+    """پاسخ به پیام با ایمیل"""
     if not request.user.is_staff:
         return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
 
@@ -120,6 +124,7 @@ def main_contact_reply(request):
 @login_required
 @require_POST
 def mark_read(request, pk):
+    """علامت‌گذاری به عنوان خوانده شده"""
     if not request.user.is_staff:
         return JsonResponse({'success': False}, status=403)
     try:
@@ -134,6 +139,7 @@ def mark_read(request, pk):
 @login_required
 @require_POST
 def delete_message(request, pk):
+    """حذف پیام"""
     if not request.user.is_staff:
         return JsonResponse({'success': False}, status=403)
     try:
@@ -150,6 +156,7 @@ def delete_message(request, pk):
 
 
 def _check_lockout(request):
+    """بررسی قفل زمانی"""
     locked_until = request.session.get('locked_until', 0)
     now = time.time()
     if locked_until > now:
