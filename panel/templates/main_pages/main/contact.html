@@ -1,5 +1,5 @@
 {% extends 'layouts/panel_base.html' %}
-{% load static %}
+{% load static jalali %}
 
 {% block title %}پیام‌های تماس{% endblock %}
 
@@ -9,85 +9,211 @@
 
 {% block content %}
 <div class="contact-manager">
+
     <div class="toolbar">
         <div class="toolbar-right">
             <div class="search-box">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" />
+                </svg>
                 <input type="text" id="searchInput" placeholder="جستجو در پیام‌ها...">
             </div>
             <select class="filter-select" id="filterStatus">
                 <option value="">همه وضعیت‌ها</option>
                 <option value="unread">خوانده نشده</option>
                 <option value="read">خوانده شده</option>
+                <option value="answered">پاسخ داده شده</option>
             </select>
         </div>
         <div class="toolbar-left">
             <span class="count-badge">{{ messages_count|default:0 }} پیام</span>
-            <button class="btn-ghost" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></button>
+            <button class="btn-ghost" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6" />
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                </svg></button>
         </div>
     </div>
 
-    <div class="card">
-        <div class="table-wrapper">
-            <table class="data-table">
-                <thead>
-                    <tr><th>نام</th><th>ایمیل</th><th>تلفن</th><th>پیام</th><th>پیوست</th><th>تاریخ</th><th>وضعیت</th><th>عملیات</th></tr>
-                </thead>
-                <tbody>
-                    {% for msg in messages_list %}
-                    <tr class="msg-row" data-id="{{ msg.id }}" data-status="{% if msg.is_read %}read{% else %}unread{% endif %}">
-                        <td class="cell-name"><div class="name-cell"><div class="avatar-sm">{{ msg.name|slice:":1" }}</div><strong>{{ msg.name }}</strong></div></td>
-                        <td class="cell-email"><a href="mailto:{{ msg.email }}">{{ msg.email|default:"—" }}</a></td>
-                        <td class="cell-phone" dir="ltr">{{ msg.phone|default:"—" }}</td>
-                        <td class="cell-message"><div class="message-preview">{{ msg.message|truncatechars:80 }}</div></td>
-                        <td class="cell-file">
-                            {% if msg.attachment %}
-                            <a href="{{ msg.attachment.url }}" target="_blank" class="file-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></a>
-                            {% else %}<span class="no-file">—</span>{% endif %}
-                        </td>
-                        <td class="cell-date"><div class="date-cell"><span>{{ msg.created_at|date:"Y/m/d" }}</span><small>{{ msg.created_at|time:"H:i" }}</small></div></td>
-                        <td class="cell-status">
-                            {% if msg.is_read %}<span class="status-badge status-read">خوانده شده</span>{% else %}<span class="status-badge status-unread">جدید</span>{% endif %}
-                        </td>
-                        <td class="cell-actions">
-                            <button class="icon-btn view-btn" data-id="{{ msg.id }}" title="مشاهده"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                            <button class="icon-btn reply-btn" data-id="{{ msg.id }}" title="پاسخ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 17l-5-5 5-5M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button>
-                            <button class="icon-btn delete-btn danger" data-id="{{ msg.id }}" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="8"><div class="empty-state"><p>هیچ پیامی وجود ندارد</p></div></td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="msg-list" id="msgList">
+        {% for msg in messages_list %}
+        <article class="msg-card {% if not msg.is_read %}is-unread{% endif %}" data-id="{{ msg.id }}"
+            data-status="{% if msg.replied_date %}answered{% elif msg.is_read %}read{% else %}unread{% endif %}"
+            data-name="{{ msg.name }}" data-email="{{ msg.email|default:'' }}" data-phone="{{ msg.phone|default:'' }}"
+            data-date="{{ msg.created_date }} — {{ msg.created_time }}"
+            data-reply-subject="{{ msg.reply_subject|default:'' }}"
+            data-replied-date="{% if msg.replied_date %}{{ msg.replied_date }} — {{ msg.replied_time }}{% endif %}">
+            <div class="msg-top">
+                <div class="msg-who">
+                    <div class="avatar-sm">{{ msg.name|slice:":1" }}</div>
+                    <div class="msg-who-info">
+                        <strong>{{ msg.name }}</strong>
+                        <small>
+                            {% if msg.email %}<span>{{ msg.email }}</span>{% endif %}
+                            {% if msg.email and msg.phone %}<span>•</span>{% endif %}
+                            {% if msg.phone %}<span dir="ltr">{{ msg.phone }}</span>{% endif %}
+                        </small>
+                    </div>
+                </div>
+                <div class="msg-timestamps">
+                    <div class="timestamp-row timestamp-sent">
+                        <span class="timestamp-icon">📨</span>
+                        <span class="timestamp-label">ارسال:</span>
+                        <span class="timestamp-value">{{ msg.created_date }}</span>
+                        <span class="timestamp-time">{{ msg.created_time }}</span>
+                    </div>
+                    {% if msg.replied_date %}
+                    <div class="timestamp-row timestamp-replied">
+                        <span class="timestamp-icon">✅</span>
+                        <span class="timestamp-label">پاسخ:</span>
+                        <span class="timestamp-value">{{ msg.replied_date }}</span>
+                        <span class="timestamp-time">{{ msg.replied_time }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="msg-subject">{{ msg.message|truncatechars:160 }}</div>
+            <div class="msg-full">{{ msg.message }}</div>
+            <div class="reply-full">{% if msg.reply_body %}{{ msg.reply_body|safe }}{% endif %}</div>
+            <div class="reply-atts">
+                {% for att in msg.reply_attachments %}
+                <a href="{{ att.file.url }}" target="_blank" class="file-badge">📎 {{ att.file.name|truncatechars:40 }}</a>
+                {% endfor %}
+            </div>
+
+            <div class="msg-bottom">
+                <div class="msg-tags">
+                    {% if msg.replied_date %}<span class="status-badge status-answered">پاسخ داده شده</span>
+                    {% elif msg.is_read %}<span class="status-badge status-read">خوانده شده</span>
+                    {% else %}<span class="status-badge status-unread">جدید</span>{% endif %}
+                    {% if msg.attachment %}
+                    <a href="{{ msg.attachment.url }}" target="_blank" class="file-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <path d="M14 2v6h6" />
+                        </svg>
+                        پیوست مشتری
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="msg-actions">
+                    <button class="icon-btn view-btn" data-id="{{ msg.id }}" title="مشاهده پیام"><svg
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg></button>
+                    {% if msg.replied_date %}
+                    <button class="icon-btn view-reply-btn" data-id="{{ msg.id }}" title="مشاهده پاسخ ادمین"><svg
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                        </svg></button>
+                    {% endif %}
+                    <button class="icon-btn reply-btn" data-id="{{ msg.id }}" title="پاسخ"><svg viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 17l-5-5 5-5M20 18v-2a4 4 0 0 0-4-4H4" />
+                        </svg></button>
+                    <button class="icon-btn delete-btn danger" data-id="{{ msg.id }}" title="حذف"><svg
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg></button>
+                </div>
+            </div>
+        </article>
+        {% empty %}
+        <div class="empty-state">
+            <p>هیچ پیامی وجود ندارد</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="pagination" aria-label="صفحات">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="page-btn" title="صفحه قبل">→</a>
+        {% else %}
+        <span class="page-btn disabled">→</span>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+        <span class="page-btn active">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a href="?page={{ num }}"
+            class="page-btn">{{ num }}</a>
+            {% elif num == 1 or num == page_obj.paginator.num_pages %}
+            <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
+            {% elif num == 2 or num == page_obj.paginator.num_pages|add:'-1' %}
+            <span class="page-btn disabled">…</span>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="page-btn" title="صفحه بعد">←</a>
+            {% else %}
+            <span class="page-btn disabled">←</span>
+            {% endif %}
+
+            <span class="page-info">صفحه {{ page_obj.number }} از {{ page_obj.paginator.num_pages }}</span>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- مودال مشاهده پیام -->
+<div class="modal" id="viewModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3>جزئیات پیام</h3><button class="modal-close" data-close>×</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-grid">
+                <div class="detail-item"><label>نام</label><span id="viewName"></span></div>
+                <div class="detail-item"><label>ایمیل</label><span id="viewEmail"></span></div>
+                <div class="detail-item"><label>تلفن</label><span id="viewPhone" dir="ltr"></span></div>
+                <div class="detail-item"><label>تاریخ ارسال</label><span id="viewDate"></span></div>
+            </div>
+            <div class="detail-section"><label>متن پیام</label>
+                <div class="message-full" id="viewMessage"></div>
+            </div>
+            <div class="detail-section" id="viewAttachmentWrap" style="display:none;">
+                <label>فایل پیوست مشتری</label>
+                <a href="#" id="viewAttachment" target="_blank" class="attachment-link"><svg viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <path d="M14 2v6h6" />
+                    </svg><span>دانلود فایل</span></a>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-ghost" data-close>بستن</button>
+            <button class="btn-primary" id="viewReplyBtn">پاسخ به پیام</button>
         </div>
     </div>
 </div>
 
-<!-- مودال مشاهده -->
-<div class="modal" id="viewModal">
+<!-- مودال مشاهده پاسخ ادمین -->
+<div class="modal modal-large" id="viewReplyModal">
     <div class="modal-backdrop"></div>
     <div class="modal-dialog">
-        <div class="modal-content" style="display:flex;flex-direction:column;max-height:90vh;">
-            <div class="modal-header"><h3>جزئیات پیام</h3><button class="modal-close" data-close>×</button></div>
-            <div class="modal-body">
-                <div class="detail-grid">
-                    <div class="detail-item"><label>نام</label><span id="viewName"></span></div>
-                    <div class="detail-item"><label>ایمیل</label><span id="viewEmail"></span></div>
-                    <div class="detail-item"><label>تلفن</label><span id="viewPhone" dir="ltr"></span></div>
-                    <div class="detail-item"><label>تاریخ</label><span id="viewDate"></span></div>
-                </div>
-                <div class="detail-section"><label>متن پیام</label><div class="message-full" id="viewMessage"></div></div>
-                <div class="detail-section" id="viewAttachmentWrap" style="display:none;">
-                    <label>فایل پیوست</label>
-                    <a href="#" id="viewAttachment" target="_blank" class="attachment-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span>دانلود فایل</span></a>
-                </div>
+        <div class="modal-header">
+            <h3>پاسخ ارسال‌شده توسط پشتیبانی</h3><button class="modal-close" data-close>×</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-grid">
+                <div class="detail-item"><label>موضوع پاسخ</label><span id="vrSubject"></span></div>
+                <div class="detail-item"><label>تاریخ پاسخ</label><span id="vrDate"></span></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-ghost" data-close>بستن</button>
-                <button class="btn-primary" id="viewReplyBtn">پاسخ به پیام</button>
+            <div class="detail-section"><label>متن پاسخ</label>
+                <div class="message-full reply-render" id="vrBody"></div>
+            </div>
+            <div class="detail-section" id="vrAttsWrap" style="display:none;">
+                <label>پیوست‌های ارسال‌شده</label>
+                <div class="vr-atts" id="vrAtts"></div>
             </div>
         </div>
+        <div class="modal-footer"><button class="btn-ghost" data-close>بستن</button></div>
     </div>
 </div>
 
@@ -95,22 +221,38 @@
 <div class="modal modal-large" id="replyModal">
     <div class="modal-backdrop"></div>
     <div class="modal-dialog">
-        <div class="modal-content" style="display:flex;flex-direction:column;max-height:90vh;">
-            <div class="modal-header"><h3>پاسخ به <span id="replyName"></span></h3><button class="modal-close" data-close>×</button></div>
-            <form id="replyForm" action="{% url 'panel:main_contact_reply' %}" method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="message_id" id="replyMessageId">
-                <div class="modal-body">
-                    <div class="form-group"><label>گیرنده</label><input type="email" id="replyEmail" readonly></div>
-                    <div class="form-group"><label>موضوع</label><input type="text" name="subject" id="replySubject" required></div>
-                    <div class="form-group"><label>متن پاسخ</label><textarea name="body" id="replyBody" rows="8"></textarea></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-ghost" data-close>انصراف</button>
-                    <button type="submit" class="btn-primary">ارسال ایمیل</button>
-                </div>
-            </form>
+        <div class="modal-header">
+            <h3>پاسخ به <span id="replyName"></span></h3><button class="modal-close" data-close>×</button>
         </div>
+        <form id="replyForm" action="{% url 'panel:main_contact_reply' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="message_id" id="replyMessageId">
+            <div class="modal-body">
+                <div class="form-group"><label>گیرنده</label><input type="email" id="replyEmail" readonly></div>
+                <div class="form-group"><label>موضوع</label><input type="text" name="subject" id="replySubject"
+                        required></div>
+                <div class="form-group"><label>متن پاسخ</label><textarea name="body" id="replyBody" rows="8"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>پیوست‌ها <span style="color:var(--text-dim);font-weight:400">(اختیاری — چند
+                            فایل)</span></label>
+                    <div class="reply-files-drop" id="replyFilesDrop">
+                        <input type="file" id="replyFiles" multiple hidden>
+                        <div class="reply-files-empty" id="replyFilesEmpty">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+                            </svg>
+                            <span>فایل‌ها را اینجا رها کنید یا <em>کلیک کنید</em></span>
+                        </div>
+                        <ul class="reply-files-list" id="replyFilesList"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-ghost" data-close>انصراف</button>
+                <button type="submit" class="btn-primary">ارسال ایمیل</button>
+            </div>
+        </form>
     </div>
 </div>
 

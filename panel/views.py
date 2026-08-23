@@ -1,5 +1,6 @@
 import time
 import os
+from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -8,7 +9,9 @@ from django.http import JsonResponse
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.views.decorators.http import require_POST
-from main.models import ContactMessage
+from django.core.mail.backends.smtp import EmailBackend
+from main.models import ContactMessage, ReplyAttachment
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def panel_login(request):
@@ -53,14 +56,56 @@ def dashboard(request):
     })
 
 
+import jdatetime
+from django.utils import timezone
+
 @login_required
 def main_contact(request):
     if not request.user.is_staff:
         return redirect('panel:login')
+
+    messages_list = []
+    for msg in ContactMessage.objects.all().order_by('-created_at'):
+        created = timezone.localtime(msg.created_at)
+        created_jd = jdatetime.datetime.fromgregorian(datetime=created)
+
+        replied_jd = None
+        if msg.replied_at:
+            replied = timezone.localtime(msg.replied_at)
+            replied_jd = jdatetime.datetime.fromgregorian(datetime=replied)
+
+        messages_list.append({
+            'id': msg.id,
+            'name': msg.name,
+            'email': msg.email,
+            'phone': msg.phone,
+            'message': msg.message,
+            'attachment': msg.attachment,
+            'is_read': msg.is_read,
+            'reply_subject': msg.reply_subject,
+            'reply_body': msg.reply_body,
+            'reply_attachments': msg.reply_attachments.all(),
+            'created_date': created_jd.strftime('%Y/%m/%d'),
+            'created_time': created.strftime('%H:%M'),
+            'replied_date': replied_jd.strftime('%Y/%m/%d') if replied_jd else None,
+            'replied_time': replied.strftime('%H:%M') if replied_jd else None,
+        })
+
+    # ═══ Pagination: ۱۰ پیام در هر صفحه ═══
+    paginator = Paginator(messages_list, 10)
+    page = request.GET.get('page', 1)
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
     return render(request, 'main_pages/main/contact.html', {
-        'messages_list': ContactMessage.objects.all().order_by('-created_at'),
-        'messages_count': ContactMessage.objects.count(),
+        'messages_list': page_obj.object_list,
+        'messages_count': paginator.count,
         'unread_messages': ContactMessage.objects.filter(is_read=False).count(),
+        'page_obj': page_obj,
     })
 
 
@@ -73,17 +118,48 @@ def main_contact_reply(request):
         msg = ContactMessage.objects.get(id=request.POST.get('message_id'))
     except ContactMessage.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'پیام یافت نشد'})
+
     subject = request.POST.get('subject', '').strip()
     body = request.POST.get('body', '').strip()
+    files = [f for f in request.FILES.getlist('attachments') if f.size <= 10 * 1024 * 1024]
+
     if not msg.email or not subject or not body:
         return JsonResponse({'success': False, 'error': 'فیلدهای اجباری خالی است'})
+
+    total_size = sum(f.size for f in files)
+    if total_size > 15 * 1024 * 1024:
+        return JsonResponse({'success': False, 'error': 'مجموع حجم پیوست‌ها نباید بیشتر از ۱۵ مگابایت باشد'})
+
     try:
-        mail = EmailMultiAlternatives(subject=subject, body='این ایمیل HTML است.',
-                                      from_email=settings.DEFAULT_FROM_EMAIL, to=[msg.email])
+        mail = EmailMultiAlternatives(
+            subject=subject, body='این ایمیل HTML است.',
+            from_email=settings.DEFAULT_FROM_EMAIL, to=[msg.email])
         mail.attach_alternative(body, "text/html")
-        mail.send()
+        for f in files:
+            mail.attach(f.name, f.read(), f.content_type)
+
+        # ارسال با ۳ بار تلاش (ضد قطعی شبکه)
+        last_error = None
+        for attempt in range(3):
+            try:
+                mail.send()
+                last_error = None
+                break
+            except Exception as e:
+                last_error = e
+                time.sleep(2)
+        if last_error:
+            print('=' * 60)
+            print('❌ EMAIL ERROR:', type(last_error).__name__, str(last_error))
+            print('=' * 60)
+            return JsonResponse({'success': False, 'error': str(last_error)})
         msg.is_read = True
+        msg.reply_subject = subject
+        msg.reply_body = body
+        msg.replied_at = timezone.now()
         msg.save()
+        for f in files:
+            ReplyAttachment.objects.create(message=msg, file=f)
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})

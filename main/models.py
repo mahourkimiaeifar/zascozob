@@ -83,6 +83,9 @@ class ContactMessage(models.Model):
     phone = models.CharField('شماره تماس', max_length=20)
     message = models.TextField('متن پیام')
     attachment = models.FileField('فایل پیوست', upload_to='contact_attachments/%Y/%m/', blank=True, null=True)
+    reply_subject = models.CharField('موضوع پاسخ', max_length=255, blank=True, null=True)
+    reply_body = models.TextField('متن پاسخ', blank=True, null=True)
+    replied_at = models.DateTimeField('تاریخ پاسخ', null=True, blank=True)
     created_at = models.DateTimeField('تاریخ ثبت', auto_now_add=True)
     is_read = models.BooleanField('خوانده شده', default=False)
 
@@ -99,3 +102,15 @@ class ContactMessage(models.Model):
 @receiver(pre_delete, sender=SiteSetting)
 def protect_site_setting(sender, instance, **kwargs):
     raise PermissionError('⛔ تنظیمات سایت قابل حذف نیست؛ فقط ویرایش کن.')
+
+class ReplyAttachment(models.Model):
+    message = models.ForeignKey(ContactMessage, on_delete=models.CASCADE, related_name='reply_attachments', verbose_name='پیام')
+    file = models.FileField('فایل پیوست', upload_to='reply_attachments/%Y/%m/')
+    uploaded_at = models.DateTimeField('تاریخ بارگذاری', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'پیوست پاسخ'
+        verbose_name_plural = 'پیوست‌های پاسخ'
+
+    def __str__(self):
+        return self.file.name

@@ -1,10 +1,11 @@
-/* ═══ صفحه مدیریت پیام‌ها ═══ */
+/* ═══ صفحه مدیریت پیام‌ها — لیست کارتی ═══ */
 .contact-manager {
     display: flex;
     flex-direction: column;
     gap: 20px
 }
 
+/* Toolbar */
 .toolbar {
     display: flex;
     justify-content: space-between;
@@ -22,7 +23,7 @@
     gap: 10px;
     flex-wrap: wrap;
     flex: 1;
-    min-width: 240px
+    min-width: 220px
 }
 
 .toolbar-left {
@@ -34,7 +35,7 @@
 .search-box {
     position: relative;
     flex: 1;
-    min-width: 200px
+    min-width: 180px
 }
 
 .search-box svg {
@@ -85,126 +86,153 @@
     color: var(--primary-light);
     border-radius: 999px;
     font-size: .8rem;
-    font-weight: 700
-}
-
-.table-wrapper {
-    overflow-x: auto
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: .9rem
-}
-
-.data-table thead {
-    background: rgba(255, 255, 255, .02);
-    border-bottom: 1px solid var(--line)
-}
-
-.data-table th {
-    text-align: right;
-    padding: 14px 16px;
-    font-size: .78rem;
     font-weight: 700;
-    color: var(--text-muted);
     white-space: nowrap
 }
 
-.data-table td {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--line);
-    vertical-align: middle
+/* لیست پیام‌ها */
+.msg-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px
 }
 
-.msg-row {
-    transition: background .2s
+.msg-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: all var(--transition)
 }
 
-.msg-row:hover {
-    background: rgba(255, 255, 255, .02)
+.msg-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 3px;
+    background: transparent
 }
 
-.msg-row[data-status="unread"] {
-    background: rgba(255, 107, 0, .03)
+.msg-card.is-unread::before {
+    background: var(--primary)
 }
 
-.name-cell {
+.msg-card.is-unread {
+    background: linear-gradient(270deg, rgba(255, 107, 0, .04), transparent 40%), var(--bg-card)
+}
+
+.msg-card:hover {
+    border-color: var(--line-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .35)
+}
+
+.msg-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px
+}
+
+.msg-who {
     display: flex;
     align-items: center;
-    gap: 10px
+    gap: 12px;
+    min-width: 0;
+    flex: 1
 }
 
 .avatar-sm {
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary), var(--primary-light));
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-weight: 700;
+    font-weight: 800;
     flex-shrink: 0
 }
 
-.cell-email a {
-    color: var(--primary-light);
-    font-size: .88rem
+.msg-who-info {
+    min-width: 0
 }
 
-.cell-phone {
-    color: var(--text-muted);
-    font-size: .88rem
+.msg-who-info strong {
+    display: block;
+    font-size: .95rem;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
 }
 
-.message-preview {
+.msg-who-info small {
     color: var(--text-muted);
-    font-size: .88rem;
-    line-height: 1.6;
-    max-width: 280px;
+    font-size: .74rem;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap
+}
+
+.unread-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+    flex-shrink: 0;
+    animation: pulse 2s infinite
+}
+
+.msg-when {
+    text-align: left;
+    flex-shrink: 0
+}
+
+.msg-when span {
+    display: block;
+    font-size: .78rem;
+    color: var(--text-muted)
+}
+
+.msg-when small {
+    color: var(--text-dim);
+    font-size: .7rem
+}
+
+.msg-subject {
+    color: #c6c9cf;
+    font-size: .9rem;
+    line-height: 1.8;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden
 }
 
-.file-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    background: rgba(255, 107, 0, .12);
-    color: var(--primary-light)
-}
-
-.file-badge:hover {
-    background: var(--primary);
-    color: #fff
-}
-
-.file-badge svg {
-    width: 16px;
-    height: 16px
-}
-
-.no-file {
-    color: var(--text-dim)
-}
-
-.date-cell {
+.msg-bottom {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
-    font-size: .85rem
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap
 }
 
-.date-cell small {
-    color: var(--text-muted);
-    font-size: .75rem
+.msg-tags {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap
 }
 
 .status-badge {
@@ -225,51 +253,350 @@
     color: #7cc47f
 }
 
-.cell-actions {
+.file-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(255, 107, 0, .1);
+    border: 1px solid rgba(255, 107, 0, .3);
+    color: var(--primary-light);
+    font-size: .74rem;
+    font-weight: 700;
+    transition: all var(--transition)
+}
+
+.file-badge:hover {
+    background: var(--primary);
+    color: #fff
+}
+
+.file-badge svg {
+    width: 14px;
+    height: 14px
+}
+
+.msg-actions {
     display: flex;
     gap: 6px
 }
 
-.empty-row td {
-    padding: 0
+.msg-full {
+    display: none
 }
 
-@media (max-width:900px) {
-    .data-table thead {
-        display: none
-    }
-
-    .data-table tbody {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
+@media (max-width:640px) {
+    .msg-card {
         padding: 16px
     }
 
-    .msg-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        padding: 16px;
-        background: var(--glass);
-        border: 1px solid var(--line);
-        border-radius: var(--radius)
+    .msg-when span {
+        font-size: .7rem
     }
 
-    .msg-row td {
-        padding: 0;
-        border: none
+    .msg-bottom {
+        flex-direction: column;
+        align-items: stretch
     }
 
-    .cell-name,
-    .cell-message,
-    .cell-actions {
-        grid-column: 1 / -1
+    .msg-actions {
+        justify-content: flex-end
     }
 
-    .cell-actions {
-        justify-content: flex-end;
-        padding-top: 10px;
-        border-top: 1px solid var(--line)
+    .toolbar {
+        padding: 12px 14px
     }
+}
+
+/* ═══ تاریخ پاسخ + وضعیت پاسخ‌داده‌شده ═══ */
+.replied-date {
+    display: block;
+    color: #7cc47f;
+    font-size: .72rem;
+    margin-top: 4px
+}
+
+.status-answered {
+    background: rgba(33, 150, 243, .15);
+    color: #64b5f6
+}
+
+.view-reply-btn {
+    border-color: rgba(33, 150, 243, .4);
+    color: #64b5f6
+}
+
+.view-reply-btn:hover {
+    background: rgba(33, 150, 243, .12);
+    border-color: #2196f3;
+    color: #90caf9
+}
+
+/* ═══ پیوست چندتایی در مودال پاسخ ═══ */
+.reply-files-drop {
+    border: 2px dashed rgba(255, 107, 0, .3);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .3s;
+    background: rgba(255, 255, 255, .02)
+}
+
+.reply-files-drop:hover,
+.reply-files-drop.dragging {
+    border-color: var(--primary);
+    background: rgba(255, 107, 0, .05)
+}
+
+.reply-files-drop svg {
+    width: 36px;
+    height: 36px;
+    color: var(--primary);
+    margin-bottom: 8px
+}
+
+.reply-files-drop span {
+    color: var(--text-muted);
+    font-size: .85rem
+}
+
+.reply-files-drop em {
+    color: var(--primary);
+    font-style: normal;
+    font-weight: 700
+}
+
+.reply-files-drop.has-files .reply-files-empty {
+    display: none
+}
+
+.reply-files-list {
+    list-style: none;
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: right
+}
+
+.reply-files-list:empty {
+    display: none
+}
+
+.reply-files-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 14px;
+    animation: toastIn .3s
+}
+
+.rf-name {
+    flex: 1;
+    font-size: .85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.rf-size {
+    color: var(--text-muted);
+    font-size: .75rem;
+    flex-shrink: 0
+}
+
+.rf-remove {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(244, 67, 54, .1);
+    border: 1px solid rgba(244, 67, 54, .4);
+    color: #ef9a9a;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s;
+    flex-shrink: 0
+}
+
+.rf-remove:hover {
+    background: #f44336;
+    color: #fff;
+    transform: rotate(90deg)
+}
+
+/* ═══ نمایش پاسخ (رندر HTML) ═══ */
+.reply-render {
+    white-space: normal
+}
+
+.reply-render p {
+    margin-bottom: 10px;
+    line-height: 2
+}
+
+.reply-render h2,
+.reply-render h3,
+.reply-render h4 {
+    color: #fff;
+    margin: 12px 0 8px
+}
+
+.reply-render img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 8px 0
+}
+
+.reply-render a {
+    color: var(--primary-light)
+}
+
+.reply-render ul,
+.reply-render ol {
+    padding-right: 22px;
+    margin-bottom: 10px
+}
+
+.reply-render table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0
+}
+
+.reply-render td,
+.reply-render th {
+    border: 1px solid var(--line);
+    padding: 8px
+}
+
+.vr-atts {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap
+}
+
+/* ═══ Timestamps (تاریخ‌های شیک) ═══ */
+.msg-timestamps {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+    min-width: 180px
+}
+
+.timestamp-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: .78rem;
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid var(--line)
+}
+
+.timestamp-sent {
+    border-right: 3px solid var(--text-muted)
+}
+
+.timestamp-replied {
+    border-right: 3px solid #7cc47f;
+    background: rgba(76, 175, 80, .06)
+}
+
+.timestamp-icon {
+    font-size: .9rem;
+    flex-shrink: 0
+}
+
+.timestamp-label {
+    color: var(--text-muted);
+    font-weight: 600;
+    flex-shrink: 0
+}
+
+.timestamp-value {
+    font-weight: 700;
+    color: var(--text-main)
+}
+
+.timestamp-time {
+    color: var(--text-dim);
+    font-size: .72rem;
+    margin-right: auto
+}
+
+@media (max-width:768px) {
+    .msg-top {
+        flex-direction: column;
+        gap: 12px
+    }
+
+    .msg-timestamps {
+        min-width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap
+    }
+
+    .timestamp-row {
+        flex: 1;
+        min-width: 140px
+    }
+}
+
+/* ═══ Pagination ═══ */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 22px 0 4px;
+    flex-wrap: wrap
+}
+
+.page-btn {
+    min-width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: .85rem;
+    font-weight: 700;
+    transition: all var(--transition);
+    padding: 0 12px
+}
+
+.page-btn:hover:not(.disabled):not(.active) {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px)
+}
+
+.page-btn.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 18px var(--primary-glow)
+}
+
+.page-btn.disabled {
+    opacity: .4;
+    cursor: not-allowed
+}
+
+.page-info {
+    color: var(--text-dim);
+    font-size: .78rem;
+    margin-right: 12px
 }
