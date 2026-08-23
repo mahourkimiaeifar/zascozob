@@ -1,4 +1,4 @@
-{% extends 'panel/layouts/base.html' %}
+{% extends 'layouts/panel_base.html' %}
 {% load static %}
 
 {% block title %}پیام‌های تماس{% endblock %}
@@ -226,6 +226,12 @@
 <!-- Toast -->
 <div class="toast-container" id="toastContainer"></div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('pageTitle').textContent = 'پیام‌های تماس';
+</script>
 {% endblock %}
 
 {% block extra_js %}
