@@ -5,6 +5,7 @@ app_name = 'panel'
 PANEL_PATH = 'zasco-admin-x9k2p'
 
 urlpatterns = [
+    # path('accounts/', include('django.contrib.auth.urls'))
     path('login/', views.panel_login, name='login'),
     path('logout/', views.panel_logout, name='logout'),
     path('', views.dashboard, name='dashboard'),
