@@ -1,7 +1,7 @@
 import time
 import os
 from django.utils import timezone
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -12,6 +12,8 @@ from django.views.decorators.http import require_POST
 from django.core.mail.backends.smtp import EmailBackend
 from main.models import ContactMessage, ReplyAttachment, SiteSetting
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from blog.models import Post, Category, Comment
+from .forms import PostForm, CategoryForm
 
 
 def panel_login(request):
@@ -234,3 +236,132 @@ def site_settings(request):
         form = SettingsForm(instance=setting)
     
     return render(request, 'main_pages/main/site_settings.html', {'form': form, 'setting': setting})
+
+
+# ════ Blog Management Views ════
+
+@login_required
+def blog_post_list(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    posts = Post.objects.all().order_by('-created')
+    return render(request, 'main_pages/panel/blog/post_list.html', {'posts': posts})
+
+
+@login_required
+def blog_post_add(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            messages.success(request, 'مقاله با موفقیت ایجاد شد')
+            return redirect('panel:blog_post_list')
+    else:
+        form = PostForm()
+    return render(request, 'main_pages/panel/blog/post_form.html', {'form': form, 'action': 'create'})
+
+
+@login_required
+def blog_post_edit(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    post = get_object_or_404(Post, pk=pk)
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'مقاله با موفقیت ویرایش شد')
+            return redirect('panel:blog_post_list')
+    else:
+        form = PostForm(instance=post)
+    return render(request, 'main_pages/panel/blog/post_form.html', {'form': form, 'action': 'edit', 'post': post})
+
+
+@login_required
+def blog_post_delete(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    post = get_object_or_404(Post, pk=pk)
+    post.delete()
+    messages.success(request, 'مقاله حذف شد')
+    return redirect('panel:blog_post_list')
+
+
+@login_required
+def blog_category_list(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    categories = Category.objects.all()
+    return render(request, 'main_pages/panel/blog/category_list.html', {'categories': categories})
+
+
+@login_required
+def blog_category_add(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'دسته‌بندی با موفقیت ایجاد شد')
+            return redirect('panel:blog_category_list')
+    else:
+        form = CategoryForm()
+    return render(request, 'main_pages/panel/blog/category_form.html', {'form': form, 'action': 'create'})
+
+
+@login_required
+def blog_category_edit(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'دسته‌بندی با موفقیت ویرایش شد')
+            return redirect('panel:blog_category_list')
+    else:
+        form = CategoryForm(instance=category)
+    return render(request, 'main_pages/panel/blog/category_form.html', {'form': form, 'action': 'edit', 'category': category})
+
+
+@login_required
+def blog_category_delete(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    category = get_object_or_404(Category, pk=pk)
+    category.delete()
+    messages.success(request, 'دسته‌بندی حذف شد')
+    return redirect('panel:blog_category_list')
+
+
+@login_required
+def blog_comment_list(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    comments = Comment.objects.all().order_by('-created')
+    return render(request, 'main_pages/panel/blog/comment_list.html', {'comments': comments})
+
+
+@login_required
+def blog_comment_approve(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    comment = get_object_or_404(Comment, pk=pk)
+    comment.approve()
+    messages.success(request, 'کامنت تایید شد')
+    return redirect('panel:blog_comment_list')
+
+
+@login_required
+def blog_comment_delete(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    comment = get_object_or_404(Comment, pk=pk)
+    comment.delete()
+    messages.success(request, 'کامنت حذف شد')
+    return redirect('panel:blog_comment_list')
