@@ -1,6 +1,7 @@
+{% load jalali %}
 <section class="comments-section" id="comments">
     <h2>نظرات <span class="comment-count">({{ total_comments }})</span></h2>
-    
+
     <div class="comment-form-wrap">
         <h3>نظر خود را بنویسید</h3>
         <form id="commentForm" class="comment-form">
@@ -14,7 +15,7 @@
             <button type="submit" class="submit-btn">ارسال نظر</button>
         </form>
     </div>
-    
+
     <div class="comments-list" id="commentsList">
         {% for comment in comments %}
         <div class="comment-card" data-id="{{ comment.id }}">
@@ -26,12 +27,12 @@
                 </div>
             </div>
             <div class="comment-body">{{ comment.text }}</div>
-            <div class="comment-actions">
-                <button class="comment-action like-comment-btn" data-id="{{ comment.id }}">
-                    👍 <span>{{ comment.likes }}</span>
+            <div class="vote-section" style="margin-top: 10px;">
+                <button onclick="voteComment({{ comment.id }}, 'like')" style="cursor: pointer;">
+                    👍 <span id="like-count-{{ comment.id }}">{{ comment.votes.filter vote_type='like' | length }}</span>
                 </button>
-                <button class="comment-action dislike-comment-btn" data-id="{{ comment.id }}">
-                    👎 <span>{{ comment.dislikes }}</span>
+                <button onclick="voteComment({{ comment.id }}, 'dislike')" style="cursor: pointer;">
+                    👎 <span id="dislike-count-{{ comment.id }}">{{ comment.votes.filter vote_type='dislike' | length }}</span>
                 </button>
             </div>
         </div>
@@ -39,10 +40,33 @@
         <p class="no-comments">هنوز نظری ثبت نشده است. اولین نفر باشید!</p>
         {% endfor %}
     </div>
-    
+
     {% if total_comments > 5 %}
     <button class="load-more-btn" id="loadMoreBtn" data-offset="5">
         بارگذاری نظرات بیشتر
     </button>
     {% endif %}
+    <script>
+        function voteComment(commentId, type) {
+            fetch(`/blog/comment/${commentId}/vote/`, { // مطمئن شوید آدرس درست است
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `vote_type=${type}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message.includes('ثبت شد')) {
+                        document.getElementById(`like-count-${commentId}`).innerText = data.likes;
+                        document.getElementById(`dislike-count-${commentId}`).innerText = data.dislikes;
+                        alert(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
 </section>

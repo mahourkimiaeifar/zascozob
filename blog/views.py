@@ -90,3 +90,35 @@ def dislike_comment(request, comment_id):
     c.dislikes += 1
     c.save(update_fields=['dislikes'])
     return JsonResponse({'success': True, 'dislikes': c.dislikes})
+
+@require_POST
+def vote_comment(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    ip = request.META.get('REMOTE_ADDR')
+        
+    vote_type = request.POST.get('vote_type')
+
+    if vote_type not in ['like', 'dislike']:
+        return JsonResponse({'error': 'Invalid vote type'}, status=400)
+
+    existing_vote = CommentVote.objects.filter(comment=comment, ip_address=ip).first()
+    
+    if existing_vote:
+        likes = comment.votes.filter(vote_type='like').count()
+        dislikes = comment.votes.filter(vote_type='dislike').count()
+        return JsonResponse({
+            'likes': likes,
+            'dislikes': dislikes,
+            'message': 'شما قبلاً به این کامنت رای داده‌اید.'
+        })
+
+    CommentVote.objects.create(comment=comment, ip_address=ip, vote_type=vote_type)
+    
+    likes = comment.votes.filter(vote_type='like').count()
+    dislikes = comment.votes.filter(vote_type='dislike').count()
+
+    return JsonResponse({
+        'likes': likes,
+        'dislikes': dislikes,
+        'message': 'رای شما با موفقیت ثبت شد.'
+    })

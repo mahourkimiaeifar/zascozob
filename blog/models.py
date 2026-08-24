@@ -79,3 +79,17 @@ class Comment(SoftDeleteModel):
 
     def __str__(self):
         return f'{self.name} — {self.post.title}'
+    
+class CommentVote(models.Model):
+    comment = models.ForeignKey('Comment', on_delete=models.CASCADE, related_name='votes')
+    ip_address = models.GenericIPAddressField()
+    vote_type = models.CharField(max_length=10, choices=[('like', 'Like'), ('dislike', 'Dislike')])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('comment', 'ip_address')
+        verbose_name = 'رای کامنت'
+        verbose_name_plural = 'رای‌های کامنت'
+
+    def __str__(self):
+        return f"{self.vote_type} by {self.ip_address}"
