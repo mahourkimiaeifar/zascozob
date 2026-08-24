@@ -1,5 +1,6 @@
 import time
 import os
+import jdatetime
 from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
@@ -12,6 +13,10 @@ from django.views.decorators.http import require_POST
 from django.core.mail.backends.smtp import EmailBackend
 from main.models import ContactMessage, ReplyAttachment, SiteSetting
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from blog.models import Post, Category, Comment
+from django.utils.text import slugify
+from panel.forms import PostForm
+
 
 
 def panel_login(request):
@@ -54,10 +59,6 @@ def dashboard(request):
         'attachments_count': ContactMessage.objects.exclude(attachment='').exclude(attachment=None).count(),
         'recent_messages': ContactMessage.objects.all()[:5],
     })
-
-
-import jdatetime
-from django.utils import timezone
 
 @login_required
 def main_contact(request):
@@ -234,3 +235,136 @@ def site_settings(request):
         form = SettingsForm(instance=setting)
     
     return render(request, 'main_pages/main/site_settings.html', {'form': form, 'setting': setting})
+
+# ═══ مدیریت پست‌های بلاگ ═══
+@login_required
+def blog_post_list(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    posts = Post.objects.all().select_related('category').order_by('-created')
+    return render(request, 'main_pages/blog/post_list.html', {'posts': posts})
+
+
+@login_required
+def blog_post_add(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            if not post.publish_date and post.published:
+                post.publish_date = timezone.now()
+            post.save()
+            return redirect('panel:blog_post_list')
+    else:
+        form = PostForm()
+    return render(request, 'main_pages/blog/post_form.html', {'form': form})
+
+
+@login_required
+def blog_post_edit(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    post = get_object_or_404(Post, id=pk)
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            return redirect('panel:blog_post_list')
+    else:
+        form = PostForm(instance=post)
+    return render(request, 'main_pages/blog/post_form.html', {'form': form, 'post': post})
+
+@login_required
+@require_POST
+def blog_post_delete(request, pk):
+    if not request.user.is_staff:
+        return JsonResponse({'success': False}, status=403)
+    Post.objects.filter(id=pk).delete()
+    return JsonResponse({'success': True})
+
+
+# ═══ مدیریت دسته‌بندی‌ها ═══
+@login_required
+def blog_category_list(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    categories = Category.objects.all().select_related('parent')
+    return render(request, 'main_pages/blog/category_list.html', {'categories': categories})
+
+
+@login_required
+def blog_category_add(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    if request.method == 'POST':
+        cat = Category()
+        cat.title = request.POST.get('title', '').strip()
+        cat.slug = slugify(cat.title, allow_unicode=True)
+        parent_id = request.POST.get('parent')
+        if parent_id:
+            cat.parent = Category.objects.get(id=parent_id)
+        cat.save()
+        return redirect('panel:blog_category_list')
+    
+    parents = Category.objects.filter(parent=None)
+    return render(request, 'main_pages/blog/category_form.html', {'parents': parents})
+
+
+@login_required
+def blog_category_edit(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    cat = get_object_or_404(Category, id=pk)
+    if request.method == 'POST':
+        cat.title = request.POST.get('title', '').strip()
+        cat.slug = slugify(cat.title, allow_unicode=True)
+        parent_id = request.POST.get('parent')
+        cat.parent = Category.objects.get(id=parent_id) if parent_id else None
+        cat.save()
+        return redirect('panel:blog_category_list')
+    
+    parents = Category.objects.filter(parent=None).exclude(id=pk)
+    return render(request, 'main_pages/blog/category_form.html', {'category': cat, 'parents': parents})
+
+
+@login_required
+@require_POST
+def blog_category_delete(request, pk):
+    if not request.user.is_staff:
+        return JsonResponse({'success': False}, status=403)
+    Category.objects.filter(id=pk).delete()
+    return JsonResponse({'success': True})
+
+
+# ═══ مدیریت کامنت‌ها ═══
+@login_required
+def blog_comment_list(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    comments = Comment.objects.all().select_related('post').order_by('-created')
+    pending = Comment.objects.filter(approved=False).count()
+    return render(request, 'main_pages/blog/comment_list.html', {'comments': comments, 'pending_count': pending})
+
+
+@login_required
+@require_POST
+def blog_comment_approve(request, pk):
+    if not request.user.is_staff:
+        return JsonResponse({'success': False}, status=403)
+    try:
+        c = Comment.objects.get(id=pk)
+        c.approve()
+        return JsonResponse({'success': True})
+    except Comment.DoesNotExist:
+        return JsonResponse({'success': False})
+
+
+@login_required
+@require_POST
+def blog_comment_delete(request, pk):
+    if not request.user.is_staff:
+        return JsonResponse({'success': False}, status=403)
+    Comment.objects.filter(id=pk).delete()
+    return JsonResponse({'success': True})

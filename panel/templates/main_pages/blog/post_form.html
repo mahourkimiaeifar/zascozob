@@ -1,0 +1,353 @@
+{% extends 'layouts/panel_base.html' %}
+{% load static %}
+
+{% block title %}{% if post %}ویرایش مقاله{% else %}مقاله جدید{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/41.4.2/ckeditor5.css">
+<style>
+/* ═══ Layout ═══ */
+.post-form-wrap{max-width:1100px;margin:0 auto;padding:0 10px}
+
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;flex-wrap:wrap;gap:16px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.page-header h1{font-size:1.6rem;font-weight:800;display:flex;align-items:center;gap:12px}
+.page-header h1::before{content:'';width:4px;height:28px;background:linear-gradient(180deg,var(--primary),var(--primary-light));border-radius:2px}
+
+/* ═══ فرم کارت ═══ */
+.post-form{background:linear-gradient(135deg,rgba(20,20,25,.8),rgba(11,13,16,.9));border:1px solid var(--line);border-radius:var(--radius-lg);padding:32px;backdrop-filter:blur(20px)}
+
+.section-title{font-size:1.05rem;font-weight:800;color:var(--primary-light);margin:24px 0 18px;padding-right:14px;border-right:3px solid var(--primary);display:flex;align-items:center;gap:10px}
+.section-title:first-child{margin-top:0}
+
+/* ═══ فیلدها ═══ */
+.field{margin-bottom:20px;position:relative}
+.field label{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:10px;color:#cfd6e0;font-size:.9rem}
+.field label .icon{width:22px;height:22px;border-radius:6px;background:rgba(255,107,0,.12);display:inline-flex;align-items:center;justify-content:center;color:var(--primary-light);flex-shrink:0}
+.field label .icon svg{width:14px;height:14px}
+
+.field .input-wrap{position:relative}
+.field input[type="text"],
+.field input[type="number"],
+.field input[type="datetime-local"],
+.field textarea,
+.field select{
+  width:100%;
+  background:rgba(255,255,255,.03);
+  border:1.5px solid var(--line);
+  border-radius:12px;
+  padding:14px 16px;
+  color:#fff;
+  font-family:'Vazirmatn',sans-serif;
+  font-size:.95rem;
+  outline:none;
+  transition:all .3s;
+}
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+  border-color:var(--primary);
+  background:rgba(255,107,0,.04);
+  box-shadow:0 0 0 4px rgba(255,107,0,.1);
+}
+.field input::placeholder,
+.field textarea::placeholder{color:var(--text-dim)}
+.field textarea{resize:vertical;min-height:100px;line-height:1.9}
+.field .hint{font-size:.78rem;color:var(--text-dim);margin-top:6px;display:flex;align-items:center;gap:6px}
+
+/* ═══ گرید ═══ */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+@media (max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* ═══ آپلود تصویر ═══ */
+.image-upload{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.image-preview{width:220px;aspect-ratio:16/10;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:rgba(255,255,255,.02);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:.85rem}
+.image-preview img{width:100%;height:100%;object-fit:cover}
+.image-upload .upload-area{flex:1;min-width:200px}
+.image-upload input[type="file"]{padding:12px 16px}
+.image-upload input[type="file"]::file-selector-button{
+  padding:8px 18px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-weight:700;
+  cursor:pointer;
+  margin-left:12px;
+  font-family:inherit;
+}
+
+/* ═══ Checkbox ═══ */
+.check-field{display:flex;align-items:center;gap:12px;padding:16px 20px;background:rgba(255,255,255,.02);border:1.5px solid var(--line);border-radius:12px;cursor:pointer;transition:all .3s}
+.check-field:hover{border-color:rgba(255,107,0,.3);background:rgba(255,107,0,.04)}
+.check-field input[type="checkbox"]{width:22px;height:22px;accent-color:var(--primary);cursor:pointer}
+.check-field .check-text{flex:1}
+.check-field .check-text strong{display:block;font-size:.95rem;margin-bottom:2px}
+.check-field .check-text small{color:var(--text-muted);font-size:.78rem}
+
+/* ═══ CKEditor ═══ */
+.ck-field .ck.ck-editor{width:100%!important;margin-top:6px}
+.ck-field .ck.ck-toolbar{background:rgba(255,255,255,.04)!important;border:1.5px solid var(--line)!important;border-radius:12px 12px 0 0!important;flex-wrap:wrap;padding:6px}
+.ck-field .ck.ck-toolbar .ck-button{color:var(--text-muted)!important;border-radius:8px!important;padding:6px 10px!important}
+.ck-field .ck.ck-toolbar .ck-button:hover{background:rgba(255,107,0,.12)!important;color:#fff!important}
+.ck-field .ck.ck-toolbar .ck-button.ck-on{background:rgba(255,107,0,.18)!important;color:var(--primary-light)!important}
+.ck-field .ck.ck-editor__editable.ck-editor__editable_inline{
+  background:rgba(255,255,255,.02)!important;
+  color:var(--text-main)!important;
+  border:1.5px solid var(--line)!important;
+  border-top:none!important;
+  border-radius:0 0 12px 12px!important;
+  min-height:380px;
+  max-height:70vh;
+  overflow-y:auto;
+  padding:20px 24px;
+  direction:rtl;
+  font-family:'Vazirmatn',sans-serif!important;
+  font-size:1rem;
+  line-height:2.1
+}
+.ck-field .ck.ck-editor__editable:focus{border-color:var(--primary)!important;box-shadow:0 0 0 3px rgba(255,107,0,.15)!important}
+.ck-content h1,.ck-content h2,.ck-content h3,.ck-content h4{color:#fff}
+.ck-content a{color:var(--primary-light)}
+.ck-content blockquote{border-right:3px solid var(--primary);padding:10px 20px;background:rgba(255,107,0,.04);border-radius:0 10px 10px 0}
+.ck-content pre,.ck-content code{background:rgba(255,255,255,.06);color:var(--primary-light);border-radius:6px;padding:2px 6px}
+.ck-content pre{padding:16px;direction:ltr}
+.ck-content table td,.ck-content table th{border:1px solid var(--line)!important;padding:10px}
+.ck-content table th{background:rgba(255,107,0,.08)}
+.ck-content img{border-radius:12px;max-width:100%}
+.ck.ck-dropdown__panel,.ck.ck-list,.ck.ck-balloon-panel{background:var(--bg-card)!important;border:1px solid var(--line)!important}
+.ck.ck-list__item .ck-button{color:var(--text-muted)!important}
+.ck.ck-list__item .ck-button:hover{background:rgba(255,255,255,.08)!important;color:#fff!important}
+.ck.ck-list__item .ck-button.ck-on{color:var(--primary-light)!important;background:rgba(255,107,0,.12)!important}
+.ck.ck-input{background:rgba(255,255,255,.06)!important;border:1px solid var(--line)!important;color:#fff!important}
+.ck.ck-placeholder:before{color:var(--text-dim)!important;font-style:italic}
+
+/* ═══ Action bar ═══ */
+.action-bar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:28px;margin-top:28px;border-top:1px solid var(--line);flex-wrap:wrap}
+.action-bar-right{display:flex;gap:10px}
+.btn-ghost{padding:12px 24px;background:rgba(255,255,255,.04);border:1.5px solid var(--line);color:var(--text-main);border-radius:10px;font-weight:700;transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn-ghost:hover{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.08)}
+.btn-primary{padding:12px 28px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;border-radius:10px;font-weight:800;box-shadow:0 8px 22px var(--primary-glow);cursor:pointer;font-family:inherit;font-size:.95rem;transition:all .3s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 30px var(--primary-glow)}
+
+/* ═══ SVG Icons ═══ */
+.icon-svg{width:18px;height:18px}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="post-form-wrap">
+    
+    <div class="page-header">
+        <h1>{% if post %}✏️ ویرایش مقاله{% else %}➕ مقاله جدید{% endif %}</h1>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="post-form" id="postForm">
+        {% csrf_token %}
+        
+        <!-- ═══ بخش ۱: اطلاعات اصلی ═══ -->
+        <div class="section-title">📝 اطلاعات اصلی</div>
+        
+        <div class="field">
+            <label>
+                <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2M4 7h16M4 7v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7"/></svg></span>
+                عنوان مقاله
+            </label>
+            <div class="input-wrap">
+                <input type="text" name="title" id="id_title" value="{{ post.title|default:'' }}" placeholder="یک عنوان جذاب و کامل بنویسید..." required>
+            </div>
+            <div class="hint">💡 عنوان کوتاه و گوگل‌پسند بنویسید</div>
+        </div>
+
+        <div class="field">
+            <label>
+                <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg></span>
+                چکیده
+            </label>
+            <textarea name="excerpt" rows="3" placeholder="یک خلاصه ۲-۳ خطی از مقاله...">{{ post.excerpt|default:'' }}</textarea>
+            <div class="hint">📋 در لیست مقالات و نتایج گوگل نمایش داده می‌شود</div>
+        </div>
+
+        <!-- ═══ بخش ۲: محتوای اصلی (CKEditor) ═══ -->
+        <div class="section-title">✍️ محتوای مقاله</div>
+        
+        <div class="field ck-field">
+            <label>
+                <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+                متن کامل
+            </label>
+            <textarea name="content" id="id_content" rows="10">{{ post.content|default:'' }}</textarea>
+            <div class="hint">🎨 از toolbar بالا برای فرمت متن، تصویر، جدول و... استفاده کنید</div>
+        </div>
+
+        <!-- ═══ بخش ۳: دسته‌بندی و جزئیات ═══ -->
+        <div class="section-title">🗂️ دسته‌بندی و جزئیات</div>
+
+        <div class="grid-2">
+            <div class="field">
+                <label>
+                    <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+                    دسته‌بندی
+                </label>
+                <select name="category" id="id_category">
+                    <option value="">— انتخاب کنید —</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if post.category_id == cat.id %}selected{% endif %}>{{ cat.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label>
+                    <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+                    زمان مطالعه (دقیقه)
+                </label>
+                <input type="number" name="read_time" id="id_read_time" value="{{ post.read_time|default:3 }}" min="1" max="60">
+            </div>
+        </div>
+
+        <!-- ═══ بخش ۴: تصویر شاخص ═══ -->
+        <div class="section-title">🖼️ تصویر شاخص</div>
+
+        <div class="field">
+            <div class="image-upload">
+                <div class="image-preview" id="imgPreview">
+                    {% if post.featured_image %}
+                    <img src="{{ post.featured_image.url }}" alt="">
+                    {% else %}
+                    <span>بدون تصویر</span>
+                    {% endif %}
+                </div>
+                <div class="upload-area">
+                    <input type="file" name="featured_image" id="id_featured_image" accept="image/*">
+                    <div class="hint">📷 بهترین سایز: ۱۲۰۰×۷۰۰ پیکسل (نسبت ۱۶:۱۰)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ بخش ۵: تنظیمات انتشار ═══ -->
+        <div class="section-title">🚀 تنظیمات انتشار</div>
+
+        <div class="grid-2">
+            <div class="field">
+                <label>
+                    <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+                    تاریخ انتشار
+                </label>
+                <input type="datetime-local" name="publish_date" id="id_publish_date" 
+                    value="{{ post.publish_date|date:'Y-m-d\TH:i' }}" 
+                    placeholder="اختیاری — خالی = الان">
+                <div class="hint">⏰ اگر خالی بگذارید، لحظه انتشار ثبت می‌شود</div>
+            </div>
+
+            <div class="field">
+                <label class="check-field" for="id_published">
+                    <input type="checkbox" name="published" id="id_published" {% if post.published %}checked{% endif %}>
+                    <div class="check-text">
+                        <strong>منتشر شود</strong>
+                        <small>مقاله فوراً در وبلاگ قابل مشاهده خواهد بود</small>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- ═══ دکمه‌ها ═══ -->
+        <div class="action-bar">
+            <a href="{% url 'panel:blog_post_list' %}" class="btn-ghost">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l-6-6 6-6M3 12h18"/></svg>
+                بازگشت
+            </a>
+            <div class="action-bar-right">
+                <button type="reset" class="btn-ghost">🗑 پاک کردن</button>
+                <button type="submit" class="btn-primary">
+                    💾 ذخیره مقاله
+                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/translations/fa.js"></script>
+<script>
+(function(){
+  /* ═══ CKEditor ═══ */
+  var contentEl = document.getElementById('id_content');
+  var editorInstance = null;
+  
+  if (contentEl && typeof ClassicEditor !== 'undefined') {
+    ClassicEditor.create(contentEl, {
+      language: 'fa',
+      toolbar: [
+        'heading', '|',
+        'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
+        'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'code', '|',
+        'bulletedList', 'numberedList', 'todoList', '|',
+        'outdent', 'indent', 'alignment', '|',
+        'link', 'blockQuote', 'insertTable', 'mediaEmbed', 'codeBlock', '|',
+        'undo', 'redo', '|',
+        'sourceEditing'
+      ],
+      heading: {
+        options: [
+          { model: 'paragraph', title: 'پاراگراف' },
+          { model: 'heading1', view: 'h1', title: 'عنوان ۱' },
+          { model: 'heading2', view: 'h2', title: 'عنوان ۲' },
+          { model: 'heading3', view: 'h3', title: 'عنوان ۳' }
+        ]
+      },
+      fontFamily: { options: ['default', 'Vazirmatn, sans-serif', 'Tahoma', 'Arial', 'Georgia', 'Courier New'] },
+      fontSize: { options: ['tiny', 'small', 'default', 'big', 'huge'] },
+      fontColor: { columns: 5, colors: [
+        {color:'#eef1f6',label:'سفید'},{color:'#ff6b00',label:'نارنجی'},{color:'#f44336',label:'قرمز'},
+        {color:'#4caf50',label:'سبز'},{color:'#2196f3',label:'آبی'},{color:'#ffc107',label:'زرد'},
+        {color:'#9c27b0',label:'بنفش'},{color:'#000000',label:'مشکی'}
+      ]},
+      fontBackgroundColor: { columns: 4, colors: [
+        {color:'transparent',label:'بدون رنگ'},{color:'#ff6b00',label:'نارنجی'},
+        {color:'#f44336',label:'قرمز'},{color:'#4caf50',label:'سبز'},{color:'#000000',label:'مشکی'}
+      ]},
+      list: { properties: { styles: true, startIndex: true, reversed: true } },
+      link: { addTargetToExternalLinks: true, defaultProtocol: 'https://' },
+      table: { contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells'] },
+      codeBlock: { languages: [
+        {language:'plaintext',label:'متن ساده'},{language:'python',label:'Python'},
+        {language:'javascript',label:'JavaScript'},{language:'html',label:'HTML'},{language:'css',label:'CSS'}
+      ]},
+      mediaEmbed: { previewsInData: true },
+      placeholder: 'محتوای مقاله خود را اینجا بنویسید...'
+    }).then(function(ed){
+      editorInstance = ed;
+    }).catch(function(err){ console.error('CKEditor:', err); });
+  }
+
+  /* ═══ آپلود تصویر — Preview ═══ */
+  var fileInput = document.getElementById('id_featured_image');
+  var preview = document.getElementById('imgPreview');
+  if (fileInput) {
+    fileInput.addEventListener('change', function(e){
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        preview.innerHTML = '<img src="'+ev.target.result+'" alt="">';
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* ═══ Submit — اطمینان از انتقال محتوا ═══ */
+  var form = document.getElementById('postForm');
+  if (form) {
+    form.addEventListener('submit', function(){
+      if (editorInstance) {
+        contentEl.value = editorInstance.getData();
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

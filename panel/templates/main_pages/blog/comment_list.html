@@ -1,0 +1,82 @@
+{% extends 'layouts/panel_base.html' %}
+
+{% block title %}کامنت‌ها{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">کامنت‌ها</h1>
+        <p class="page-subtitle">مدیریت نظرات کاربران</p>
+    </div>
+    {% if pending_count %}
+    <span class="badge badge-warning">{{ pending_count }} در انتظار تایید</span>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>نام</th>
+                    <th>مقاله</th>
+                    <th>متن</th>
+                    <th>وضعیت</th>
+                    <th>تاریخ</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in comments %}
+                <tr data-id="{{ c.id }}">
+                    <td><strong>{{ c.name }}</strong></td>
+                    <td>{{ c.post.title|truncatechars:30 }}</td>
+                    <td>{{ c.text|truncatechars:50 }}</td>
+                    <td>
+                        {% if c.approved %}
+                        <span class="badge badge-success">تایید شده</span>
+                        {% else %}
+                        <span class="badge badge-warning">در انتظار</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ c.created|date:"Y/m/d H:i" }}</td>
+                    <td>
+                        {% if not c.approved %}
+                        <button class="btn-icon success approve-btn" data-id="{{ c.id }}" title="تایید">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        </button>
+                        {% endif %}
+                        <button class="btn-icon danger delete-btn" data-id="{{ c.id }}" title="حذف">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center">هنوز کامنتی ثبت نشده</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.approve-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    fetch('/zasco-admin-x9k2p/blog/comment/'+btn.dataset.id+'/approve/',{method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}})
+      .then(function(r){return r.json()})
+      .then(function(d){if(d.success)location.reload()});
+  });
+});
+document.querySelectorAll('.delete-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    if(!confirm('آیا از حذف این کامنت مطمئن هستید؟')) return;
+    fetch('/zasco-admin-x9k2p/blog/comment/'+btn.dataset.id+'/delete/',{method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}})
+      .then(function(r){return r.json()})
+      .then(function(d){if(d.success)location.reload()});
+  });
+});
+function getCookie(n){var v='; '+document.cookie;var p=v.split('; '+n+'=');if(p.length===2)return p.pop().split(';').shift();return '';}
+</script>
+{% endblock %}
