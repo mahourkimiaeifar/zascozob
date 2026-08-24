@@ -1,11 +1,11 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 
 app_name = 'blog'
 
 urlpatterns = [
     path('', views.post_list, name='post_list'),
-    path('<slug:slug>/', views.post_detail, name='post_detail'),
+    re_path(r'^(?P<slug>[-\w\u0600-\u06FF]+)/$', views.post_detail, name='post_detail'),
     path('api/comments/<int:post_id>/load/', views.load_more_comments, name='load_comments'),
     path('api/comments/<int:post_id>/submit/', views.submit_comment, name='submit_comment'),
     path('api/posts/<int:post_id>/like/', views.like_post, name='like_post'),
