@@ -40,19 +40,40 @@
         </div>
         <div class="nav-section">
             <div class="nav-title">بلاگ</div>
-            <a href="{% url 'panel:blog_post_add' %}" class="nav-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M12 5v14M5 12h14" />
-                </svg>
-                <span>مقاله جدید</span>
-            </a>
-            <a href="{% url 'panel:blog_post_list' %}" class="nav-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
-                </svg>
-                <span>مقاله‌ها</span>
-            </a>
+            <!-- ═══ گروه مقاله‌ها (زیرمنو) ═══ -->
+            <div class="nav-group">
+                <button type="button" class="nav-group-toggle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <path d="M14 2v6h6M16 13H8M16 17H8" />
+                    </svg>
+                    <span>مقاله‌ها</span>
+                    <svg class="nav-group-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                </button>
+                <div class="nav-submenu">
+                    <a href="{% url 'panel:blog_post_add' %}"
+                        class="nav-sub-item {% if request.resolver_match.url_name == 'blog_post_add' %}active{% endif %}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14" />
+                        </svg>
+                        مقاله جدید
+                    </a>
+                    <a href="{% url 'panel:blog_post_list' %}"
+                        class="nav-sub-item {% if request.resolver_match.url_name == 'blog_post_list' or request.resolver_match.url_name == 'blog_post_edit' %}active{% endif %}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="8" y1="6" x2="21" y2="6" />
+                            <line x1="8" y1="12" x2="21" y2="12" />
+                            <line x1="8" y1="18" x2="21" y2="18" />
+                            <line x1="3" y1="6" x2="3.01" y2="6" />
+                            <line x1="3" y1="12" x2="3.01" y2="12" />
+                            <line x1="3" y1="18" x2="3.01" y2="18" />
+                        </svg>
+                        لیست مقاله‌ها
+                    </a>
+                </div>
+            </div>
             <div class="nav-divider"></div>
             <a href="{% url 'panel:blog_category_list' %}" class="nav-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">

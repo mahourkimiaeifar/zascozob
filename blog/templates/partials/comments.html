@@ -27,12 +27,12 @@
                 </div>
             </div>
             <div class="comment-body">{{ comment.text }}</div>
-            <div class="vote-section" style="margin-top: 10px;">
-                <button onclick="voteComment({{ comment.id }}, 'like')" style="cursor: pointer;">
-                    👍 <span id="like-count-{{ comment.id }}">{{ comment.votes.filter vote_type='like' | length }}</span>
+            <div class="comment-actions">
+                <button class="comment-action like-comment-btn{% if comment.id in user_likes_comments %} voted liked{% endif %}" data-id="{{ comment.id }}">
+                    👍 <span>{{ comment.likes }}</span>
                 </button>
-                <button onclick="voteComment({{ comment.id }}, 'dislike')" style="cursor: pointer;">
-                    👎 <span id="dislike-count-{{ comment.id }}">{{ comment.votes.filter vote_type='dislike' | length }}</span>
+                <button class="comment-action dislike-comment-btn{% if comment.id in user_dislikes_comments %} voted disliked{% endif %}" data-id="{{ comment.id }}">
+                    👎 <span>{{ comment.dislikes }}</span>
                 </button>
             </div>
         </div>
@@ -46,27 +46,4 @@
         بارگذاری نظرات بیشتر
     </button>
     {% endif %}
-    <script>
-        function voteComment(commentId, type) {
-            fetch(`/blog/comment/${commentId}/vote/`, { // مطمئن شوید آدرس درست است
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: `vote_type=${type}`
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message.includes('ثبت شد')) {
-                        document.getElementById(`like-count-${commentId}`).innerText = data.likes;
-                        document.getElementById(`dislike-count-${commentId}`).innerText = data.dislikes;
-                        alert(data.message);
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    </script>
 </section>

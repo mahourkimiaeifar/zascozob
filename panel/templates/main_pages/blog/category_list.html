@@ -32,32 +32,42 @@
                     <td>{{ cat.posts.count }}</td>
                     <td>
                         <a href="{% url 'panel:blog_category_edit' cat.id %}" class="btn-icon" title="ویرایش">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            </svg>
                         </a>
                         <button class="btn-icon danger delete-cat-btn" data-id="{{ cat.id }}" title="حذف">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
                         </button>
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" class="text-center">هنوز دسته‌بندی ایجاد نشده</td></tr>
+                <tr>
+                    <td colspan="5" class="text-center">هنوز دسته‌بندی ایجاد نشده</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% include 'partials/panel_pagination.html' with page_obj=categories %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.querySelectorAll('.delete-cat-btn').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    if(!confirm('آیا از حذف این دسته‌بندی مطمئن هستید؟')) return;
-    fetch('/zasco-admin-x9k2p/blog/category/'+btn.dataset.id+'/delete/',{method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}})
-      .then(function(r){return r.json()})
-      .then(function(d){if(d.success)location.reload()});
-  });
-});
-function getCookie(n){var v='; '+document.cookie;var p=v.split('; '+n+'=');if(p.length===2)return p.pop().split(';').shift();return '';}
+    document.querySelectorAll('.delete-cat-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            if (!confirm('آیا از حذف این دسته‌بندی مطمئن هستید؟')) return;
+            fetch('/zasco-admin-x9k2p/blog/category/' + btn.dataset.id + '/delete/', { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } })
+                .then(function (r) { return r.json() })
+                .then(function (d) { if (d.success) location.reload() });
+        });
+    });
+    function getCookie(n) { var v = '; ' + document.cookie; var p = v.split('; ' + n + '='); if (p.length === 2) return p.pop().split(';').shift(); return ''; }
 </script>
 {% endblock %}

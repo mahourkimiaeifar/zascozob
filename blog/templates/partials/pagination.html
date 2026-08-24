@@ -1,0 +1,19 @@
+{% if posts.paginator.num_pages > 1 %}
+<nav class="blog-pagination">
+    {% if posts.has_previous %}
+    <a href="?{{ extra_get }}page={{ posts.previous_page_number }}" class="page-btn">
+        قبلی <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    {% else %}<span class="page-btn disabled">قبلی</span>{% endif %}
+
+    {% for num in posts.paginator.page_range %}
+    <a href="?{{ extra_get }}page={{ num }}" class="page-btn num {% if num == posts.number %}active{% endif %}">{{ num }}</a>
+    {% endfor %}
+
+    {% if posts.has_next %}
+    <a href="?{{ extra_get }}page={{ posts.next_page_number }}" class="page-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg> بعدی
+    </a>
+    {% else %}<span class="page-btn disabled">بعدی</span>{% endif %}
+</nav>
+{% endif %}

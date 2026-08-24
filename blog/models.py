@@ -80,16 +80,30 @@ class Comment(SoftDeleteModel):
     def __str__(self):
         return f'{self.name} — {self.post.title}'
     
-class CommentVote(models.Model):
-    comment = models.ForeignKey('Comment', on_delete=models.CASCADE, related_name='votes')
-    ip_address = models.GenericIPAddressField()
-    vote_type = models.CharField(max_length=10, choices=[('like', 'Like'), ('dislike', 'Dislike')])
+class VoteRecord(models.Model):
+    """رکورد رأی‌ها برای جلوگیری از رأی تکراری"""
+    VOTE_TYPES = [('like', 'لایک'), ('dislike', 'دیسلایک')]
+    TARGET_TYPES = [('post', 'مقاله'), ('comment', 'کامنت')]
+    
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True,
+        related_name='blog_votes', verbose_name='کاربر')
+    ip_address = models.GenericIPAddressField('آی‌پی', null=True, blank=True)
+    session_key = models.CharField('شناسه سشن', max_length=40, blank=True)
+    
+    target_type = models.CharField('نوع', max_length=10, choices=TARGET_TYPES)
+    target_id = models.PositiveIntegerField('شناسه هدف')
+    vote_type = models.CharField('نوع رأی', max_length=10, choices=VOTE_TYPES)
+    
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
     class Meta:
-        unique_together = ('comment', 'ip_address')
-        verbose_name = 'رای کامنت'
-        verbose_name_plural = 'رای‌های کامنت'
-
+        verbose_name = 'رکورد رأی'
+        verbose_name_plural = 'رکوردهای رأی'
+        unique_together = [
+            ('user', 'target_type', 'target_id'),
+            ('ip_address', 'target_type', 'target_id'),
+            ('session_key', 'target_type', 'target_id'),
+        ]
+    
     def __str__(self):
-        return f"{self.vote_type} by {self.ip_address}"
+        return f'{self.vote_type} → {self.target_type}#{self.target_id}'

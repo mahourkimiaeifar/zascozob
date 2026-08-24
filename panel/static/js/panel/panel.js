@@ -72,3 +72,15 @@
 
     console.log('✅ Panel initialized');
 })();
+/* ═══ زیرمنوی کشویی سایدبار ═══ */
+document.querySelectorAll('.nav-group-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        btn.closest('.nav-group').classList.toggle('open');
+    });
+});
+
+/* باز شدن خودکار اگه زیرمنوی فعال باز باشه */
+document.querySelectorAll('.nav-sub-item.active').forEach(function (item) {
+    var g = item.closest('.nav-group');
+    if (g) g.classList.add('open');
+});

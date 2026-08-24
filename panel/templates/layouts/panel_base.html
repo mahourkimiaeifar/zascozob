@@ -24,6 +24,18 @@
             {% include 'partials/panel_footer.html' %}
         </div>
     </div>
+
+    <a href="{% url 'panel:blog_comment_list' %}"
+        class="nav-item {% if request.resolver_match.url_name == 'blog_comment_list' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        <span>کامنت‌ها</span>
+        {% if pending_comments %}
+        <span class="nav-badge badge-pulse">{{ pending_comments }}</span>
+        {% endif %}
+    </a>
+
     <script src="{% static 'js/panel/panel.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>

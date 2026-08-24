@@ -16,6 +16,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from blog.models import Post, Category, Comment
 from django.utils.text import slugify
 from panel.forms import PostForm
+from django.core.paginator import Paginator
+from django.db.models import Count
+
 
 
 
@@ -241,7 +244,9 @@ def site_settings(request):
 def blog_post_list(request):
     if not request.user.is_staff:
         return redirect('panel:login')
-    posts = Post.objects.all().select_related('category').order_by('-created')
+    posts = Post.objects.all().select_related('category').order_by('-publish_date')
+    paginator = Paginator(posts, 10)
+    posts = paginator.get_page(request.GET.get('page'))
     return render(request, 'main_pages/blog/post_list.html', {'posts': posts})
 
 
@@ -249,6 +254,9 @@ def blog_post_list(request):
 def blog_post_add(request):
     if not request.user.is_staff:
         return redirect('panel:login')
+    
+    post = None  # ← این خط اضافه شد
+    
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
@@ -259,14 +267,27 @@ def blog_post_add(request):
             return redirect('panel:blog_post_list')
     else:
         form = PostForm()
-    return render(request, 'main_pages/blog/post_form.html', {'form': form})
+    
+    categories_data = [
+        {'id': c.id, 'title': c.title, 'parent': c.parent_id}
+        for c in Category.objects.all()
+    ]
+    
+    return render(request, 'main_pages/blog/post_form.html', {
+        'form': form,
+        'post': post,
+        'categories': Category.objects.all(),
+        'categories_data': categories_data,
+    })
 
 
 @login_required
 def blog_post_edit(request, pk):
     if not request.user.is_staff:
         return redirect('panel:login')
+    
     post = get_object_or_404(Post, id=pk)
+    
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
@@ -274,8 +295,19 @@ def blog_post_edit(request, pk):
             return redirect('panel:blog_post_list')
     else:
         form = PostForm(instance=post)
-    return render(request, 'main_pages/blog/post_form.html', {'form': form, 'post': post})
-
+    
+    categories_data = [
+        {'id': c.id, 'title': c.title, 'parent': c.parent_id}
+        for c in Category.objects.all()
+    ]
+    
+    return render(request, 'main_pages/blog/post_form.html', {
+        'form': form,
+        'post': post,
+        'categories': Category.objects.all(),
+        'categories_data': categories_data,
+    })
+    
 @login_required
 @require_POST
 def blog_post_delete(request, pk):
@@ -290,7 +322,9 @@ def blog_post_delete(request, pk):
 def blog_category_list(request):
     if not request.user.is_staff:
         return redirect('panel:login')
-    categories = Category.objects.all().select_related('parent')
+    cats = Category.objects.annotate(posts_count=Count('posts')).order_by('-id')
+    paginator = Paginator(cats, 10)
+    categories = paginator.get_page(request.GET.get('page'))
     return render(request, 'main_pages/blog/category_list.html', {'categories': categories})
 
 
@@ -343,10 +377,10 @@ def blog_category_delete(request, pk):
 def blog_comment_list(request):
     if not request.user.is_staff:
         return redirect('panel:login')
-    comments = Comment.objects.all().select_related('post').order_by('-created')
-    pending = Comment.objects.filter(approved=False).count()
-    return render(request, 'main_pages/blog/comment_list.html', {'comments': comments, 'pending_count': pending})
-
+    comments = Comment.objects.select_related('post').order_by('-created')
+    paginator = Paginator(comments, 10)
+    comments = paginator.get_page(request.GET.get('page'))
+    return render(request, 'main_pages/blog/comment_list.html', {'comments': comments})
 
 @login_required
 @require_POST
