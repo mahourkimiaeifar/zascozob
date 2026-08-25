@@ -5,26 +5,194 @@
 
 {% block extra_css %}
 <style>
-.settings-form{display:grid;gap:18px;max-width:900px;margin:0 auto}
-.form-section{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px}
-.form-section h3{font-size:1.05rem;font-weight:800;color:var(--primary-light);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
-.field-row{margin-bottom:16px}
-.field-row label{display:block;font-size:.85rem;font-weight:700;margin-bottom:6px;color:#cfd6e0}
-.field-row input,.field-row textarea,.field-row select{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:var(--text-main);font-family:inherit;font-size:.9rem;outline:none}
-.field-row input:focus,.field-row textarea:focus{border-color:var(--primary)}
-.field-row small{color:var(--text-dim);font-size:.75rem;display:block;margin-top:4px}
-.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.save-bar{position:sticky;bottom:0;background:rgba(11,13,16,.95);backdrop-filter:blur(20px);padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;z-index:100}
+    /* ── فیلد آپلود فایل (QR) ── */
+    .settings-form input[type="file"] {
+        width: 100%;
+        padding: 14px;
+        background: rgba(255, 107, 0, .03);
+        border: 1.5px dashed rgba(255, 107, 0, .35);
+        border-radius: 14px;
+        color: #9aa3b2;
+        font-size: .85rem;
+        cursor: pointer;
+        transition: all .3s
+    }
+
+    .settings-form input[type="file"]:hover {
+        border-color: #ff6b00;
+        background: rgba(255, 107, 0, .06)
+    }
+
+    .settings-form input[type="file"]::file-selector-button {
+        padding: 10px 22px;
+        margin-left: 14px;
+        background: linear-gradient(135deg, #ff6b00, #ff9a4d);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(255, 107, 0, .3);
+        transition: all .3s
+    }
+
+    .settings-form input[type="file"]::file-selector-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(255, 107, 0, .4)
+    }
+
+    /* ── چک‌باکس «پاک کردن» ── */
+    .settings-form input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #f44336;
+        cursor: pointer;
+        vertical-align: middle
+    }
+
+    /* ── پیش‌نمایش QR فعلی ── */
+    .qr-current-wrap {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 14px;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, .03);
+        border: 1px solid rgba(255, 255, 255, .08);
+        border-radius: 12px;
+        width: fit-content
+    }
+
+    .qr-current {
+        width: 90px;
+        height: 90px;
+        object-fit: contain;
+        background: #fff;
+        border-radius: 10px;
+        padding: 6px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, .4)
+    }
+
+    .qr-current-wrap span {
+        font-size: .8rem;
+        color: #9aa3b2;
+        font-weight: 600
+    }
+
+    /* ── باکس QR فعلی ── */
+    .qr-current-wrap {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 18px;
+        background: rgba(255, 255, 255, .03);
+        border: 1px solid rgba(255, 255, 255, .08);
+        border-radius: 14px;
+        margin-bottom: 14px;
+        width: fit-content
+    }
+
+    .qr-current {
+        width: 84px;
+        height: 84px;
+        object-fit: contain;
+        background: #fff;
+        border-radius: 10px;
+        padding: 6px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, .4)
+    }
+
+    .qr-current-info {
+        display: flex;
+        flex-direction: column;
+        gap: 6px
+    }
+
+    .qr-title {
+        font-weight: 800;
+        font-size: .9rem;
+        color: #7cc47f
+    }
+
+    .qr-clear {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #ef9a9a;
+        font-size: .8rem;
+        cursor: pointer;
+        transition: color .2s
+    }
+
+    .qr-clear input {
+        width: 16px;
+        height: 16px;
+        accent-color: #f44336;
+        cursor: pointer
+    }
+
+    .qr-clear svg {
+        width: 14px;
+        height: 14px
+    }
+
+    .qr-clear:hover {
+        color: #f44336
+    }
+
+    /* ── آپلودباکس جدید ── */
+    .qr-upload {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 26px 20px;
+        background: rgba(255, 107, 0, .03);
+        border: 1.5px dashed rgba(255, 107, 0, .35);
+        border-radius: 14px;
+        cursor: pointer;
+        text-align: center;
+        transition: all .3s
+    }
+
+    .qr-upload:hover {
+        border-color: #ff6b00;
+        background: rgba(255, 107, 0, .07)
+    }
+
+    .qr-upload svg {
+        width: 30px;
+        height: 30px;
+        color: #ff9a4d
+    }
+
+    .qr-upload span {
+        font-weight: 800;
+        color: #eef1f6;
+        font-size: .92rem
+    }
+
+    .qr-upload small {
+        color: #6b7482;
+        font-size: .75rem
+    }
+
+    .qr-hidden-input {
+        display: none
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <form method="POST" enctype="multipart/form-data" class="settings-form">
     {% csrf_token %}
-    
+
     <div class="form-section">
         <h3>🎯 عمومی</h3>
-        <div class="field-row">{{ form.site_title.label_tag }}{{ form.site_title }}<small>{{ form.site_title.help_text }}</small></div>
+        <div class="field-row">{{ form.site_title.label_tag }}{{ form.site_title }}<small>{{ form.site_title.help_text
+                }}</small></div>
         <div class="field-row">{{ form.subtitle.label_tag }}{{ form.subtitle }}</div>
         <div class="field-row">{{ form.about_text.label_tag }}{{ form.about_text }}</div>
     </div>
@@ -45,8 +213,38 @@
         <h3>📄 دیگر صفحات</h3>
         <div class="field-row">{{ form.footer_title_pages.label_tag }}{{ form.footer_title_pages }}</div>
         <div class="field-row">{{ form.footer_description.label_tag }}{{ form.footer_description }}</div>
-        <div class="field-row">{{ form.catalog_link.label_tag }}{{ form.catalog_link }}</div>
-        <div class="field-row">{{ form.catalog_qr.label_tag }}{{ form.catalog_qr }}</div>
+        <div class="field-row">
+            <label>تصویر QR کاتالوگ</label>
+
+            {% if form.instance.catalog_qr %}
+            <div class="qr-current-wrap">
+                <img src="{{ form.instance.catalog_qr.url }}" alt="QR فعلی" class="qr-current">
+                <div class="qr-current-info">
+                    <span class="qr-title">✅ QR فعلی فعال است</span>
+                    <label class="qr-clear">
+                        <input type="checkbox" name="catalog_qr-clear" id="catalog_qr-clear_id">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        </svg>
+                        حذف تصویر فعلی
+                    </label>
+                </div>
+            </div>
+            {% endif %}
+
+            <label class="qr-upload" for="id_catalog_qr">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                <span id="qrFileName">انتخاب تصویر QR جدید</span>
+                <small>PNG یا JPG — مربع و با پس‌زمینه سفید</small>
+            </label>
+            <input type="file" name="catalog_qr" id="id_catalog_qr" class="qr-hidden-input" accept="image/*">
+            {{ form.catalog_qr.errors }}
+        </div>
     </div>
 
     <div class="form-section">
@@ -80,5 +278,14 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>document.getElementById('pageTitle').textContent = 'تنظیمات سایت';</script>
+<script>document.getElementById('pageTitle').textContent = 'تنظیمات سایت';
+    /* ── نشون دادن اسم فایل انتخاب‌شده ── */
+    var qrFile = document.getElementById('id_catalog_qr');
+    var qrName = document.getElementById('qrFileName');
+    if (qrFile && qrName) {
+        qrFile.addEventListener('change', function () {
+            if (qrFile.files[0]) qrName.textContent = '✓ ' + qrFile.files[0].name;
+        });
+    }
+</script>
 {% endblock %}

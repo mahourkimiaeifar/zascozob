@@ -2734,3 +2734,34 @@ textarea {
     border-color: transparent;
     box-shadow: 0 4px 14px rgba(255, 107, 0, .3)
 }
+
+/* ═══ نمایش دسته‌بندی سلسله‌مراتبی در جدول ═══ */
+.cat-cell{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.cat-parent{
+  font-size:.72rem;
+  color:var(--text-dim);
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+  padding:3px 10px;
+  border-radius:999px;
+  white-space:nowrap
+}
+.cat-arrow{width:12px;height:12px;color:var(--primary);flex-shrink:0}
+.cat-child{
+  font-size:.78rem;
+  font-weight:700;
+  color:var(--primary-light);
+  background:rgba(255,107,0,.1);
+  border:1px solid rgba(255,107,0,.3);
+  padding:4px 12px;
+  border-radius:999px;
+  white-space:nowrap;
+  transition:all .2s
+}
+.cat-child:hover{background:rgba(255,107,0,.2);box-shadow:0 2px 10px var(--primary-glow)}
+.cat-child.solo{
+  color:var(--text-main);
+  background:rgba(33,150,243,.1);
+  border-color:rgba(33,150,243,.3)
+}
+.cat-child.solo:hover{background:rgba(33,150,243,.2);box-shadow:0 2px 10px rgba(33,150,243,.2)}

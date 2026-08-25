@@ -30,7 +30,26 @@
                 {% for post in posts %}
                 <tr>
                     <td><strong>{{ post.title }}</strong></td>
-                    <td>{{ post.category|default:"—" }}</td>
+                    <td>
+                        {% if post.category %}
+                        {% if post.category.parent %}
+                        <div class="cat-cell">
+                            <span class="cat-parent">{{ post.category.parent.title }}</span>
+                            <svg class="cat-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <polyline points="15 18 9 12 15 6" />
+                            </svg>
+                            <span class="cat-child">{{ post.category.title }}</span>
+                        </div>
+                        {% else %}
+                        <div class="cat-cell">
+                            <span class="cat-child solo">{{ post.category.title }}</span>
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <span class="badge badge-warning">بدون دسته</span>
+                        {% endif %}
+                    </td>
                     <td>
                         {% if post.published %}
                         <span class="badge badge-success">منتشر شده</span>
