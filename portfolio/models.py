@@ -2,42 +2,53 @@ from django.db import models
 from django.utils.text import slugify
 from main.models import SoftDeleteModel
 
-class Tag(models.Model):
-    title = models.CharField('برچسب', max_length=100, unique=True)
-    slug = models.SlugField('اسلاگ', max_length=120, unique=True, allow_unicode=True, blank=True)
 
-    class Meta:
-        verbose_name = 'برچسب'; verbose_name_plural = 'برچسب‌ها'
-    def save(self, *a, **k):
-        if not self.slug: self.slug = slugify(self.title, allow_unicode=True)
-        super().save(*a, **k)
-    @staticmethod
-    def bulk_from_string(text):
-        tags = []
-        for part in text.split('*'):
-            t = part.strip()
-            if t:
-                obj, _ = Tag.objects.get_or_create(title=t)
-                tags.append(obj)
-        return tags
-    def __str__(self): return self.title
-
-class PortfolioItem(SoftDeleteModel):
-    title = models.CharField('عنوان نمونه‌کار', max_length=200)
-    slug = models.SlugField('اسلاگ', max_length=220, unique=True, allow_unicode=True, blank=True)
-    excerpt = models.TextField('چکیده', blank=True)
-    description = models.TextField('توضیحات')
-    cover = models.ImageField('تصویر شاخص', upload_to='portfolio/%Y/%m/')
-    tags = models.ManyToManyField(Tag, verbose_name='برچسب‌ها', blank=True, related_name='items')
-    published = models.BooleanField('منتشر شده', default=False)
-    created = models.DateTimeField('تاریخ', auto_now_add=True)
+class PortfolioCategory(SoftDeleteModel):
+    title = models.CharField('عنوان دسته', max_length=120)
+    slug = models.SlugField('اسلاگ', max_length=160, unique=True, allow_unicode=True)
+    description = models.TextField('توضیحات سئو', blank=True)
     order = models.PositiveIntegerField('ترتیب', default=0)
 
     class Meta:
-        verbose_name = 'نمونه‌کار'; verbose_name_plural = 'نمونه‌کارها'; ordering = ['-created']
-    def save(self, *a, **k):
-        if not self.slug: self.slug = slugify(self.title, allow_unicode=True)
-        super().save(*a, **k)
-    def assign_tags_from_string(self, text):
-        self.tags.set(Tag.bulk_from_string(text))
+        verbose_name = 'دسته نمونه‌کار'; verbose_name_plural = 'دسته‌های نمونه‌کار'
+        ordering = ['order', 'title']
+
     def __str__(self): return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title, allow_unicode=True)
+        super().save(*args, **kwargs)
+
+
+class PortfolioItem(SoftDeleteModel):
+    title = models.CharField('عنوان قطعه', max_length=200)
+    slug = models.SlugField('اسلاگ', max_length=220, unique=True, allow_unicode=True)
+    category = models.ForeignKey(PortfolioCategory, verbose_name='دسته', null=True, blank=True, on_delete=models.SET_NULL, related_name='items')
+    summary = models.CharField('خلاصه', max_length=300, blank=True)
+    content = models.TextField('توضیحات کامل', blank=True)
+    featured_image = models.ImageField('تصویر شاخص', upload_to='portfolio/%Y/%m/')
+    image_alt = models.CharField('متن جایگزین تصویر (سئو)', max_length=200, blank=True)
+    material = models.CharField('جنس آلیاژ', max_length=100, blank=True)
+    weight = models.CharField('وزن قطعه', max_length=50, blank=True)
+    standard = models.CharField('استاندارد', max_length=100, blank=True)
+    meta_description = models.CharField('توضیحات متا سئو', max_length=300, blank=True)
+    published = models.BooleanField('منتشر شده', default=True)
+    views = models.PositiveIntegerField('بازدید', default=0)
+    created = models.DateTimeField('تاریخ ایجاد', auto_now_add=True)
+    updated = models.DateTimeField('به‌روزرسانی', auto_now=True)
+
+    class Meta:
+        verbose_name = 'نمونه‌کار'; verbose_name_plural = 'نمونه‌کارها'
+        ordering = ['-created']
+
+    def __str__(self): return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base = slugify(self.title, allow_unicode=True)
+            slug, n = base, 1
+            while PortfolioItem.objects.filter(slug=slug).exists():
+                n += 1; slug = f'{base}-{n}'
+            self.slug = slug
+        super().save(*args, **kwargs)

@@ -18,6 +18,7 @@ from django.utils.text import slugify
 from panel.forms import PostForm
 from django.core.paginator import Paginator
 from django.db.models import Count
+from portfolio.models import PortfolioItem, PortfolioCategory
 
 
 
@@ -402,3 +403,79 @@ def blog_comment_delete(request, pk):
         return JsonResponse({'success': False}, status=403)
     Comment.objects.filter(id=pk).delete()
     return JsonResponse({'success': True})
+
+# ═══ مدیریت نمونه کارها ═══
+@login_required
+def portfolio_list(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    items = PortfolioItem.objects.select_related('category').order_by('-created')
+    paginator = Paginator(items, 10)
+    items = paginator.get_page(request.GET.get('page'))
+    return render(request, 'main_pages/portfolio/portfolio_list.html', {'items': items})
+
+
+@login_required
+def portfolio_add(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        if not title:
+            messages.error(request, 'عنوان الزامی است.')
+            return redirect('panel:portfolio_add')
+        item = PortfolioItem(
+            title=title,
+            summary=request.POST.get('summary', ''),
+            content=request.POST.get('content', ''),
+            image_alt=request.POST.get('image_alt', ''),
+            material=request.POST.get('material', ''),
+            weight=request.POST.get('weight', ''),
+            standard=request.POST.get('standard', ''),
+            meta_description=request.POST.get('meta_description', ''),
+            published=request.POST.get('published') == 'on',
+            featured_image=request.FILES.get('featured_image'),
+        )
+        cat_id = request.POST.get('category')
+        if cat_id:
+            item.category = PortfolioCategory.objects.filter(id=cat_id).first()
+        item.save()
+        messages.success(request, 'نمونه‌کار اضافه شد.')
+        return redirect('panel:portfolio_list')
+    return render(request, 'main_pages/portfolio/portfolio_form.html', {'categories': PortfolioCategory.objects.all()})
+
+
+@login_required
+def portfolio_edit(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    item = get_object_or_404(PortfolioItem, id=pk)
+    if request.method == 'POST':
+        item.title = request.POST.get('title', '').strip() or item.title
+        item.summary = request.POST.get('summary', '')
+        item.content = request.POST.get('content', '')
+        item.image_alt = request.POST.get('image_alt', '')
+        item.material = request.POST.get('material', '')
+        item.weight = request.POST.get('weight', '')
+        item.standard = request.POST.get('standard', '')
+        item.meta_description = request.POST.get('meta_description', '')
+        item.published = request.POST.get('published') == 'on'
+        if request.FILES.get('featured_image'):
+            item.featured_image = request.FILES['featured_image']
+        cat_id = request.POST.get('category')
+        item.category = PortfolioCategory.objects.filter(id=cat_id).first() if cat_id else None
+        item.save()
+        messages.success(request, 'تغییرات ذخیره شد.')
+        return redirect('panel:portfolio_list')
+    return render(request, 'main_pages/portfolio/portfolio_form.html', {'item': item, 'categories': PortfolioCategory.objects.all()})
+
+
+@login_required
+def portfolio_delete(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    item = get_object_or_404(PortfolioItem, id=pk)
+    item.is_deleted = True
+    item.save()
+    messages.success(request, 'نمونه‌کار حذف شد.')
+    return redirect('panel:portfolio_list')

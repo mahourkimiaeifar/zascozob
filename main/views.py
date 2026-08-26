@@ -6,7 +6,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from .models import ContactMessage
 from blog.models import Post
-from portfolio.models import PortfolioItem
+from portfolio.models import PortfolioItem, PortfolioCategory
 
 
 def home(request):

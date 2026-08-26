@@ -1,0 +1,399 @@
+/* ═══ نمونه‌کارها ═══ */
+.pf-hero {
+    position: relative;
+    padding: 120px 0 70px;
+    text-align: center;
+    overflow: hidden
+}
+
+.pf-hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(255, 107, 0, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 107, 0, .05) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    pointer-events: none
+}
+
+.pf-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: rgba(255, 107, 0, .08);
+    border: 1px solid rgba(255, 107, 0, .25);
+    border-radius: 999px;
+    color: var(--primary-light);
+    font-size: .8rem;
+    font-weight: 700;
+    margin-bottom: 20px
+}
+
+.pf-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 12px var(--primary)
+}
+
+.pf-hero h1 {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 16px
+}
+
+.pf-grad {
+    background: linear-gradient(120deg, var(--primary), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent
+}
+
+.pf-desc {
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.9
+}
+
+.pf-content {
+    padding: 30px 0 90px
+}
+
+.pf-chips {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    scrollbar-width: none
+}
+
+.pf-chips::-webkit-scrollbar {
+    display: none
+}
+
+.pf-chip {
+    padding: 9px 18px;
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--text-muted);
+    font-size: .85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all .3s
+}
+
+.pf-chip:hover {
+    border-color: rgba(255, 107, 0, .4);
+    color: var(--primary-light)
+}
+
+.pf-chip.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    border-color: transparent
+}
+
+.pf-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px
+}
+
+.pf-grid.small {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr))
+}
+
+.pf-card {
+    background: linear-gradient(135deg, rgba(20, 20, 25, .8), rgba(14, 14, 18, .9));
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: all .4s;
+    display: flex;
+    flex-direction: column
+}
+
+.pf-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(255, 107, 0, .3);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, .4)
+}
+
+.pf-card-img {
+    aspect-ratio: 16/10;
+    overflow: hidden
+}
+
+.pf-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .6s
+}
+
+.pf-card:hover .pf-card-img img {
+    transform: scale(1.07)
+}
+
+.pf-card-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1
+}
+
+.pf-badge {
+    width: fit-content;
+    padding: 4px 12px;
+    background: rgba(255, 107, 0, .12);
+    border: 1px solid rgba(255, 107, 0, .25);
+    color: var(--primary-light);
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700
+}
+
+.pf-card-body h2 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.6
+}
+
+.pf-card:hover .pf-card-body h2 {
+    color: var(--primary-light)
+}
+
+.pf-card-body p {
+    color: var(--text-muted);
+    font-size: .85rem;
+    line-height: 1.8;
+    margin: 0
+}
+
+.pf-card-specs {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    margin-top: auto
+}
+
+.pf-card-specs span {
+    font-size: .75rem;
+    color: var(--text-dim)
+}
+
+.pf-empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+    border: 1.5px dashed rgba(255, 107, 0, .3);
+    border-radius: 20px
+}
+
+.pf-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 44px;
+    flex-wrap: wrap
+}
+
+.pf-page {
+    min-width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    color: var(--text-muted);
+    font-weight: 700;
+    transition: all .3s
+}
+
+.pf-page:hover {
+    border-color: rgba(255, 107, 0, .4);
+    color: var(--primary-light)
+}
+
+.pf-page.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    border-color: transparent
+}
+
+/* ═══ صفحه جزئیات نمونه‌کار ═══ */
+.pfd-container {
+    max-width: 960px;
+    padding: 120px 24px 80px
+}
+
+.pfd-breadcrumb {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    color: var(--text-dim);
+    font-size: .85rem;
+    margin-bottom: 26px
+}
+
+.pfd-breadcrumb a {
+    color: var(--text-muted);
+    transition: color .2s
+}
+
+.pfd-breadcrumb a:hover {
+    color: var(--primary-light)
+}
+
+.pfd-crumb-active {
+    color: var(--primary-light)
+}
+
+.pfd-header {
+    margin-bottom: 28px
+}
+
+.pfd-header h1 {
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 900;
+    color: #fff;
+    margin: 14px 0 10px
+}
+
+.pfd-summary {
+    color: var(--text-muted);
+    line-height: 2;
+    font-size: 1.02rem
+}
+
+.pfd-image {
+    margin: 0 0 30px;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .5)
+}
+
+.pfd-image img {
+    width: 100%;
+    aspect-ratio: 21/10;
+    object-fit: cover;
+    display: block
+}
+
+.pfd-specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 34px
+}
+
+.pfd-spec {
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 18px;
+    text-align: center
+}
+
+.pfd-spec small {
+    display: block;
+    color: var(--text-dim);
+    font-size: .75rem;
+    margin-bottom: 6px
+}
+
+.pfd-spec strong {
+    color: var(--primary-light);
+    font-size: .95rem
+}
+
+.pfd-body {
+    line-height: 2.2;
+    color: #d4d9e2
+}
+
+.pfd-cta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin: 44px 0;
+    padding: 30px 34px;
+    background: linear-gradient(135deg, rgba(255, 107, 0, .12), rgba(255, 154, 77, .04));
+    border: 1px solid rgba(255, 107, 0, .25);
+    border-radius: 20px
+}
+
+.pfd-cta h3 {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin-bottom: 6px
+}
+
+.pfd-cta p {
+    color: var(--text-muted);
+    font-size: .9rem
+}
+
+.pfd-cta-btn {
+    padding: 14px 30px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: #fff;
+    border-radius: 12px;
+    font-weight: 800;
+    box-shadow: 0 10px 28px var(--primary-glow);
+    transition: all .3s
+}
+
+.pfd-cta-btn:hover {
+    transform: translateY(-3px);
+    color: #fff
+}
+
+.pfd-related {
+    margin-top: 50px
+}
+
+.pfd-related h2 {
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 900;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px
+}
+
+.pfd-related h2::before {
+    content: '';
+    width: 4px;
+    height: 24px;
+    background: linear-gradient(180deg, var(--primary), var(--primary-light));
+    border-radius: 2px
+}
+
+@media (max-width:640px) {
+    .pfd-image img {
+        aspect-ratio: 16/10
+    }
+
+    .pfd-container {
+        padding-top: 100px
+    }
+}

@@ -1,0 +1,48 @@
+{% extends 'layouts/panel_base.html' %}
+{% block title %}{% if item %}ویرایش نمونه‌کار{% else %}نمونه‌کار جدید{% endif %}{% endblock %}
+
+{% block content %}
+<form method="POST" enctype="multipart/form-data" class="form-card" style="max-width:900px">
+    {% csrf_token %}
+
+    <div class="form-section">
+        <h3>🏭 اطلاعات قطعه</h3>
+        <div class="field"><label>عنوان قطعه *</label><input type="text" name="title" value="{{ item.title|default:'' }}" required></div>
+        <div class="field-grid">
+            <div class="field">
+                <label>دسته‌بندی</label>
+                <select name="category">
+                    <option value="">— بدون دسته —</option>
+                    {% for c in categories %}
+                    <option value="{{ c.id }}" {% if item.category_id == c.id %}selected{% endif %}>{{ c.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field"><label>جنس آلیاژ</label><input type="text" name="material" value="{{ item.material|default:'' }}" placeholder="چدن خاکستری GG25"></div>
+        </div>
+        <div class="field-grid">
+            <div class="field"><label>وزن قطعه</label><input type="text" name="weight" value="{{ item.weight|default:'' }}" placeholder="۱۲ کیلوگرم"></div>
+            <div class="field"><label>استاندارد</label><input type="text" name="standard" value="{{ item.standard|default:'' }}" placeholder="DIN 1691"></div>
+        </div>
+        <div class="field"><label>خلاصه</label><textarea name="summary" rows="2">{{ item.summary|default:'' }}</textarea></div>
+        <div class="field"><label>توضیحات کامل</label><textarea name="content" rows="8">{{ item.content|default:'' }}</textarea></div>
+    </div>
+
+    <div class="form-section">
+        <h3>📸 تصویر و سئو</h3>
+        <div class="field"><label>تصویر شاخص</label><input type="file" name="featured_image" accept="image/*"></div>
+        {% if item.featured_image %}<div class="image-preview"><img src="{{ item.featured_image.url }}"></div>{% endif %}
+        <div class="field"><label>متن جایگزین تصویر (ALT سئو)</label><input type="text" name="image_alt" value="{{ item.image_alt|default:'' }}" placeholder="چرخ‌دنده چدنی تولیدی زاسکو ذوب"></div>
+        <div class="field"><label>توضیحات متا سئو</label><textarea name="meta_description" rows="2" maxlength="300">{{ item.meta_description|default:'' }}</textarea></div>
+        <label class="check-field">
+            <input type="checkbox" name="published" {% if item.published or not item %}checked{% endif %}>
+            <span class="check-text"><strong>منتشر شود</strong><small>در صفحه نمونه‌کارها نمایش داده می‌شود</small></span>
+        </label>
+    </div>
+
+    <div class="save-bar">
+        <a href="{% url 'panel:portfolio_list' %}" class="btn-ghost">انصراف</a>
+        <button type="submit" class="btn-primary">💾 ذخیره</button>
+    </div>
+</form>
+{% endblock %}  

@@ -1,0 +1,44 @@
+{% extends 'layouts/panel_base.html' %}
+{% block title %}نمونه‌کارها{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">نمونه‌کارها</h1>
+        <p class="page-subtitle">مدیریت قطعات تولیدشده</p>
+    </div>
+    <a href="{% url 'panel:portfolio_add' %}" class="btn-primary">+ نمونه‌کار جدید</a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr><th>عنوان</th><th>دسته</th><th>جنس</th><th>بازدید</th><th>وضعیت</th><th>عملیات</th></tr>
+            </thead>
+            <tbody>
+            {% for it in items %}
+            <tr>
+                <td>{{ it.title }}</td>
+                <td>{% if it.category %}<span class="cat-child">{{ it.category.title }}</span>{% else %}<span class="badge badge-warning">بدون دسته</span>{% endif %}</td>
+                <td>{{ it.material|default:'—' }}</td>
+                <td>{{ it.views }}</td>
+                <td>{% if it.published %}<span class="badge badge-success">منتشر شده</span>{% else %}<span class="badge badge-danger">پیش‌نویس</span>{% endif %}</td>
+                <td>
+                    <a href="{% url 'panel:portfolio_edit' it.id %}" class="btn-icon" title="ویرایش">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </a>
+                    <a href="{% url 'panel:portfolio_delete' it.id %}" class="btn-icon danger" title="حذف" onclick="return confirm('حذف شود؟')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center">نمونه‌کاری ثبت نشده.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include 'partials/panel_pagination.html' with page_obj=items %}
+</div>
+{% endblock %}

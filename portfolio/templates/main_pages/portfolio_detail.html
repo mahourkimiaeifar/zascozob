@@ -1,0 +1,81 @@
+{% extends 'layouts/portfolio_base.html' %}
+{% load static %}
+
+{% block title %}{{ item.title }} | نمونه‌کار زاسکو ذوب{% endblock %}
+
+{% block content %}
+<article class="pfd-page">
+    <div class="container pfd-container">
+
+        <nav class="pfd-breadcrumb">
+            <a href="/">خانه</a> <span>/</span>
+            <a href="{% url 'portfolio_list' %}">نمونه‌کارها</a>
+            {% if item.category %}<span>/</span><a
+                href="{% url 'portfolio_list' %}?category={{ item.category.slug }}">{{ item.category.title }}</a>{% endif %}
+            <span>/</span> <span class="pfd-crumb-active">{{ item.title }}</span>
+        </nav>
+
+        <header class="pfd-header">
+            {% if item.category %}<span class="pf-badge">{{ item.category.title }}</span>{% endif %}
+            <h1>{{ item.title }}</h1>
+            {% if item.summary %}<p class="pfd-summary">{{ item.summary }}</p>{% endif %}
+        </header>
+
+        <figure class="pfd-image">
+            <img src="{{ item.featured_image.url }}" alt="{{ item.image_alt|default:item.title }}">
+        </figure>
+
+        {% if item.material or item.weight or item.standard %}
+        <div class="pfd-specs">
+            {% if item.material %}<div class="pfd-spec"><small>جنس آلیاژ</small><strong>{{ item.material }}</strong>
+            </div>{% endif %}
+            {% if item.weight %}<div class="pfd-spec"><small>وزن قطعه</small><strong>{{ item.weight }}</strong></div>{% endif %}
+            {% if item.standard %}<div class="pfd-spec"><small>استاندارد</small><strong>{{ item.standard }}</strong>
+            </div>{% endif %}
+            <div class="pfd-spec"><small>بازدید</small><strong>{{ item.views }}</strong></div>
+        </div>
+        {% endif %}
+
+        {% if item.content %}
+        <div class="pfd-body ck-content">{{ item.content|safe }}</div>
+        {% endif %}
+
+        <div class="pfd-cta">
+            <div>
+                <h3>قطعه مشابهی نیاز دارید؟</h3>
+                <p>نقشه فنی خود را ارسال کنید تا پیش‌فاکتور دقیق دریافت کنید.</p>
+            </div>
+            <a href="/contact-us/" class="pfd-cta-btn">استعلام قیمت</a>
+        </div>
+
+        {% if related %}
+        <section class="pfd-related">
+            <h2>نمونه‌کارهای مشابه</h2>
+            <div class="pf-grid small">
+                {% for r in related %}
+                <a href="{% url 'portfolio_detail' r.slug %}" class="pf-card">
+                    <div class="pf-card-img"><img src="{{ r.featured_image.url }}"
+                            alt="{{ r.image_alt|default:r.title }}" loading="lazy"></div>
+                    <div class="pf-card-body">
+                        <h2>{{ r.title }}</h2>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</article>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ item.title }}",
+  "description": "{{ item.meta_description|default:item.summary }}",
+  "image": "{{ request.scheme }}://{{ request.get_host }}{{ item.featured_image.url }}",
+  "brand": { "@type": "Brand", "name": "زاسکو ذوب" },
+  "manufacturer": { "@type": "Organization", "name": "کارخانه ریخته‌گری زاسکو ذوب", "url": "{{ request.scheme }}://{{ request.get_host }}/" }
+}
+</script>
+{% endblock %}

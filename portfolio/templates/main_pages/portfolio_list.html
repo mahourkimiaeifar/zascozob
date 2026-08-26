@@ -1,0 +1,61 @@
+{% extends 'layouts/portfolio_base.html' %}
+{% load static %}
+
+{% block title %}نمونه کارهای ریخته‌گری چدن و فولاد | کارخانه زاسکو ذوب{% endblock %}
+
+{% block content %}
+<section class="pf-hero">
+    <div class="pf-hero-grid"></div>
+    <div class="container">
+        <span class="pf-pill"><span class="pf-dot"></span> توان تولیدی ما</span>
+        <h1>نمونه‌کارهای <span class="pf-grad">ریخته‌گری زاسکو ذوب</span></h1>
+        <p class="pf-desc">قطعات چدنی، فولادی و غیرآهنی تولیدشده در کارخانه زاسکو ذوب — با کنترل کیفیت کامل و ماشین‌کاری
+            دقیق</p>
+    </div>
+</section>
+
+<section class="pf-content">
+    <div class="container">
+        <div class="pf-chips">
+            <a href="{% url 'portfolio_list' %}" class="pf-chip {% if not current_category %}active{% endif %}">همه</a>
+            {% for cat in categories %}
+            <a href="?category={{ cat.slug }}" class="pf-chip {% if current_category == cat.slug %}active{% endif %}">{{ cat.title }}</a>
+            {% endfor %}
+        </div>
+
+        <div class="pf-grid">
+            {% for it in items %}
+            <a href="{% url 'portfolio_detail' it.slug %}" class="pf-card">
+                <div class="pf-card-img">
+                    <img src="{{ it.featured_image.url }}" alt="{{ it.image_alt|default:it.title }}" loading="lazy">
+                </div>
+                <div class="pf-card-body">
+                    {% if it.category %}<span class="pf-badge">{{ it.category.title }}</span>{% endif %}
+                    <h2>{{ it.title }}</h2>
+                    <p>{{ it.summary|truncatechars:90 }}</p>
+                    <div class="pf-card-specs">
+                        {% if it.material %}<span>⚙ {{ it.material }}</span>{% endif %}
+                        {% if it.weight %}<span>⚖ {{ it.weight }}</span>{% endif %}
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="pf-empty">هنوز نمونه‌کاری ثبت نشده است.</div>
+            {% endfor %}
+        </div>
+
+        {% if items.paginator.num_pages > 1 %}
+        <nav class="pf-pagination">
+            {% if items.has_previous %}<a href="?{{ extra_get }}page={{ items.previous_page_number }}"
+                class="pf-page">قبلی</a>{% endif %}
+            {% for num in items.paginator.page_range %}
+            <a href="?{{ extra_get }}page={{ num }}" class="pf-page {% if num == items.number %}active{% endif %}">{{
+                num }}</a>
+            {% endfor %}
+            {% if items.has_next %}<a href="?{{ extra_get }}page={{ items.next_page_number }}"
+                class="pf-page">بعدی</a>{% endif %}
+        </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

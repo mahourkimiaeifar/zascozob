@@ -26,4 +26,9 @@ urlpatterns = [
     path('blog/comments/', views.blog_comment_list, name='blog_comment_list'),
     path('blog/comment/<int:pk>/approve/', views.blog_comment_approve, name='blog_comment_approve'),
     path('blog/comment/<int:pk>/delete/', views.blog_comment_delete, name='blog_comment_delete'),
+        # ═══ Portfolio Managment ═══
+    path('portfolio/', views.portfolio_list, name='portfolio_list'),
+    path('portfolio/add/', views.portfolio_add, name='portfolio_add'),
+    path('portfolio/<int:pk>/edit/', views.portfolio_edit, name='portfolio_edit'),
+    path('portfolio/<int:pk>/delete/', views.portfolio_delete, name='portfolio_delete'),
 ]
