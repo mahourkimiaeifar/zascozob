@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls')),
+    path('portfolio/', include('portfolio.urls')),
     path('zasco-admin-x9k2p/', include('panel.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
