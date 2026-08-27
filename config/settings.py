@@ -37,7 +37,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'django.contrib.admin','django.contrib.auth','django.contrib.contenttypes',
     'django.contrib.sessions','django.contrib.messages','django.contrib.staticfiles',
-    'main','gallery','blog','portfolio','panel','django_ckeditor_5',
+    'main','gallery','blog','portfolio','panel',    'django_editorjs_fields',
 
 ]
 
@@ -142,74 +142,32 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = 'Zasco Foundry <zascozob@gmail.com>'
 CONTACT_EMAIL = 'zascozob@gmail.com'
 
-# ═══ CKEditor 5 ═══
-CKEDITOR_5_FILE_UPLOAD_PERMISSION = "authenticated"
-
-CKEDITOR_5_CONFIGS = {
-    'default': {
-        'toolbar': ['heading', '|', 'bold', 'italic', '|', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
+# تنظیمات Editor.js
+EDITORJS_ALLOWED_TOOLS = {
+    'header': {
+        'class': '@editorjs/header',
+        'config': {
+            'placeholder': 'عنوان را وارد کنید',
+            'levels': [2, 3, 4],
+            'defaultLevel': 2
+        }
     },
-    'extends': {
-        'toolbar': [
-            'heading', '|',
-            'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
-            'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'code', '|',
-            'removeFormat', '|',
-            'bulletedList', 'numberedList', 'todoList', '|',
-            'outdent', 'indent', 'alignment', '|',
-            'link', 'uploadImage', 'insertImage', 'blockQuote', 'insertTable', 'mediaEmbed', 'codeBlock', 'specialCharacters', 'horizontalLine', 'highlight', '|',
-            'undo', 'redo', '|',
-            'sourceEditing', 'findAndReplace', 'selectAll'
-        ],
-        'heading': {
-            'options': [
-                {'model': 'paragraph', 'title': 'پاراگراف', 'class': 'ck-heading_paragraph'},
-                {'model': 'heading1', 'view': 'h1', 'title': 'عنوان ۱', 'class': 'ck-heading_heading1'},
-                {'model': 'heading2', 'view': 'h2', 'title': 'عنوان ۲', 'class': 'ck-heading_heading2'},
-                {'model': 'heading3', 'view': 'h3', 'title': 'عنوان ۳', 'class': 'ck-heading_heading3'},
-                {'model': 'heading4', 'view': 'h4', 'title': 'عنوان ۴', 'class': 'ck-heading_heading4'},
-            ]
-        },
-        'fontFamily': {'options': ['default', 'Vazirmatn, sans-serif', 'Tahoma, sans-serif', 'Arial, sans-serif', 'Georgia, serif', 'Courier New, monospace']},
-        'fontSize': {'options': ['tiny', 'small', 'default', 'big', 'huge']},
-        'fontColor': {
-            'colors': [
-                {'color': '#eef1f6', 'label': 'سفید'},
-                {'color': '#ff6b00', 'label': 'نارنجی'},
-                {'color': '#f44336', 'label': 'قرمز'},
-                {'color': '#4caf50', 'label': 'سبز'},
-                {'color': '#2196f3', 'label': 'آبی'},
-                {'color': '#ffc107', 'label': 'زرد'},
-                {'color': '#9c27b0', 'label': 'بنفش'},
-                {'color': '#000000', 'label': 'مشکی'},
-            ],
-            'columns': 4
-        },
-        'fontBackgroundColor': {
-            'colors': [
-                {'color': 'transparent', 'label': 'بدون رنگ'},
-                {'color': '#ff6b00', 'label': 'نارنجی'},
-                {'color': '#f44336', 'label': 'قرمز'},
-                {'color': '#4caf50', 'label': 'سبز'},
-                {'color': '#2196f3', 'label': 'آبی'},
-                {'color': '#ffc107', 'label': 'زرد'},
-                {'color': '#000000', 'label': 'مشکی'},
-                {'color': '#ffffff', 'label': 'سفید'},
-            ],
-            'columns': 4
-        },
-        'list': {'properties': {'styles': True, 'startIndex': True, 'reversed': True}},
-        'link': {'addTargetToExternalLinks': True, 'defaultProtocol': 'https://'},
-        'image': {'toolbar': ['imageTextAlternative', '|', 'imageStyle:inline', 'imageStyle:wrapText', 'imageStyle:breakText', '|', 'resizeImage']},
-        'table': {'contentToolbar': ['tableColumn', 'tableRow', 'mergeTableCells', 'tableCellProperties', 'tableProperties']},
-        'codeBlock': {'languages': [
-            {'language': 'plaintext', 'label': 'متن ساده'},
-            {'language': 'python', 'label': 'Python'},
-            {'language': 'javascript', 'label': 'JavaScript'},
-            {'language': 'html', 'label': 'HTML'},
-            {'language': 'css', 'label': 'CSS'},
-        ]},
-        'mediaEmbed': {'previewsInData': True},
-        'language': 'fa',
+    'paragraph': '@editorjs/paragraph',
+    'list': {
+        'class': '@editorjs/list',
+        'inlineToolbar': True
     },
+    'quote': '@editorjs/quote',
+    'code': '@editorjs/code',
+    'table': '@editorjs/table',
+    'image': {
+        'class': '@editorjs/image',
+        'config': {
+            'uploader': {
+                'uploadUrl': '/panel/editorjs/upload/'
+            }
+        }
+    },
+    'delimiter': '@editorjs/delimiter',
+    'checklist': '@editorjs/checklist',
 }

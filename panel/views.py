@@ -1,3 +1,4 @@
+import json
 import time
 import os
 import jdatetime
@@ -17,8 +18,10 @@ from blog.models import Post, Category, Comment
 from django.utils.text import slugify
 from panel.forms import PostForm
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Q,Count
 from portfolio.models import PortfolioItem, PortfolioCategory
+from portfolio.forms import PortfolioItemForm
+
 
 
 
@@ -419,56 +422,64 @@ def portfolio_list(request):
 def portfolio_add(request):
     if not request.user.is_staff:
         return redirect('panel:login')
+
+    categories_qs = PortfolioCategory.objects.filter(is_deleted=False).order_by('order', 'title')
+    categories_data = [{'id': c.id, 'title': c.title, 'parent': None} for c in categories_qs]
+
     if request.method == 'POST':
-        title = request.POST.get('title', '').strip()
-        if not title:
-            messages.error(request, 'عنوان الزامی است.')
-            return redirect('panel:portfolio_add')
-        item = PortfolioItem(
-            title=title,
-            summary=request.POST.get('summary', ''),
-            content=request.POST.get('content', ''),
-            image_alt=request.POST.get('image_alt', ''),
-            material=request.POST.get('material', ''),
-            weight=request.POST.get('weight', ''),
-            standard=request.POST.get('standard', ''),
-            meta_description=request.POST.get('meta_description', ''),
-            published=request.POST.get('published') == 'on',
-            featured_image=request.FILES.get('featured_image'),
-        )
-        cat_id = request.POST.get('category')
-        if cat_id:
-            item.category = PortfolioCategory.objects.filter(id=cat_id).first()
-        item.save()
-        messages.success(request, 'نمونه‌کار اضافه شد.')
-        return redirect('panel:portfolio_list')
-    return render(request, 'main_pages/portfolio/portfolio_form.html', {'categories': PortfolioCategory.objects.all()})
+        form = PortfolioItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            item = form.save(commit=False)
+            cat_id = request.POST.get('category')
+            if cat_id:
+                item.category = PortfolioCategory.objects.filter(id=cat_id, is_deleted=False).first()
+            item.save()
+            messages.success(request, 'نمونه‌کار با موفقیت اضافه شد.')
+            return redirect('panel:portfolio_list')
+        else:
+            messages.error(request, 'لطفاً خطاهای فرم را بررسی کنید.')
+    else:
+        form = PortfolioItemForm()
 
-
+    return render(request, 'main_pages/portfolio/portfolio_form.html', {
+        'form': form,
+        'categories': categories_qs,
+        'categories_data': categories_data,
+    })
+    
 @login_required
 def portfolio_edit(request, pk):
     if not request.user.is_staff:
         return redirect('panel:login')
-    item = get_object_or_404(PortfolioItem, id=pk)
-    if request.method == 'POST':
-        item.title = request.POST.get('title', '').strip() or item.title
-        item.summary = request.POST.get('summary', '')
-        item.content = request.POST.get('content', '')
-        item.image_alt = request.POST.get('image_alt', '')
-        item.material = request.POST.get('material', '')
-        item.weight = request.POST.get('weight', '')
-        item.standard = request.POST.get('standard', '')
-        item.meta_description = request.POST.get('meta_description', '')
-        item.published = request.POST.get('published') == 'on'
-        if request.FILES.get('featured_image'):
-            item.featured_image = request.FILES['featured_image']
-        cat_id = request.POST.get('category')
-        item.category = PortfolioCategory.objects.filter(id=cat_id).first() if cat_id else None
-        item.save()
-        messages.success(request, 'تغییرات ذخیره شد.')
-        return redirect('panel:portfolio_list')
-    return render(request, 'main_pages/portfolio/portfolio_form.html', {'item': item, 'categories': PortfolioCategory.objects.all()})
 
+    item = get_object_or_404(PortfolioItem, id=pk, is_deleted=False)
+
+    categories_qs = PortfolioCategory.objects.filter(is_deleted=False).order_by('order', 'title')
+    categories_data = [{'id': c.id, 'title': c.title, 'parent': None} for c in categories_qs]
+
+    if request.method == 'POST':
+        form = PortfolioItemForm(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            item = form.save(commit=False)
+            cat_id = request.POST.get('category')
+            if cat_id:
+                item.category = PortfolioCategory.objects.filter(id=cat_id, is_deleted=False).first()
+            else:
+                item.category = None
+            item.save()
+            messages.success(request, 'تغییرات ذخیره شد.')
+            return redirect('panel:portfolio_list')
+        else:
+            messages.error(request, 'لطفاً خطاهای فرم را بررسی کنید.')
+    else:
+        form = PortfolioItemForm(instance=item)
+
+    return render(request, 'main_pages/portfolio/portfolio_form.html', {
+        'form': form,
+        'item': item,
+        'categories': categories_qs,
+        'categories_data': categories_data,
+    })
 
 @login_required
 def portfolio_delete(request, pk):
@@ -479,3 +490,60 @@ def portfolio_delete(request, pk):
     item.save()
     messages.success(request, 'نمونه‌کار حذف شد.')
     return redirect('panel:portfolio_list')
+
+@login_required
+def portfolio_category_list(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    categories = PortfolioCategory.objects.annotate(
+        items_count=Count('items', filter=Q(items__published=True, items__is_deleted=False))
+    ).order_by('order', 'title')
+    paginator = Paginator(categories, 10)
+    categories = paginator.get_page(request.GET.get('page'))
+    return render(request, 'main_pages/portfolio/category_list.html', {'categories': categories})
+
+
+@login_required
+def portfolio_category_add(request):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        if not title:
+            messages.error(request, 'عنوان الزامی است.')
+            return redirect('panel:portfolio_category_add')
+        cat = PortfolioCategory(
+            title=title,
+            description=request.POST.get('description', ''),
+            order=int(request.POST.get('order', 0) or 0),
+        )
+        cat.save()
+        messages.success(request, 'دسته‌بندی اضافه شد.')
+        return redirect('panel:portfolio_category_list')
+    return render(request, 'main_pages/portfolio/category_form.html')
+
+
+@login_required
+def portfolio_category_edit(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    cat = get_object_or_404(PortfolioCategory, id=pk)
+    if request.method == 'POST':
+        cat.title = request.POST.get('title', '').strip() or cat.title
+        cat.description = request.POST.get('description', '')
+        cat.order = int(request.POST.get('order', 0) or 0)
+        cat.save()
+        messages.success(request, 'تغییرات ذخیره شد.')
+        return redirect('panel:portfolio_category_list')
+    return render(request, 'main_pages/portfolio/category_form.html', {'cat': cat})
+
+
+@login_required
+def portfolio_category_delete(request, pk):
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    cat = get_object_or_404(PortfolioCategory, id=pk)
+    cat.is_deleted = True
+    cat.save()
+    messages.success(request, 'دسته‌بندی حذف شد.')
+    return redirect('panel:portfolio_category_list')

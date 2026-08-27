@@ -1,0 +1,263 @@
+{% if request.user.is_authenticated and request.user.is_staff %}
+<!-- ═══ دکمه شناور حرفه‌ای ══ -->
+<div class="fab-container" id="adminFab">
+    <button type="button" class="fab-main" id="fabToggle" aria-label="منوی مدیریت">
+        <svg class="fab-icon fab-icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <svg class="fab-icon fab-icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+    </button>
+    
+    <div class="fab-items">
+        {% if fab_type == 'blog' %}
+        <a href="{% url 'panel:blog_post_add' %}" class="fab-item" style="--delay: 1">
+            <span class="fab-item-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+            </span>
+            <span class="fab-item-label">مقاله جدید</span>
+        </a>
+        
+        <a href="{% url 'panel:blog_post_list' %}" class="fab-item" style="--delay: 2">
+            <span class="fab-item-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+            </span>
+            <span class="fab-item-label">لیست مقاله‌ها</span>
+        </a>
+        
+        {% elif fab_type == 'portfolio' %}
+        <a href="{% url 'panel:portfolio_add' %}" class="fab-item" style="--delay: 1">
+            <span class="fab-item-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+            </span>
+            <span class="fab-item-label">نمونه‌کار جدید</span>
+        </a>
+        
+        <a href="{% url 'panel:portfolio_list' %}" class="fab-item" style="--delay: 2">
+            <span class="fab-item-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+            </span>
+            <span class="fab-item-label">لیست نمونه‌کارها</span>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+/* ══ دکمه شناور حرفه‌ای ═══ */
+.fab-container {
+    position: fixed;
+    bottom: 40px;
+    left: 40px;
+    z-index: 999;
+}
+
+.fab-main {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b00 0%, #ff9a4d 100%);
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 40px rgba(255, 107, 0, 0.4), 0 0 0 0 rgba(255, 107, 0, 0.7);
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    position: relative;
+    z-index: 2;
+}
+
+.fab-main:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 15px 50px rgba(255, 107, 0, 0.6), 0 0 0 10px rgba(255, 107, 0, 0);
+    animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+.fab-main:active {
+    transform: scale(0.95);
+}
+
+.fab-icon {
+    width: 28px;
+    height: 28px;
+    position: absolute;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.fab-icon-plus {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+
+.fab-icon-close {
+    opacity: 0;
+    transform: rotate(-180deg);
+}
+
+.fab-container.open .fab-icon-plus {
+    opacity: 0;
+    transform: rotate(180deg);
+}
+
+.fab-container.open .fab-icon-close {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+
+.fab-items {
+    position: absolute;
+    bottom: 80px;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    pointer-events: none;
+}
+
+.fab-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 22px;
+    background: linear-gradient(135deg, rgba(30, 30, 35, 0.95), rgba(20, 20, 25, 0.98));
+    border: 1px solid rgba(255, 107, 0, 0.2);
+    border-radius: 16px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition-delay: calc(var(--delay) * 0.05s);
+    pointer-events: none;
+}
+
+.fab-item:hover {
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.15), rgba(255, 154, 77, 0.08));
+    border-color: rgba(255, 107, 0, 0.5);
+    transform: translateX(-8px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(255, 107, 0, 0.3);
+}
+
+.fab-item-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, rgba(255, 107, 0, 0.2), rgba(255, 154, 77, 0.1));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fab-item-icon svg {
+    width: 20px;
+    height: 20px;
+    color: #ff9a4d;
+}
+
+.fab-container.open .fab-item {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+@keyframes pulse-ring {
+    0% {
+        box-shadow: 0 10px 40px rgba(255, 107, 0, 0.4), 0 0 0 0 rgba(255, 107, 0, 0.7);
+    }
+    70% {
+        box-shadow: 0 10px 40px rgba(255, 107, 0, 0.4), 0 0 0 20px rgba(255, 107, 0, 0);
+    }
+    100% {
+        box-shadow: 0 10px 40px rgba(255, 107, 0, 0.4), 0 0 0 0 rgba(255, 107, 0, 0);
+    }
+}
+
+@media (max-width: 768px) {
+    .fab-container {
+        bottom: 24px;
+        left: 24px;
+    }
+    
+    .fab-main {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .fab-icon {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .fab-item {
+        padding: 12px 18px;
+        font-size: 0.85rem;
+    }
+    
+    .fab-item-icon {
+        width: 32px;
+        height: 32px;
+    }
+}
+</style>
+
+<script>
+(function() {
+    var fab = document.getElementById('adminFab');
+    var toggle = document.getElementById('fabToggle');
+    
+    if (!fab || !toggle) return;
+    
+    toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        fab.classList.toggle('open');
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!fab.contains(e.target)) {
+            fab.classList.remove('open');
+        }
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            fab.classList.remove('open');
+        }
+    });
+})();
+</script>
+{% endif %}

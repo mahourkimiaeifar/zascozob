@@ -9,53 +9,119 @@
     <div class="container">
         <span class="pf-pill"><span class="pf-dot"></span> توان تولیدی ما</span>
         <h1>نمونه‌کارهای <span class="pf-grad">ریخته‌گری زاسکو ذوب</span></h1>
-        <p class="pf-desc">قطعات چدنی، فولادی و غیرآهنی تولیدشده در کارخانه زاسکو ذوب — با کنترل کیفیت کامل و ماشین‌کاری
-            دقیق</p>
+        <p class="pf-desc">قطعات چدنی، فولادی و غیرآهنی تولیدشده در کارخانه زاسکو ذوب — با کنترل کیفیت کامل و ماشین‌کاری دقیق</p>
     </div>
 </section>
 
 <section class="pf-content">
     <div class="container">
-        <div class="pf-chips">
-            <a href="{% url 'portfolio_list' %}" class="pf-chip {% if not current_category %}active{% endif %}">همه</a>
-            {% for cat in categories %}
-            <a href="?category={{ cat.slug }}" class="pf-chip {% if current_category == cat.slug %}active{% endif %}">{{ cat.title }}</a>
-            {% endfor %}
-        </div>
+        <div class="pfl-layout">
 
-        <div class="pf-grid">
-            {% for it in items %}
-            <a href="{% url 'portfolio_detail' it.slug %}" class="pf-card">
-                <div class="pf-card-img">
-                    <img src="{{ it.featured_image.url }}" alt="{{ it.image_alt|default:it.title }}" loading="lazy">
-                </div>
-                <div class="pf-card-body">
-                    {% if it.category %}<span class="pf-badge">{{ it.category.title }}</span>{% endif %}
-                    <h2>{{ it.title }}</h2>
-                    <p>{{ it.summary|truncatechars:90 }}</p>
-                    <div class="pf-card-specs">
-                        {% if it.material %}<span>⚙ {{ it.material }}</span>{% endif %}
-                        {% if it.weight %}<span>⚖ {{ it.weight }}</span>{% endif %}
+            <!-- ═══ سایدبار ═══ -->
+            <aside class="pf-sidebar">
+                <div class="pfs-box">
+                    <div class="pfs-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <h3>جستجو</h3>
                     </div>
+                    <form method="GET" class="pfs-search-form">
+                        <input type="text" name="q" value="{{ search_query }}" placeholder="جستجوی قطعه...">
+                        <button type="submit" title="جستجو">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        </button>
+                    </form>
                 </div>
-            </a>
-            {% empty %}
-            <div class="pf-empty">هنوز نمونه‌کاری ثبت نشده است.</div>
-            {% endfor %}
-        </div>
 
-        {% if items.paginator.num_pages > 1 %}
-        <nav class="pf-pagination">
-            {% if items.has_previous %}<a href="?{{ extra_get }}page={{ items.previous_page_number }}"
-                class="pf-page">قبلی</a>{% endif %}
-            {% for num in items.paginator.page_range %}
-            <a href="?{{ extra_get }}page={{ num }}" class="pf-page {% if num == items.number %}active{% endif %}">{{
-                num }}</a>
-            {% endfor %}
-            {% if items.has_next %}<a href="?{{ extra_get }}page={{ items.next_page_number }}"
-                class="pf-page">بعدی</a>{% endif %}
-        </nav>
-        {% endif %}
+                <div class="pfs-box">
+                    <div class="pfs-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        <h3>دسته‌بندی‌ها</h3>
+                    </div>
+                    <ul class="pfs-cat-list">
+                        <li>
+                            <a href="{% url 'port:portfolio_list' %}" class="pfs-cat {% if not current_category %}active{% endif %}">
+                                <span>همه نمونه‌کارها</span>
+                                <span class="pfs-count">{{ total_items }}</span>
+                            </a>
+                        </li>
+                        {% for cat in sidebar_categories %}
+                        <li>
+                            <a href="?category={{ cat.slug }}" class="pfs-cat {% if current_category == cat.slug %}active{% endif %}">
+                                <span>{{ cat.title }}</span>
+                                <span class="pfs-count">{{ cat.num_items }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="pfs-box">
+                    <div class="pfs-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <h3>چرا زاسکو ذوب؟</h3>
+                    </div>
+                    <ul class="pfs-features">
+                        <li>کنترل کیفیت ابعادی و متالورژی</li>
+                        <li>ماشین‌کاری دقیق CNC</li>
+                        <li>آلیاژهای چدن، فولاد و برنز</li>
+                        <li>تحویل به‌موقع با بسته‌بندی صنعتی</li>
+                    </ul>
+                </div>
+
+                <div class="pfs-box pfs-cta">
+                    <div class="pfs-cta-icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </div>
+                    <h4>استعلام قیمت</h4>
+                    <p>نقشه فنی خود را ارسال کنید تا پیش‌فاکتور دریافت کنید</p>
+                    <a href="tel:09134302591" class="pfs-cta-btn" dir="ltr">0913 430 2591</a>
+                </div>
+            </aside>
+
+            <!-- ═══ محتوای اصلی ══ -->
+            <div class="pfl-main">
+                {% if search_query or current_category %}
+                <div class="pfl-results">
+                    <div>
+                        <h2>{% if search_query %}نتایج جستجو برای «{{ search_query }}»{% else %}دسته: {{ current_category }}{% endif %}</h2>
+                        <p>{{ total_items }} نمونه‌کار پیدا شد</p>
+                    </div>
+                    <a href="{% url 'port:portfolio_list' %}" class="pfl-clear">✕ پاک کردن فیلتر</a>
+                </div>
+                {% endif %}
+
+                <div class="pf-grid">
+                    {% for it in items %}
+                    <a href="{% url 'port:portfolio_detail' it.slug %}" class="pf-card">
+                        <div class="pf-card-img">
+                            <img src="{{ it.featured_image.url }}" alt="{{ it.image_alt|default:it.title }}" loading="lazy">
+                        </div>
+                        <div class="pf-card-body">
+                            {% if it.category %}<span class="pf-badge">{{ it.category.title }}</span>{% endif %}
+                            <h2>{{ it.title }}</h2>
+                            <p>{{ it.summary|truncatechars:90 }}</p>
+                            <div class="pf-card-specs">
+                                {% if it.material %}<span> {{ it.material }}</span>{% endif %}
+                                {% if it.weight %}<span>⚖ {{ it.weight }}</span>{% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="pf-empty">هنوز نمونه‌کاری ثبت نشده است.</div>
+                    {% endfor %}
+                </div>
+
+                {% if items.paginator.num_pages > 1 %}
+                <nav class="pf-pagination">
+                    {% if items.has_previous %}<a href="?{{ extra_get }}page={{ items.previous_page_number }}" class="pf-page">قبلی</a>{% endif %}
+                    {% for num in items.paginator.page_range %}
+                    <a href="?{{ extra_get }}page={{ num }}" class="pf-page {% if num == items.number %}active{% endif %}">{{ num }}</a>
+                    {% endfor %}
+                    {% if items.has_next %}<a href="?{{ extra_get }}page={{ items.next_page_number }}" class="pf-page">بعدی</a>{% endif %}
+                </nav>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </section>
 {% endblock %}

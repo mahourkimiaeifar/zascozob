@@ -1,0 +1,386 @@
+{% extends 'layouts/panel_base.html' %}
+{% block title %}{% if item %}ویرایش نمونه‌کار{% else %}نمونه‌کار جدید{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{% if item %}ویرایش نمونه‌کار{% else %}نمونه‌کار جدید{% endif %}</h1>
+        <p class="page-subtitle">{% if item %}{{ item.title }}{% else %}افزودن قطعه جدید به پورتفولیو{% endif %}</p>
+    </div>
+    <a href="{% url 'panel:portfolio_list' %}" class="btn-ghost">← بازگشت به لیست</a>
+</div>
+
+<form method="POST" enctype="multipart/form-data" class="form-card" style="max-width:900px" id="portfolioForm">
+    {% csrf_token %}
+
+    {% if form.errors %}
+    <div class="alert alert-danger" style="background:rgba(244,67,54,0.1); border:1px solid rgba(244,67,54,0.3); border-radius:12px; padding:16px 20px; margin-bottom:24px; color:#ef9a9a;">
+        <strong>⚠️ خطا در فرم:</strong>
+        <ul style="margin:10px 0 0 20px; font-size:0.9rem;">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                <li>{{ field }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="form-section">
+        <h3>🏭 اطلاعات قطعه</h3>
+
+        <div class="field">
+            <label>عنوان قطعه *</label>
+            <input type="text" name="title" value="{{ item.title|default:'' }}" required class="form-control" placeholder="مثلاً: چرخ‌دنده چدنی GG25">
+        </div>
+
+        <!-- ═══ انتخاب‌گر پیشرفته دسته‌بندی ═══ -->
+        <div class="field">
+            <label>
+                <span class="icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </span>
+                دسته‌بندی
+            </label>
+
+            {{ categories_data|json_script:"categories-data" }}
+            <input type="hidden" name="category" id="id_category" value="{{ item.category_id|default:'' }}">
+
+            <div class="zpicker" id="catPicker">
+                <div class="zpicker-btn" id="catBtn" tabindex="0" role="combobox" aria-expanded="false">
+                    <span class="zpicker-value is-placeholder" id="catValue">انتخاب دسته‌بندی...</span>
+                    <button type="button" class="zpicker-clear" id="catClear" title="حذف انتخاب" style="display:none">×</button>
+                    <svg class="zpicker-caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </div>
+                <div class="zpicker-panel" id="catPanel">
+                    <div class="zpicker-search">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" id="catSearch" placeholder="جستجوی دسته...">
+                        <kbd>ESC</kbd>
+                    </div>
+                    <div class="zpicker-tree" id="catTree"></div>
+                    <div class="zpicker-footer"><span id="catPath">هنوز دسته‌ای انتخاب نشده</span></div>
+                </div>
+            </div>
+            <div class="hint">📂 دسته را انتخاب کنید یا سرچ کنید</div>
+        </div>
+        <!-- ═══ پایان انتخاب‌گر ═══ -->
+
+        <div class="field-grid">
+            <div class="field">
+                <label>جنس آلیاژ</label>
+                <input type="text" name="material" value="{{ item.material|default:'' }}" class="form-control" placeholder="مثلاً: چدن خاکستری">
+            </div>
+            <div class="field">
+                <label>وزن قطعه</label>
+                <input type="text" name="weight" value="{{ item.weight|default:'' }}" class="form-control" placeholder="مثلاً: ۱۲ کیلوگرم">
+            </div>
+        </div>
+
+        <div class="field">
+            <label>استاندارد</label>
+            <input type="text" name="standard" value="{{ item.standard|default:'' }}" class="form-control" placeholder="مثلاً: DIN 1691">
+        </div>
+
+        <div class="field">
+            <label>خلاصه</label>
+            <textarea name="summary" rows="2" class="form-control" placeholder="توضیح کوتاه برای نمایش در کارت">{{ item.summary|default:'' }}</textarea>
+        </div>
+
+        <!-- ═══ Editor.js ═══ -->
+        <div class="field">
+            <label>توضیحات کامل (ویرایشگر پیشرفته)</label>
+            <div id="editorjs" style="background:rgba(255,255,255,0.03); border:1.5px solid rgba(255,255,255,0.1); border-radius:10px; min-height:300px;"></div>
+            <!-- اصلاح شده با escapejs برای جلوگیری از شکستن HTML -->
+            <input type="hidden" name="content" id="contentJson" value='{{ item.content|default:""|escapejs }}'>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>📸 تصویر و سئو</h3>
+        <div class="field">
+            <label>تصویر شاخص</label>
+            <input type="file" name="featured_image" accept="image/*" class="form-control">
+        </div>
+        {% if item.featured_image %}
+        <div class="image-preview">
+            <img src="{{ item.featured_image.url }}" alt="{{ item.title }}">
+        </div>
+        {% endif %}
+
+        <div class="field">
+            <label>متن جایگزین تصویر (ALT سئو)</label>
+            <input type="text" name="image_alt" value="{{ item.image_alt|default:'' }}" class="form-control" placeholder="توضیح کوتاه برای موتورهای جستجو">
+        </div>
+
+        <div class="field">
+            <label>توضیحات متا سئو</label>
+            <textarea name="meta_description" rows="2" maxlength="300" class="form-control" placeholder="توضیحات برای موتورهای جستجو">{{ item.meta_description|default:'' }}</textarea>
+        </div>
+
+        <label class="check-field">
+            <input type="checkbox" name="published" {% if item.published or not item %}checked{% endif %} style="width:20px; height:20px; accent-color:#ff6b00;">
+            <span class="check-text">
+                <strong>منتشر شود</strong>
+                <small>در صفحه نمونه‌کارها نمایش داده می‌شود</small>
+            </span>
+        </label>
+    </div>
+
+    <div class="save-bar">
+        <a href="{% url 'panel:portfolio_list' %}" class="btn-ghost">انصراف</a>
+        <button type="submit" class="btn-primary">💾 ذخیره نمونه‌کار</button>
+    </div>
+</form>
+
+<!-- ═══ استایل‌ها ═══ -->
+<style>
+.zpicker { position: relative; width: 100%; }
+.zpicker-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px; color: #fff; cursor: pointer;
+    transition: all 0.3s; font-family: inherit; font-size: 0.95rem;
+}
+.zpicker-btn:hover, .zpicker-btn.open { border-color: #ff6b00; background: rgba(255, 107, 0, 0.05); }
+.zpicker-value.is-placeholder { color: #888; }
+.zpicker-clear { background: none; border: none; color: #ff6b00; font-size: 1.2rem; cursor: pointer; padding: 0 4px; }
+.zpicker-caret { transition: transform 0.3s; }
+.zpicker-btn.open .zpicker-caret { transform: rotate(180deg); }
+
+.zpicker-panel {
+    position: absolute; top: 110%; left: 0; right: 0;
+    background: #1a1a20; border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    z-index: 100; opacity: 0; visibility: hidden; transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.zpicker-panel.open { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.zpicker-search { display: flex; align-items: center; gap: 8px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.zpicker-search input { flex: 1; background: transparent; border: none; color: #fff; font-family: inherit; outline: none; }
+.zpicker-search kbd { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; color: #888; }
+
+.zpicker-tree { max-height: 200px; overflow-y: auto; padding: 8px; }
+.zpicker-tree::-webkit-scrollbar { width: 6px; }
+.zpicker-tree::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+.zpicker-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 8px; cursor: pointer;
+    transition: background 0.2s; color: #ccc; font-size: 0.9rem;
+}
+.zpicker-item:hover { background: rgba(255, 107, 0, 0.1); color: #fff; }
+.zpicker-item.selected { background: rgba(255, 107, 0, 0.15); color: #ff9a4d; font-weight: 700; }
+.zpicker-check { margin-right: auto; color: #ff6b00; }
+.zpicker-empty { padding: 20px; text-align: center; color: #666; font-size: 0.85rem; }
+
+.zpicker-footer { padding: 10px 12px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; color: #888; }
+.zpicker-footer strong { color: #ff9a4d; }
+
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.hint { color: #888; font-size: 0.8rem; margin-top: 6px; }
+.image-preview { margin-top: 10px; }
+.image-preview img { max-width: 200px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
+
+.form-control {
+    width: 100%; padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px; color: #fff;
+    font-family: inherit; font-size: 0.95rem;
+    outline: none; transition: all 0.3s;
+}
+.form-control:focus { border-color: #ff6b00; background: rgba(255, 107, 0, 0.05); }
+textarea.form-control { resize: vertical; min-height: 80px; line-height: 1.8; }
+input[type="file"].form-control { padding: 10px; border-style: dashed; cursor: pointer; }
+
+.check-field { display: flex; align-items: center; gap: 10px; margin-top: 20px; cursor: pointer; }
+.check-text strong { display: block; color: #fff; font-weight: 700; }
+.check-text small { display: block; color: #888; font-size: 0.8rem; margin-top: 2px; }
+
+/* Editor.js dark theme */
+.codex-editor { color: #fff !important; }
+.codex-editor .ce-block__content { max-width: 100% !important; }
+.codex-editor .ce-toolbar__content { max-width: 100% !important; }
+.ce-paragraph { color: #fff !important; }
+.ce-header { color: #fff !important; }
+.cdx-block { color: #fff !important; }
+</style>
+
+<!-- ═══ Editor.js از CDN پایدار (cdnjs) ═══ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/editor.js/2.29.1/editorjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-header/2.8.1/header.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-list/2.0.4/list.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-quote/2.7.2/quote.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-code/2.9.0/code.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-table/2.4.1/table.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-delimiter/1.4.0/delimiter.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-checklist/1.6.0/checklist.min.js"></script>
+
+<script>
+// ═══ انتخاب‌گر دسته‌بندی ═══
+(function(){
+    var dataEl = document.getElementById('categories-data');
+    var hidden = document.getElementById('id_category');
+    if(!dataEl || !hidden) return;
+    
+    var cats = JSON.parse(dataEl.textContent);
+    var btn = document.getElementById('catBtn');
+    var valueEl = document.getElementById('catValue');
+    var clearBtn = document.getElementById('catClear');
+    var panel = document.getElementById('catPanel');
+    var search = document.getElementById('catSearch');
+    var tree = document.getElementById('catTree');
+    var pathEl = document.getElementById('catPath');
+    
+    var selectedId = hidden.value ? parseInt(hidden.value, 10) : null;
+
+    function byId(id){ return cats.find(function(c){ return c.id === id; }) || null; }
+
+    function renderTree(filterText) {
+        filterText = filterText || '';
+        tree.innerHTML = '';
+        var filtered = cats.filter(function(c){ return c.title.indexOf(filterText) !== -1; });
+        
+        if(filtered.length === 0) {
+            tree.innerHTML = '<div class="zpicker-empty">موردی یافت نشد</div>';
+            return;
+        }
+
+        filtered.forEach(function(c){
+            var row = document.createElement('div');
+            row.className = 'zpicker-item' + (selectedId === c.id ? ' selected' : '');
+            row.innerHTML = '<span>' + c.title + '</span>' + (selectedId === c.id ? '<span class="zpicker-check">✓</span>' : '');
+            row.addEventListener('click', function(){ select(c.id); });
+            tree.appendChild(row);
+        });
+    }
+
+    function select(id){
+        selectedId = id; 
+        hidden.value = id;
+        var c = byId(id);
+        if(c) {
+            valueEl.textContent = c.title;
+            valueEl.classList.remove('is-placeholder');
+            clearBtn.style.display = 'block';
+            pathEl.innerHTML = 'انتخاب شده: <strong>' + c.title + '</strong>';
+        }
+        close(); 
+        renderTree();
+    }
+
+    function open(){ 
+        panel.classList.add('open'); 
+        btn.classList.add('open'); 
+        search.value = ''; 
+        renderTree(); 
+        setTimeout(function(){ search.focus(); }, 100); 
+    }
+    
+    function close(){ 
+        panel.classList.remove('open'); 
+        btn.classList.remove('open'); 
+    }
+
+    btn.addEventListener('click', function(e){ 
+        e.stopPropagation(); 
+        panel.classList.contains('open') ? close() : open(); 
+    });
+    
+    panel.addEventListener('click', function(e){ e.stopPropagation(); });
+    document.addEventListener('click', close);
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
+    
+    search.addEventListener('input', function(){ 
+        renderTree(search.value.trim()); 
+    });
+    
+    clearBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        selectedId = null; 
+        hidden.value = '';
+        valueEl.textContent = 'انتخاب دسته‌بندی...';
+        valueEl.classList.add('is-placeholder');
+        clearBtn.style.display = 'none';
+        pathEl.textContent = 'هنوز دسته‌ای انتخاب نشده';
+        renderTree();
+    });
+
+    if(selectedId) { 
+        var cur = byId(selectedId); 
+        if(cur) select(selectedId); 
+    } else {
+        renderTree();
+    }
+})();
+
+// ═══ Editor.js (با مدیریت خطای JSON) ═══
+var editor;
+document.addEventListener('DOMContentLoaded', function() {
+    var initialData = document.getElementById('contentJson').value;
+    var data = { time: Date.now(), blocks: [] }; // حالت پیش‌فرض خالی
+    
+    // تلاش برای پارس کردن، اگر متن ساده قدیمی بود، خطا را نادیده می‌گیرد
+    if (initialData && initialData.trim() !== '') {
+        try {
+            var parsed = JSON.parse(initialData);
+            if (parsed && typeof parsed === 'object' && Array.isArray(parsed.blocks)) {
+                data = parsed;
+            } else {
+                console.warn('ساختار JSON نامعتبر است. ویرایشگر خالی بارگذاری شد.');
+            }
+        } catch (e) {
+            console.warn('محتوای قبلی متن ساده است (JSON نیست). ویرایشگر خالی بارگذاری شد. خطا:', e.message);
+        }
+    }
+    
+    editor = new EditorJS({
+        holder: 'editorjs',
+        placeholder: 'توضیحات کامل نمونه‌کار را اینجا بنویسید...',
+        data: data,
+        tools: {
+            header: {
+                class: Header,
+                config: {
+                    placeholder: 'عنوان را وارد کنید',
+                    levels: [2, 3, 4],
+                    defaultLevel: 2
+                }
+            },
+            list: {
+                class: List,
+                inlineToolbar: true
+            },
+            quote: Quote,
+            code: Code,
+            table: Table,
+            delimiter: Delimiter,
+            checklist: {
+                class: Checklist,
+                inlineToolbar: true
+            }
+        }
+    });
+    
+    // ذخیره محتوا قبل از ارسال فرم
+    document.getElementById('portfolioForm').addEventListener('submit', function(e) {
+        editor.save().then(function(outputData) {
+            document.getElementById('contentJson').value = JSON.stringify(outputData);
+        }).catch(function(err) {
+            console.error('Editor.js save error:', err);
+        });
+    });
+});
+</script>
+{% endblock %}

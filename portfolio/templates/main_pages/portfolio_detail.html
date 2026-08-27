@@ -4,78 +4,292 @@
 {% block title %}{{ item.title }} | نمونه‌کار زاسکو ذوب{% endblock %}
 
 {% block content %}
-<article class="pfd-page">
-    <div class="container pfd-container">
+<div class="container pfd-wrap">
+    <div class="pfd-layout">
 
-        <nav class="pfd-breadcrumb">
-            <a href="/">خانه</a> <span>/</span>
-            <a href="{% url 'portfolio_list' %}">نمونه‌کارها</a>
-            {% if item.category %}<span>/</span><a
-                href="{% url 'portfolio_list' %}?category={{ item.category.slug }}">{{ item.category.title }}</a>{% endif %}
-            <span>/</span> <span class="pfd-crumb-active">{{ item.title }}</span>
-        </nav>
+        <!-- ═══ ستون اصلی ═══ -->
+        <div class="pfd-main">
+            <nav class="pfd-breadcrumb">
+                <a href="/">خانه</a> <span>/</span>
+                <a href="{% url 'port:portfolio_list' %}">نمونه‌کارها</a>
+                {% if item.category %}<span>/</span><a
+                    href="{% url 'port:portfolio_list' %}?category={{ item.category.slug }}">{{ item.category.title
+                    }}</a>{% endif %}
+                <span>/</span> <span class="pfd-crumb-active">{{ item.title }}</span>
+            </nav>
 
-        <header class="pfd-header">
-            {% if item.category %}<span class="pf-badge">{{ item.category.title }}</span>{% endif %}
-            <h1>{{ item.title }}</h1>
-            {% if item.summary %}<p class="pfd-summary">{{ item.summary }}</p>{% endif %}
-        </header>
+            <header class="pfd-header">
+                {% if item.category %}<span class="pf-badge">{{ item.category.title }}</span>{% endif %}
+                <h1>{{ item.title }}</h1>
+                {% if item.summary %}<p class="pfd-summary">{{ item.summary }}</p>{% endif %}
+            </header>
 
-        <figure class="pfd-image">
-            <img src="{{ item.featured_image.url }}" alt="{{ item.image_alt|default:item.title }}">
-        </figure>
+            <figure class="pfd-image">
+                <img src="{{ item.featured_image.url }}" alt="{{ item.image_alt|default:item.title }}">
+            </figure>
 
-        {% if item.material or item.weight or item.standard %}
-        <div class="pfd-specs">
-            {% if item.material %}<div class="pfd-spec"><small>جنس آلیاژ</small><strong>{{ item.material }}</strong>
-            </div>{% endif %}
-            {% if item.weight %}<div class="pfd-spec"><small>وزن قطعه</small><strong>{{ item.weight }}</strong></div>{% endif %}
-            {% if item.standard %}<div class="pfd-spec"><small>استاندارد</small><strong>{{ item.standard }}</strong>
-            </div>{% endif %}
-            <div class="pfd-spec"><small>بازدید</small><strong>{{ item.views }}</strong></div>
-        </div>
-        {% endif %}
-
-        {% if item.content %}
-        <div class="pfd-body ck-content">{{ item.content|safe }}</div>
-        {% endif %}
-
-        <div class="pfd-cta">
-            <div>
-                <h3>قطعه مشابهی نیاز دارید؟</h3>
-                <p>نقشه فنی خود را ارسال کنید تا پیش‌فاکتور دقیق دریافت کنید.</p>
+            {% if item.material or item.weight or item.standard %}
+            <div class="pfd-specs">
+                {% if item.material %}<div class="pfd-spec"><small>جنس آلیاژ</small><strong>{{ item.material }}</strong>
+                </div>{% endif %}
+                {% if item.weight %}<div class="pfd-spec"><small>وزن قطعه</small><strong>{{ item.weight }}</strong>
+                </div>{% endif %}
+                {% if item.standard %}<div class="pfd-spec"><small>استاندارد</small><strong>{{ item.standard }}</strong>
+                </div>{% endif %}
+                <div class="pfd-spec"><small>بازدید</small><strong>{{ item.views }}</strong></div>
             </div>
-            <a href="/contact-us/" class="pfd-cta-btn">استعلام قیمت</a>
+            {% endif %}
+
+            {% if item.content %}
+            <div class="pfd-body" id="portfolioContent"></div>
+
+            <!-- ═══ Editor.js از cdnjs ═══ -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/editor.js/2.29.1/editorjs.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-header/2.8.1/header.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-list/2.0.4/list.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-quote/2.7.2/quote.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-code/2.9.0/code.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-table/2.4.1/table.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-delimiter/1.4.0/delimiter.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/editorjs-checklist/1.6.0/checklist.min.js"></script>
+
+            <script>
+                // ═══ Editor.js ═══
+                var editor;
+                document.addEventListener('DOMContentLoaded', function () {
+                    var initialData = document.getElementById('contentJson').value;
+                    var data = { time: Date.now(), blocks: [] };
+
+                    // پارس ایمن JSON
+                    if (initialData && initialData.trim() !== '') {
+                        try {
+                            var parsed = JSON.parse(initialData);
+                            if (parsed && parsed.blocks && Array.isArray(parsed.blocks)) {
+                                data = parsed;
+                            }
+                        } catch (e) {
+                            console.warn('محتوای قبلی JSON معتبر نیست، از محتوای خالی استفاده می‌شود:', e);
+                        }
+                    }
+
+                    editor = new EditorJS({
+                        holder: 'editorjs',
+                        placeholder: 'توضیحات کامل نمونه‌کار را اینجا بنویسید...',
+                        data: data,
+                        tools: {
+                            header: {
+                                class: Header,
+                                config: {
+                                    placeholder: 'عنوان را وارد کنید',
+                                    levels: [2, 3, 4],
+                                    defaultLevel: 2
+                                }
+                            },
+                            list: {
+                                class: List,
+                                inlineToolbar: true
+                            },
+                            quote: Quote,
+                            code: Code,
+                            table: Table,
+                            delimiter: Delimiter,
+                            checklist: {
+                                class: Checklist,
+                                inlineToolbar: true
+                            }
+                        }
+                    });
+
+                    // ذخیره محتوا قبل از ارسال فرم
+                    document.getElementById('portfolioForm').addEventListener('submit', function (e) {
+                        editor.save().then(function (outputData) {
+                            document.getElementById('contentJson').value = JSON.stringify(outputData);
+                        }).catch(function (err) {
+                            console.error('Editor.js save error:', err);
+                        });
+                    });
+                });
+            </script>
+            {% endif %}
+
+            <div class="pfd-cta">
+                <div>
+                    <h3>قطعه مشابهی نیاز دارید؟</h3>
+                    <p>نقشه فنی خود را ارسال کنید تا پیش‌فاکتور دقیق دریافت کنید.</p>
+                </div>
+                <a href="/contact/" class="pfd-cta-btn">استعلام قیمت</a>
+            </div>
+
+            {% if related %}
+            <section class="pfd-related">
+                <h2>نمونه‌کارهای مشابه</h2>
+                <div class="pf-grid small">
+                    {% for r in related %}
+                    <a href="{% url 'port:portfolio_detail' r.slug %}" class="pf-card">
+                        <div class="pf-card-img"><img src="{{ r.featured_image.url }}"
+                                alt="{{ r.image_alt|default:r.title }}" loading="lazy"></div>
+                        <div class="pf-card-body">
+                            <h2>{{ r.title }}</h2>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
         </div>
 
-        {% if related %}
-        <section class="pfd-related">
-            <h2>نمونه‌کارهای مشابه</h2>
-            <div class="pf-grid small">
-                {% for r in related %}
-                <a href="{% url 'portfolio_detail' r.slug %}" class="pf-card">
-                    <div class="pf-card-img"><img src="{{ r.featured_image.url }}"
-                            alt="{{ r.image_alt|default:r.title }}" loading="lazy"></div>
-                    <div class="pf-card-body">
-                        <h2>{{ r.title }}</h2>
-                    </div>
-                </a>
-                {% endfor %}
+        <!-- ═══ سایدبار ══ -->
+        <aside class="pfd-sidebar">
+            <div class="pfs-box" id="tocBox">
+                <div class="pfs-header">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6" />
+                        <line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" />
+                        <line x1="3" y1="6" x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" />
+                        <line x1="3" y1="18" x2="3.01" y2="18" />
+                    </svg>
+                    <h3>در این صفحه</h3>
+                </div>
+                <ul class="pf-toc" id="tocList"></ul>
             </div>
-        </section>
-        {% endif %}
+
+            <div class="pfs-box">
+                <div class="pfs-header">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    </svg>
+                    <h3>دسته‌بندی‌ها</h3>
+                </div>
+                <ul class="pfs-cat-list">
+                    {% for cat in sidebar_categories %}
+                    <li>
+                        <a href="{% url 'port:portfolio_list' %}?category={{ cat.slug }}"
+                            class="pfs-cat {% if item.category_id == cat.id %}active{% endif %}">
+                            <span>{{ cat.title }}</span>
+                            <span class="pfs-count">{{ cat.num_items }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="pfs-box">
+                <div class="pfs-header">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <h3>آخرین نمونه‌کارها</h3>
+                </div>
+                <div class="pfs-latest">
+                    {% for p in latest_items %}
+                    <a href="{% url 'port:portfolio_detail' p.slug %}" class="pfs-latest-item">
+                        {% if p.featured_image %}<img src="{{ p.featured_image.url }}" alt="{{ p.title }}">{% endif %}
+                        <div>
+                            <strong>{{ p.title|truncatechars:50 }}</strong>
+                            <small>{{ p.category.title|default:'بدون دسته' }}</small>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="pfs-empty">نمونه‌کار دیگری وجود ندارد</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="pfs-box pfs-cta">
+                <div class="pfs-cta-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                    </svg>
+                </div>
+                <h4>مشاوره رایگان</h4>
+                <p>برای استعلام قیمت قطعات با کارشناسان ما تماس بگیرید</p>
+                <a href="tel:09134302591" class="pfs-cta-btn" dir="ltr">0913 430 2591</a>
+            </div>
+        </aside>
     </div>
-</article>
+</div>
+{% block three_js %}
+<script>
+    (function () {
+        /* ═══ فهرست مطالب + Scrollspy ═══ */
+        var body = document.querySelector('.pfd-body');
+        var list = document.getElementById('tocList');
+        var box = document.getElementById('tocBox');
+        if (body && list && !list.children.length) {
+            var heads = body.querySelectorAll('h2, h3');
+            if (!heads.length) { if (box) box.style.display = 'none'; }
+            else {
+                heads.forEach(function (h, i) {
+                    if (!h.id) h.id = 'sec-' + i;
+                    var li = document.createElement('li');
+                    li.className = 'toc-' + h.tagName.toLowerCase();
+                    var a = document.createElement('a');
+                    a.href = '#' + h.id;
+                    a.textContent = h.textContent;
+                    a.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        var y = h.getBoundingClientRect().top + window.pageYOffset - 100;
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                    });
+                    li.appendChild(a);
+                    list.appendChild(li);
+                });
+                var links = list.querySelectorAll('a');
+                function spy() {
+                    var cur = null;
+                    heads.forEach(function (h) { if (h.getBoundingClientRect().top < 150) cur = h.id; });
+                    links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + cur); });
+                }
+                window.addEventListener('scroll', spy, { passive: true });
+                spy();
+            }
+        }
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Product",
-  "name": "{{ item.title }}",
-  "description": "{{ item.meta_description|default:item.summary }}",
-  "image": "{{ request.scheme }}://{{ request.get_host }}{{ item.featured_image.url }}",
-  "brand": { "@type": "Brand", "name": "زاسکو ذوب" },
-  "manufacturer": { "@type": "Organization", "name": "کارخانه ریخته‌گری زاسکو ذوب", "url": "{{ request.scheme }}://{{ request.get_host }}/" }
-}
+        /* ═══ Reveal on Scroll ═══ */
+        var revealEls = document.querySelectorAll('.pf-card, .pfd-spec, .pfd-image, .pfd-cta, .pfd-header, .pfd-related');
+        if ('IntersectionObserver' in window && revealEls.length) {
+            revealEls.forEach(function (el, i) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'opacity .7s cubic-bezier(.22,1,.36,1) ' + ((i % 9) * 0.07) + 's, transform .7s cubic-bezier(.22,1,.36,1) ' + ((i % 9) * 0.07) + 's';
+            });
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (en) {
+                    if (en.isIntersecting) {
+                        var el = en.target;
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                        el.addEventListener('transitionend', function clear() {
+                            el.style.opacity = ''; el.style.transform = ''; el.style.transition = '';
+                            el.removeEventListener('transitionend', clear);
+                        });
+                        io.unobserve(el);
+                    }
+                });
+            }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+            revealEls.forEach(function (el) { io.observe(el); });
+        }
+
+        /* ═══ لایت‌باکس ═══ */
+        var img = document.querySelector('.pfd-image img');
+        if (img) {
+            img.style.cursor = 'zoom-in';
+            var lb = document.createElement('div');
+            lb.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);backdrop-filter:blur(10px);z-index:9999;display:none;align-items:center;justify-content:center;cursor:zoom-out;padding:30px';
+            var big = document.createElement('img');
+            big.style.cssText = 'max-width:95%;max-height:95%;border-radius:14px;box-shadow:0 40px 100px rgba(0,0,0,.8)';
+            lb.appendChild(big);
+            document.body.appendChild(lb);
+            img.addEventListener('click', function () { big.src = img.src; lb.style.display = 'flex'; document.body.style.overflow = 'hidden'; });
+            lb.addEventListener('click', function () { lb.style.display = 'none'; document.body.style.overflow = ''; });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && lb.style.display === 'flex') lb.click(); });
+        }
+    });
 </script>
+{% endblock %}
 {% endblock %}

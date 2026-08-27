@@ -84,3 +84,98 @@ document.querySelectorAll('.nav-sub-item.active').forEach(function (item) {
     var g = item.closest('.nav-group');
     if (g) g.classList.add('open');
 });
+
+(function(){
+    var dataEl = document.getElementById('categories-data');
+    var hidden = document.getElementById('id_category');
+    if(!dataEl || !hidden) return;
+    
+    var cats = JSON.parse(dataEl.textContent);
+    var btn = document.getElementById('catBtn');
+    var valueEl = document.getElementById('catValue');
+    var clearBtn = document.getElementById('catClear');
+    var panel = document.getElementById('catPanel');
+    var search = document.getElementById('catSearch');
+    var tree = document.getElementById('catTree');
+    var pathEl = document.getElementById('catPath');
+    
+    var selectedId = hidden.value ? parseInt(hidden.value, 10) : null;
+
+    function byId(id){ return cats.find(function(c){ return c.id === id; }) || null; }
+
+    function renderTree(filterText = '') {
+        tree.innerHTML = '';
+        var filtered = cats.filter(function(c){ return c.title.includes(filterText); });
+        
+        if(filtered.length === 0) {
+            tree.innerHTML = '<div class="zpicker-empty">موردی یافت نشد</div>';
+            return;
+        }
+
+        filtered.forEach(function(c){
+            var row = document.createElement('div');
+            row.className = 'zpicker-item' + (selectedId === c.id ? ' selected' : '');
+            row.innerHTML = '<span>' + c.title + '</span>' + (selectedId === c.id ? '<span class="zpicker-check">✓</span>' : '');
+            row.addEventListener('click', function(){ select(c.id); });
+            tree.appendChild(row);
+        });
+    }
+
+    function select(id){
+        selectedId = id; 
+        hidden.value = id;
+        var c = byId(id);
+        if(c) {
+            valueEl.textContent = c.title;
+            valueEl.classList.remove('is-placeholder');
+            clearBtn.style.display = 'block';
+            pathEl.innerHTML = 'انتخاب شده: <strong>' + c.title + '</strong>';
+        }
+        close(); 
+        renderTree();
+    }
+
+    function open(){ 
+        panel.classList.add('open'); 
+        btn.classList.add('open'); 
+        search.value = ''; 
+        renderTree(); 
+        setTimeout(function(){ search.focus(); }, 100); 
+    }
+    
+    function close(){ 
+        panel.classList.remove('open'); 
+        btn.classList.remove('open'); 
+    }
+
+    btn.addEventListener('click', function(e){ 
+        e.stopPropagation(); 
+        panel.classList.contains('open') ? close() : open(); 
+    });
+    
+    panel.addEventListener('click', function(e){ e.stopPropagation(); });
+    document.addEventListener('click', close);
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
+    
+    search.addEventListener('input', function(){ 
+        renderTree(search.value.trim()); 
+    });
+    
+    clearBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        selectedId = null; 
+        hidden.value = '';
+        valueEl.textContent = 'انتخاب دسته‌بندی...';
+        valueEl.classList.add('is-placeholder');
+        clearBtn.style.display = 'none';
+        pathEl.textContent = 'هنوز دسته‌ای انتخاب نشده';
+        renderTree();
+    });
+
+    if(selectedId) { 
+        var cur = byId(selectedId); 
+        if(cur) select(selectedId); 
+    } else {
+        renderTree();
+    }
+})();

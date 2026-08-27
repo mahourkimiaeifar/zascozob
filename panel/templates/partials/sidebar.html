@@ -98,6 +98,13 @@
             </svg>
             <span>نمونه‌کارها</span>
         </a>
+        <a href="{% url 'panel:portfolio_category_list' %}"
+            class="nav-item {% if 'portfolio_category' in request.resolver_match.url_name %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+            <span>دسته‌بندی نمونه‌کارها</span>
+        </a>
         <a href="{% url 'panel:site_settings' %}"
             class="nav-item {% if request.resolver_match.url_name == 'site_settings' %}active{% endif %}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
