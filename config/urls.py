@@ -25,7 +25,7 @@ urlpatterns = [
     path('blog/', include('blog.urls', namespace='blog')),
     path('portfolio/', include('portfolio.urls', namespace='port')),
     path('zasco-admin-x9k2p/', include('panel.urls')),
-    path('ckeditor5/', include('django_ckeditor_5.urls')),
+    path('ckeditor/', include('ckeditor_uploader.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
 ]
 if settings.DEBUG:

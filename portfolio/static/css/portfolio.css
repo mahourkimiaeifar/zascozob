@@ -933,3 +933,169 @@
         grid-template-columns: 1fr
     }
 }
+
+.pfd-body {
+    direction: rtl;
+    font-family: 'Vazirmatn', sans-serif;
+    line-height: 2.2;
+    color: #d4d9e2;
+    font-size: 1rem;
+    margin-top: 30px;
+}
+
+.pfd-body h1,
+.pfd-body h2,
+.pfd-body h3,
+.pfd-body h4 {
+    color: #fff;
+    font-weight: 800;
+    margin: 28px 0 16px;
+    line-height: 1.4;
+}
+
+.pfd-body h1 {
+    font-size: 1.8rem;
+}
+
+.pfd-body h2 {
+    font-size: 1.6rem;
+}
+
+.pfd-body h3 {
+    font-size: 1.3rem;
+}
+
+.pfd-body h4 {
+    font-size: 1.1rem;
+}
+
+.pfd-body p {
+    margin-bottom: 16px;
+    text-align: justify;
+}
+
+.pfd-body ul,
+.pfd-body ol {
+    padding-right: 24px;
+    margin: 16px 0;
+}
+
+.pfd-body li {
+    margin-bottom: 8px;
+    line-height: 1.9;
+}
+
+.pfd-body ul li::marker {
+    color: #ff6b00;
+}
+
+.pfd-body ol li::marker {
+    color: #ff9a4d;
+    font-weight: 700;
+}
+
+.pfd-body blockquote {
+    border-right: 4px solid #ff6b00;
+    padding: 14px 20px;
+    margin: 20px 0;
+    background: rgba(255, 107, 0, 0.05);
+    border-radius: 0 10px 10px 0;
+    color: #c6c9cf;
+    font-style: italic;
+}
+
+.pfd-body strong {
+    color: #fff;
+    font-weight: 800;
+}
+
+.pfd-body em {
+    color: #ff9a4d;
+    font-style: italic;
+}
+
+.pfd-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.pfd-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.pfd-body th,
+.pfd-body td {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 16px;
+    text-align: right;
+}
+
+.pfd-body th {
+    background: rgba(255, 107, 0, 0.15);
+    color: #ff9a4d;
+    font-weight: 700;
+}
+
+.pfd-body code {
+    background: rgba(255, 107, 0, 0.15);
+    color: #ff9a4d;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.pfd-body pre {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 16px;
+    margin: 20px 0;
+    overflow-x: auto;
+    direction: ltr;
+}
+
+.pfd-body pre code {
+    background: transparent;
+    padding: 0;
+    color: #eef1f6;
+}
+
+.pfd-body hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 30px 0;
+}
+
+.pfd-body a {
+    color: #ff9a4d;
+    text-decoration: underline;
+}
+
+.pfd-body a:hover {
+    color: #ff6b00;
+}
+
+.pfd-body figure {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.pfd-body figure img {
+    display: inline-block;
+}
+
+.pfd-body figcaption {
+    color: #888;
+    font-size: 0.85rem;
+    margin-top: 8px;
+    font-style: italic;
+}

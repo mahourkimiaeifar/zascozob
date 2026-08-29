@@ -37,7 +37,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'django.contrib.admin','django.contrib.auth','django.contrib.contenttypes',
     'django.contrib.sessions','django.contrib.messages','django.contrib.staticfiles',
-    'main','gallery','blog','portfolio','panel',    'django_editorjs_fields',
+    'main','gallery','blog','portfolio','panel','ckeditor','ckeditor_uploader',
 
 ]
 
@@ -123,6 +123,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'main' / 'static',
     BASE_DIR / 'blog' / 'static',
+    BASE_DIR / 'portfolio' / 'static',  # ← این خط رو دقیقاً همین‌طوری اضافه کن
+
 ]
 
 # Default primary key field type
@@ -142,32 +144,20 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = 'Zasco Foundry <zascozob@gmail.com>'
 CONTACT_EMAIL = 'zascozob@gmail.com'
 
-# تنظیمات Editor.js
-EDITORJS_ALLOWED_TOOLS = {
-    'header': {
-        'class': '@editorjs/header',
-        'config': {
-            'placeholder': 'عنوان را وارد کنید',
-            'levels': [2, 3, 4],
-            'defaultLevel': 2
-        }
+# تنظیمات CKEditor
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            ['Bold', 'Italic', 'Underline', 'Strike'],
+            ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'],
+            ['Link', 'Unlink'],
+            ['Image', 'Table'],
+            ['Format', 'FontSize', 'TextColor', 'BGColor'],
+            ['Maximize', 'Source']
+        ],
+        'height': 400,
+        'width': '100%',
     },
-    'paragraph': '@editorjs/paragraph',
-    'list': {
-        'class': '@editorjs/list',
-        'inlineToolbar': True
-    },
-    'quote': '@editorjs/quote',
-    'code': '@editorjs/code',
-    'table': '@editorjs/table',
-    'image': {
-        'class': '@editorjs/image',
-        'config': {
-            'uploader': {
-                'uploadUrl': '/panel/editorjs/upload/'
-            }
-        }
-    },
-    'delimiter': '@editorjs/delimiter',
-    'checklist': '@editorjs/checklist',
 }

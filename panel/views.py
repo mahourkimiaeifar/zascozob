@@ -425,6 +425,11 @@ def portfolio_add(request):
 
     categories_qs = PortfolioCategory.objects.filter(is_deleted=False).order_by('order', 'title')
     categories_data = [{'id': c.id, 'title': c.title, 'parent': None} for c in categories_qs]
+    
+    # دیباگ: چاپ در کنسول
+    print(f"DEBUG: {len(categories_data)} دسته‌بندی پیدا شد")
+    for c in categories_data:
+        print(f"  - {c}")
 
     if request.method == 'POST':
         form = PortfolioItemForm(request.POST, request.FILES)
@@ -444,18 +449,21 @@ def portfolio_add(request):
     return render(request, 'main_pages/portfolio/portfolio_form.html', {
         'form': form,
         'categories': categories_qs,
-        'categories_data': categories_data,
+        'categories_data': categories_data,  # ← این خط مهمه
     })
-    
+
+
 @login_required
 def portfolio_edit(request, pk):
     if not request.user.is_staff:
         return redirect('panel:login')
 
     item = get_object_or_404(PortfolioItem, id=pk, is_deleted=False)
-
     categories_qs = PortfolioCategory.objects.filter(is_deleted=False).order_by('order', 'title')
     categories_data = [{'id': c.id, 'title': c.title, 'parent': None} for c in categories_qs]
+    
+    # دیباگ: چاپ در کنسول
+    print(f"DEBUG EDIT: {len(categories_data)} دسته‌بندی پیدا شد")
 
     if request.method == 'POST':
         form = PortfolioItemForm(request.POST, request.FILES, instance=item)
@@ -478,9 +486,9 @@ def portfolio_edit(request, pk):
         'form': form,
         'item': item,
         'categories': categories_qs,
-        'categories_data': categories_data,
+        'categories_data': categories_data,  # ← این خط مهمه
     })
-
+    
 @login_required
 def portfolio_delete(request, pk):
     if not request.user.is_staff:

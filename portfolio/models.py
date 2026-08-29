@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
 from main.models import SoftDeleteModel
+from ckeditor_uploader.fields import RichTextUploadingField
 
 
 class PortfolioCategory(SoftDeleteModel):
@@ -31,7 +32,7 @@ class PortfolioItem(SoftDeleteModel):
         null=True, blank=True, on_delete=models.SET_NULL, related_name='items'
     )
     summary = models.CharField('خلاصه', max_length=300, blank=True)
-    content = models.TextField('توضیحات کامل (JSON)', blank=True)  # ← JSON ذخیره می‌شه
+    content = RichTextUploadingField('توضیحات کامل', blank=True)
     featured_image = models.ImageField('تصویر شاخص', upload_to='portfolio/%Y/%m/')
     image_alt = models.CharField('متن جایگزین تصویر (سئو)', max_length=200, blank=True)
     material = models.CharField('جنس آلیاژ', max_length=100, blank=True)
