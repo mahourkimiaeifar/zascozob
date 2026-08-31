@@ -153,3 +153,101 @@ class ReplyAttachment(models.Model):
 
     def __str__(self):
         return self.file.name
+    
+class MediaFile(SoftDeleteModel):
+    """کتابخانه فایل‌ها (Media Library)"""
+    FILE_TYPE_CHOICES = [
+        ('image', 'تصویر'),
+        ('document', 'سند (PDF, Word)'),
+        ('video', 'ویدیو'),
+        ('audio', 'صدا'),
+        ('other', 'سایر'),
+    ]
+    
+    title = models.CharField('عنوان فایل', max_length=200)
+    file = models.FileField('فایل', upload_to='media_library/%Y/%m/')
+    file_type = models.CharField('نوع فایل', max_length=20, choices=FILE_TYPE_CHOICES, default='other')
+    file_size = models.PositiveBigIntegerField('حجم فایل (بایت)', default=0)
+    uploaded_by = models.ForeignKey('auth.User', verbose_name='آپلود کننده', on_delete=models.SET_NULL, null=True, blank=True)
+    uploaded_at = models.DateTimeField('تاریخ آپلود', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'فایل'
+        verbose_name_plural = 'کتابخانه فایل‌ها'
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        # تشخیص خودکار نوع فایل و حجم
+        if self.file and not self.file_size:
+            self.file_size = self.file.size
+        
+        if self.file and self.file_type == 'other':
+            ext = self.file.name.split('.')[-1].lower()
+            if ext in ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']:
+                self.file_type = 'image'
+            elif ext in ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'zip', 'rar']:
+                self.file_type = 'document'
+            elif ext in ['mp4', 'avi', 'mov', 'mkv']:
+                self.file_type = 'video'
+            elif ext in ['mp3', 'wav', 'ogg']:
+                self.file_type = 'audio'
+                
+        super().save(*args, **kwargs)
+        
+class AuditLog(models.Model):
+    """لاگ فعالیت‌های کاربران"""
+    user = models.ForeignKey(
+        'auth.User',
+        verbose_name='کاربر',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    action = models.CharField('عملیات', max_length=100)
+    model_name = models.CharField('مدل', max_length=100, blank=True)
+    object_id = models.PositiveIntegerField('شناسه شیء', null=True, blank=True)
+    description = models.TextField('توضیحات', blank=True)
+    ip_address = models.GenericIPAddressField('آدرس IP', null=True, blank=True)
+    created_at = models.DateTimeField('تاریخ', auto_now_add=True)
+    
+    class Meta:
+        verbose_name = 'لاگ فعالیت'
+        verbose_name_plural = 'لاگ فعالیت‌ها'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f'{self.user} - {self.action} - {self.created_at}'
+    
+class SiteSetting(SoftDeleteModel):
+    # ... فیلدهای موجود ...
+    
+    maintenance_mode = models.BooleanField('حالت تعمیر', default=False)
+    maintenance_message = models.TextField(
+        'پیام حالت تعمیر',
+        default='سایت در حال بروزرسانی است. لطفاً بعداً مراجعه کنید.',
+        blank=True
+    )
+    
+    class Meta:
+        verbose_name = 'تنظیمات سایت'
+        verbose_name_plural = 'تنظیمات سایت'
+
+    def __str__(self):
+        return 'تنظیمات اصلی سایت'
+
+    # ═══ این متد را اضافه کنید ═══
+    @classmethod
+    def load(cls):
+        # اگر تنظیماتی وجود داشت آن را برمی‌گرداند، در غیر این صورت یک رکورد جدید می‌سازد
+        setting, created = cls.objects.get_or_create(
+            id=1,
+            defaults={
+                # اگر فیلد اجباری (required=True) دارید که مقدار پیش‌فرض ندارد، 
+                # نام آن را اینجا با یک مقدار خالی یا پیش‌فرض بنویسید تا خطا ندهد.
+                # مثال: 'site_name': 'زاسکو ذوب'
+            }
+        )
+        return setting

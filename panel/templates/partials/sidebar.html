@@ -1,19 +1,24 @@
 <aside class="panel-sidebar" id="panelSidebar">
     <div class="sidebar-header">
         <div class="sidebar-logo">
-            <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="3" />
                     <path
                         d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                </svg></div>
+                </svg>
+            </div>
             <div class="logo-text"><strong>زاسکو ذوب</strong><small>پنل مدیریت</small></div>
         </div>
-        <button class="sidebar-close" id="sidebarClose" aria-label="بستن"><svg viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2">
+        <button class="sidebar-close" id="sidebarClose" aria-label="بستن">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M18 6L6 18M6 6l12 12" />
-            </svg></button>
+            </svg>
+        </button>
     </div>
+
     <nav class="sidebar-nav">
+        <!-- منوی اصلی -->
         <div class="nav-section">
             <div class="nav-title">منوی اصلی</div>
             <a href="{% url 'panel:dashboard' %}"
@@ -27,6 +32,21 @@
                 <span>داشبورد</span>
             </a>
         </div>
+        <!-- تنظیمات -->
+        <div class="nav-section">
+            <div class="nav-title">سیستم</div>
+            <a href="{% url 'panel:site_settings' %}"
+                class="nav-item {% if request.resolver_match.url_name == 'site_settings' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span>تنظیمات سایت</span>
+            </a>
+        </div>
+
+        <!-- اپلیکیشن‌ها -->
         <div class="nav-section">
             <div class="nav-title">اپلیکیشن‌ها</div>
             <a href="{% url 'panel:main_contact' %}"
@@ -38,9 +58,10 @@
                 {% if unread_messages %}<span class="nav-badge">{{ unread_messages }}</span>{% endif %}
             </a>
         </div>
+
+        <!-- ═══ بخش بلاگ ═══ -->
         <div class="nav-section">
             <div class="nav-title">بلاگ</div>
-            <!-- ═══ گروه مقاله‌ها (زیرمنو) ═══ -->
             <div class="nav-group">
                 <button type="button" class="nav-group-toggle">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -75,14 +96,16 @@
                 </div>
             </div>
             <div class="nav-divider"></div>
-            <a href="{% url 'panel:blog_category_list' %}" class="nav-item">
+            <a href="{% url 'panel:blog_category_list' %}"
+                class="nav-item {% if 'blog_category' in request.resolver_match.url_name %}active{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                 </svg>
                 <span>دسته‌بندی‌ها</span>
             </a>
             <div class="nav-divider"></div>
-            <a href="{% url 'panel:blog_comment_list' %}" class="nav-item">
+            <a href="{% url 'panel:blog_comment_list' %}"
+                class="nav-item {% if 'blog_comment' in request.resolver_match.url_name %}active{% endif %}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
@@ -90,31 +113,74 @@
                 {% if pending_comments %}<span class="nav-badge">{{ pending_comments }}</span>{% endif %}
             </a>
         </div>
-        <a href="{% url 'panel:portfolio_list' %}"
-            class="nav-item {% if 'portfolio' in request.resolver_match.url_name %}active{% endif %}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-            </svg>
-            <span>نمونه‌کارها</span>
-        </a>
-        <a href="{% url 'panel:portfolio_category_list' %}"
-            class="nav-item {% if 'portfolio_category' in request.resolver_match.url_name %}active{% endif %}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-            </svg>
-            <span>دسته‌بندی نمونه‌کارها</span>
-        </a>
-        <a href="{% url 'panel:site_settings' %}"
-            class="nav-item {% if request.resolver_match.url_name == 'site_settings' %}active{% endif %}">
+
+        <!-- ═══ بخش گالری تصاویر (جدید) ═══ -->
+        <div class="nav-section">
+            <div class="nav-title">گالری تصاویر</div>
+            <div class="nav-group">
+                <button type="button" class="nav-group-toggle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                    </svg>
+                    <span>آلبوم‌ها</span>
+                    <svg class="nav-group-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                </button>
+                <div class="nav-submenu">
+                    <a href="{% url 'panel:gallery_album_add' %}"
+                        class="nav-sub-item {% if request.resolver_match.url_name == 'gallery_album_add' %}active{% endif %}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14" />
+                        </svg>
+                        آلبوم جدید
+                    </a>
+                    <a href="{% url 'panel:gallery_album_list' %}"
+                        class="nav-sub-item {% if 'gallery_album' in request.resolver_match.url_name or 'gallery_image' in request.resolver_match.url_name %}active{% endif %}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                        لیست آلبوم‌ها
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ بخش نمونه‌کارها (با عنوان مرتب‌شده) ═══ -->
+        <div class="nav-section">
+            <div class="nav-title">نمونه‌کارها</div>
+            <a href="{% url 'panel:portfolio_list' %}"
+                class="nav-item {% if 'portfolio' in request.resolver_match.url_name and 'category' not in request.resolver_match.url_name %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
+                <span>لیست نمونه‌کارها</span>
+            </a>
+            <div class="nav-divider"></div>
+            <a href="{% url 'panel:portfolio_category_list' %}"
+                class="nav-item {% if 'portfolio_category' in request.resolver_match.url_name %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                </svg>
+                <span>دسته‌بندی نمونه‌کارها</span>
+            </a>
+        </div>
+
+        <a href="{% url 'panel:media_library' %}"
+            class="nav-item {% if 'media' in request.resolver_match.url_name %}active{% endif %}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <circle cx="12" cy="12" r="3" />
-                <path
-                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                <polyline points="13 2 13 9 20 9"></polyline>
             </svg>
-            <span>تنظیمات سایت</span>
+            <span>کتابخانه فایل‌ها</span>
         </a>
     </nav>
+
     <div class="sidebar-footer">
         <a href="{% url 'panel:logout' %}" class="nav-item logout-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">

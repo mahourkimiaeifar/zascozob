@@ -2,12 +2,13 @@ import json
 import time
 import os
 import jdatetime
+import shutil
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.views.decorators.http import require_POST
@@ -21,13 +22,14 @@ from django.core.paginator import Paginator
 from django.db.models import Q,Count
 from portfolio.models import PortfolioItem, PortfolioCategory
 from portfolio.forms import PortfolioItemForm
-
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from gallery.models import GalleryAlbum, GalleryImage
 from gallery.utils import add_watermark_and_compress
 from gallery.forms import GalleryAlbumForm, MultipleImageUploadForm
-
-
+from main.models import AuditLog
+from django.core.cache import cache
 
 
 def panel_login(request):
@@ -263,8 +265,6 @@ def blog_post_add(request):
     if not request.user.is_staff:
         return redirect('panel:login')
     
-    post = None  # ← این خط اضافه شد
-    
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
@@ -273,22 +273,22 @@ def blog_post_add(request):
                 post.publish_date = timezone.now()
             post.save()
             return redirect('panel:blog_post_list')
+        else:
+            messages.error(request, 'لطفاً خطاهای فرم را بررسی کنید.')
     else:
         form = PostForm()
     
-    categories_data = [
-        {'id': c.id, 'title': c.title, 'parent': c.parent_id}
-        for c in Category.objects.all()
-    ]
+    # ✅ اصلاح شده: حذف is_deleted
+    categories = Category.objects.all()
+    categories_data = [{'id': c.id, 'title': c.title, 'parent': c.parent_id} for c in categories]
     
     return render(request, 'main_pages/blog/post_form.html', {
         'form': form,
-        'post': post,
-        'categories': Category.objects.all(),
+        'post': None,
+        'categories': categories,
         'categories_data': categories_data,
     })
-
-
+    
 @login_required
 def blog_post_edit(request, pk):
     if not request.user.is_staff:
@@ -301,19 +301,20 @@ def blog_post_edit(request, pk):
         if form.is_valid():
             form.save()
             return redirect('panel:blog_post_list')
+        else:
+            messages.error(request, 'لطفاً خطاهای فرم را بررسی کنید.')
     else:
         form = PostForm(instance=post)
     
-    categories_data = [
-        {'id': c.id, 'title': c.title, 'parent': c.parent_id}
-        for c in Category.objects.all()
-    ]
+    # ← این دو خط مهم هستند!
+    categories = Category.objects.filter(is_deleted=False).order_by('order', 'title')
+    categories_data = [{'id': c.id, 'title': c.title, 'parent': c.parent_id} for c in categories]
     
     return render(request, 'main_pages/blog/post_form.html', {
         'form': form,
         'post': post,
-        'categories': Category.objects.all(),
-        'categories_data': categories_data,
+        'categories': categories,  # ← برای حلقه for در JS
+        'categories_data': categories_data,  # ← برای json_script
     })
     
 @login_required
@@ -568,10 +569,10 @@ def gallery_album_list(request):
         return redirect('panel:login')
     
     albums = GalleryAlbum.objects.filter(is_deleted=False).order_by('-created')
-    
-    return render(request, '/gallery/album_list.html', {
+    return render(request, 'main_pages/gallery/album_list.html', {
         'albums': albums,
     })
+
 
 @login_required
 def gallery_album_add(request):
@@ -590,9 +591,10 @@ def gallery_album_add(request):
     else:
         form = GalleryAlbumForm()
     
-    return render(request, 'panel/gallery/album_form.html', {
+    return render(request, 'main_pages/gallery/album_form.html', {
         'form': form,
     })
+
 
 @login_required
 def gallery_album_edit(request, pk):
@@ -613,10 +615,11 @@ def gallery_album_edit(request, pk):
     else:
         form = GalleryAlbumForm(instance=album)
     
-    return render(request, 'panel/gallery/album_form.html', {
+    return render(request, 'main_pages/gallery/album_form.html', {
         'form': form,
         'album': album,
     })
+
 
 @login_required
 def gallery_album_images(request, album_id):
@@ -635,19 +638,14 @@ def gallery_album_images(request, album_id):
             
             for f in files:
                 try:
-                    # اعمال واترمارک و فشرده‌سازی
                     processed_image = add_watermark_and_compress(f, watermark_text="ZASCO")
-                    
-                    # محاسبه ترتیب
                     max_order = album.images.filter(is_deleted=False).count()
                     
-                    # ایجاد تصویر جدید
                     img = GalleryImage(
                         album=album,
                         order=max_order + 1,
                     )
                     
-                    # ذخیره تصویر پردازش شده
                     img.image.save(
                         f.name,
                         InMemoryUploadedFile(
@@ -662,7 +660,6 @@ def gallery_album_images(request, album_id):
                     )
                     img.save()
                     count += 1
-                    
                 except Exception as e:
                     print(f"Error processing {f.name}: {e}")
                     continue
@@ -674,11 +671,12 @@ def gallery_album_images(request, album_id):
     else:
         upload_form = MultipleImageUploadForm()
     
-    return render(request, 'panel/gallery/album_images.html', {
+    return render(request, 'main_pages/gallery/album_images.html', {
         'album': album,
         'images': images,
         'upload_form': upload_form,
     })
+
 
 @login_required
 def gallery_image_edit(request, pk):
@@ -696,9 +694,10 @@ def gallery_image_edit(request, pk):
         messages.success(request, 'تصویر با موفقیت ویرایش شد.')
         return redirect('panel:gallery_album_images', album_id=image.album.id)
     
-    return render(request, 'panel/gallery/image_edit.html', {
+    return render(request, 'main_pages/gallery/album_edit.html', {
         'image': image,
     })
+
 
 @login_required
 def gallery_image_delete(request, pk):
@@ -715,9 +714,10 @@ def gallery_image_delete(request, pk):
         messages.success(request, 'تصویر حذف شد.')
         return redirect('panel:gallery_album_images', album_id=album_id)
     
-    return render(request, 'panel/gallery/image_delete.html', {
+    return render(request, 'main_pages/gallery/image_delete.html', {
         'image': image,
     })
+
 
 @login_required
 def gallery_album_delete(request, pk):
@@ -733,7 +733,22 @@ def gallery_album_delete(request, pk):
         messages.success(request, 'آلبوم حذف شد.')
         return redirect('panel:gallery_album_list')
     
-    return render(request, 'panel/gallery/album_delete.html', {
+    return render(request, 'main_pages/gallery/album_delete.html', {
+        'album': album,
+    })
+    """حذف آلبوم"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    album = get_object_or_404(GalleryAlbum, id=pk, is_deleted=False)
+    
+    if request.method == 'POST':
+        album.is_deleted = True
+        album.save()
+        messages.success(request, 'آلبوم حذف شد.')
+        return redirect('panel:gallery_album_list')
+    
+    return render(request, 'main_pages/gallery/album_delete.html', {
         'album': album,
     })
     """لیست آلبوم‌های گالری"""
@@ -742,6 +757,313 @@ def gallery_album_delete(request, pk):
     
     albums = GalleryAlbum.objects.filter(is_deleted=False).order_by('-created')
     
-    return render(request, 'panel/gallery/album_list.html', {
+    return render(request, 'main_pages/gallery/album_list.html', {
         'albums': albums,
     })
+    
+# ═══ مدیریت رسانه ها ═══
+@login_required
+def media_library(request):
+    """کتابخانه فایل‌ها"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    files = MediaFile.objects.filter(is_deleted=False).order_by('-uploaded_at')
+    
+    # فیلتر بر اساس نوع
+    file_type = request.GET.get('type', '')
+    if file_type:
+        files = files.filter(file_type=file_type)
+    
+    # جستجو
+    search = request.GET.get('q', '')
+    if search:
+        files = files.filter(title__icontains=search)
+    
+    # آپلود فایل جدید
+    if request.method == 'POST':
+        uploaded_files = request.FILES.getlist('files')
+        count = 0
+        for f in uploaded_files:
+            MediaFile.objects.create(
+                title=f.name,
+                file=f,
+                uploaded_by=request.user
+            )
+            count += 1
+        messages.success(request, f'{count} فایل با موفقیت آپلود شد.')
+        return redirect('panel:media_library')
+    
+    paginator = Paginator(files, 20)
+    page = request.GET.get('page')
+    files_page = paginator.get_page(page)
+    
+    return render(request, 'panel/media_library.html', {
+        'files': files_page,
+        'file_type': file_type,
+        'search': search,
+    })
+
+@login_required
+def media_file_delete(request, pk):
+    """حذف فایل"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    file = get_object_or_404(MediaFile, id=pk, is_deleted=False)
+    
+    if request.method == 'POST':
+        file.is_deleted = True
+        file.save()
+        messages.success(request, 'فایل حذف شد.')
+        return redirect('panel:media_library')
+    
+    return render(request, 'panel/media_file_delete.html', {'file': file})
+
+# ═══ مدیریت کاربر ═══
+@login_required
+def user_list(request):
+    """لیست کاربران"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    users = User.objects.all().order_by('-date_joined')
+    
+    return render(request, 'panel/user_list.html', {'users': users})
+
+@login_required
+def user_add(request):
+    """افزودن کاربر جدید"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        is_staff = request.POST.get('is_staff') == 'on'
+        is_superuser = request.POST.get('is_superuser') == 'on'
+        
+        if not username or not password:
+            messages.error(request, 'نام کاربری و رمز عبور الزامی است.')
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, 'این نام کاربری قبلاً استفاده شده.')
+        else:
+            User.objects.create_user(
+                username=username,
+                email=email,
+                password=password,
+                is_staff=is_staff,
+                is_superuser=is_superuser
+            )
+            messages.success(request, f'کاربر "{username}" با موفقیت ایجاد شد.')
+            return redirect('panel:user_list')
+    
+    return render(request, 'panel/user_form.html')
+
+@login_required
+def user_edit(request, pk):
+    """ویرایش کاربر"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    user = get_object_or_404(User, id=pk)
+    
+    if request.method == 'POST':
+        user.email = request.POST.get('email', '').strip()
+        user.is_staff = request.POST.get('is_staff') == 'on'
+        user.is_superuser = request.POST.get('is_superuser') == 'on'
+        
+        new_password = request.POST.get('new_password', '')
+        if new_password:
+            user.password = make_password(new_password)
+        
+        user.save()
+        messages.success(request, 'کاربر با موفقیت ویرایش شد.')
+        return redirect('panel:user_list')
+    
+    return render(request, 'panel/user_form.html', {'user_obj': user})
+
+@login_required
+def user_delete(request, pk):
+    """حذف کاربر"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    user = get_object_or_404(User, id=pk)
+    
+    if request.method == 'POST':
+        if user == request.user:
+            messages.error(request, 'نمی‌توانید خودتان را حذف کنید!')
+        else:
+            user.delete()
+            messages.success(request, 'کاربر حذف شد.')
+        return redirect('panel:user_list')
+    
+    return render(request, 'panel/user_delete.html', {'user_obj': user})
+
+# ═══ فعالیت لاگ ها ═══
+@login_required
+def audit_log(request):
+    """لاگ فعالیت‌ها"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    logs = AuditLog.objects.all().select_related('user').order_by('-created_at')
+    
+    # فیلتر بر اساس کاربر
+    user_id = request.GET.get('user', '')
+    if user_id:
+        logs = logs.filter(user_id=user_id)
+    
+    # فیلتر بر اساس عملیات
+    action = request.GET.get('action', '')
+    if action:
+        logs = logs.filter(action__icontains=action)
+    
+    paginator = Paginator(logs, 50)
+    page = request.GET.get('page')
+    logs_page = paginator.get_page(page)
+    
+    return render(request, 'panel/audit_log.html', {
+        'logs': logs_page,
+        'user_id': user_id,
+        'action': action,
+        'users': User.objects.filter(is_staff=True),
+    })
+# ═══ مدیریت بکاپ ═══
+@login_required
+def backup_manager(request):
+    """مدیریت بک‌آپ"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    backup_dir = os.path.join(settings.BASE_DIR, 'backups')
+    os.makedirs(backup_dir, exist_ok=True)
+    
+    # ایجاد بک‌آپ جدید
+    if request.method == 'POST' and request.POST.get('action') == 'create':
+        import zipfile
+        from datetime import datetime
+        
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        backup_file = os.path.join(backup_dir, f'backup_{timestamp}.zip')
+        
+        with zipfile.ZipFile(backup_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            # بک‌آپ دیتابیس
+            db_path = os.path.join(settings.BASE_DIR, 'db.sqlite3')
+            if os.path.exists(db_path):
+                zipf.write(db_path, 'db.sqlite3')
+            
+            # بک‌آپ فایل‌های مدیا
+            media_root = settings.MEDIA_ROOT
+            if os.path.exists(media_root):
+                for root, dirs, files in os.walk(media_root):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        arcname = os.path.relpath(file_path, settings.BASE_DIR)
+                        zipf.write(file_path, arcname)
+        
+        messages.success(request, 'بک‌آپ با موفقیت ایجاد شد.')
+        return redirect('panel:backup_manager')
+    
+    # لیست بک‌آپ‌های موجود
+    backups = []
+    if os.path.exists(backup_dir):
+        for file in os.listdir(backup_dir):
+            if file.endswith('.zip'):
+                file_path = os.path.join(backup_dir, file)
+                backups.append({
+                    'name': file,
+                    'size': os.path.getsize(file_path),
+                    'created': os.path.getctime(file_path),
+                })
+    
+    backups.sort(key=lambda x: x['created'], reverse=True)
+    
+    return render(request, 'panel/backup_manager.html', {'backups': backups})
+
+@login_required
+def backup_download(request, filename):
+    """دانلود بک‌آپ"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    backup_dir = os.path.join(settings.BASE_DIR, 'backups')
+    file_path = os.path.join(backup_dir, filename)
+    
+    if os.path.exists(file_path):
+        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=filename)
+    
+    messages.error(request, 'فایل یافت نشد.')
+    return redirect('panel:backup_manager')
+
+@login_required
+def backup_delete(request, filename):
+    """حذف بک‌آپ"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    backup_dir = os.path.join(settings.BASE_DIR, 'backups')
+    file_path = os.path.join(backup_dir, filename)
+    
+    if request.method == 'POST' and os.path.exists(file_path):
+        os.remove(file_path)
+        messages.success(request, 'بک‌آپ حذف شد.')
+    
+    return redirect('panel:backup_manager')
+# ═══ مدیریت کش ها ═══
+@login_required
+def cache_manager(request):
+    """مدیریت کش"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'clear_all':
+            cache.clear()
+            messages.success(request, 'تمام کش پاک شد.')
+        elif action == 'clear_templates':
+            # پاک کردن کش تمپلیت‌ها
+            from django.template import engines
+            for engine in engines.all():
+                if hasattr(engine, 'engine'):
+                    engine.engine.template_loaders[0].reset()
+            messages.success(request, 'کش تمپلیت‌ها پاک شد.')
+        
+        return redirect('panel:cache_manager')
+    
+    # آمار کش
+    cache_stats = {
+        'backend': cache.__class__.__name__,
+    }
+    
+    return render(request, 'panel/cache_manager.html', {'cache_stats': cache_stats})
+
+# ═══ مدیریت حالت تعمیر ═══
+@login_required
+def maintenance_mode(request):
+    """مدیریت حالت تعمیر"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    from main.models import SiteSetting
+    setting = SiteSetting.load()
+    
+    if request.method == 'POST':
+        setting.maintenance_mode = request.POST.get('maintenance_mode') == 'on'
+        setting.maintenance_message = request.POST.get('maintenance_message', '')
+        setting.save()
+        
+        # بروزرسانی settings.py
+        settings.MAINTENANCE_MODE = setting.maintenance_mode
+        
+        messages.success(request, 'تنظیمات حالت تعمیر ذخیره شد.')
+        return redirect('panel:maintenance_mode')
+    
+    return render(request, 'panel/maintenance_mode.html', {'setting': setting})
+
+
+

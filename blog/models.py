@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 from main.models import SoftDeleteModel
+from ckeditor.fields import RichTextField
 
 
 class Category(models.Model):
@@ -27,7 +28,7 @@ class Post(SoftDeleteModel):
     title = models.CharField('عنوان مقاله', max_length=200)
     slug = models.SlugField('اسلاگ', max_length=220, unique=True, allow_unicode=True, blank=True)
     excerpt = models.TextField('چکیده', blank=True)
-    content = models.TextField('متن مقاله')
+    content = RichTextField('متن مقاله')
     featured_image = models.ImageField('تصویر شاخص', upload_to='blog/%Y/%m/')
     category = models.ForeignKey(Category, verbose_name='دسته‌بندی', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='posts')

@@ -1,6 +1,4 @@
 {% extends 'layouts/panel_base.html' %}
-{% load static %}
-
 {% block title %}ویرایش تصویر{% endblock %}
 
 {% block content %}
@@ -14,11 +12,11 @@
 
 <form method="POST" class="form-card" style="max-width:800px">
     {% csrf_token %}
-    <div class="form-section" style="display: flex; gap: 30px;">
-        <div style="flex: 1;">
+    <div class="form-section" style="display: flex; gap: 30px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
             <img src="{{ image.image.url }}" style="width: 100%; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
         </div>
-        <div style="flex: 1.5;">
+        <div style="flex: 1.5; min-width: 300px;">
             <div class="field">
                 <label>عنوان تصویر</label>
                 <input type="text" name="title" value="{{ image.title }}" class="form-control">

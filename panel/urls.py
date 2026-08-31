@@ -5,7 +5,6 @@ app_name = 'panel'
 PANEL_PATH = 'zasco-admin-x9k2p'
 
 urlpatterns = [
-    # path('accounts/', include('django.contrib.auth.urls'))
     path('login/', views.panel_login, name='login'),
     path('logout/', views.panel_logout, name='logout'),
     path('', views.dashboard, name='dashboard'),
@@ -35,12 +34,30 @@ urlpatterns = [
     path('portfolio-categories/add/', views.portfolio_category_add, name='portfolio_category_add'),
     path('portfolio-categories/<int:pk>/edit/', views.portfolio_category_edit, name='portfolio_category_edit'),
     path('portfolio-categories/<int:pk>/delete/', views.portfolio_category_delete, name='portfolio_category_delete'),
-        # ═══ gallery Managment ═══
+        # ═══ Gallery Managment ═══
     path('gallery/', views.gallery_album_list, name='gallery_album_list'),
     path('gallery/add/', views.gallery_album_add, name='gallery_album_add'),
     path('gallery/<int:pk>/edit/', views.gallery_album_edit, name='gallery_album_edit'),
     path('gallery/<int:pk>/delete/', views.gallery_album_delete, name='gallery_album_delete'),
     path('gallery/<int:album_id>/images/', views.gallery_album_images, name='gallery_album_images'),
     path('gallery/image/<int:pk>/edit/', views.gallery_image_edit, name='gallery_image_edit'),
-    path('gallery/image/<int:pk>/delete/', views.gallery_image_delete, name='gallery_image_delete'),    
+    path('gallery/image/<int:pk>/delete/', views.gallery_image_delete, name='gallery_image_delete'),
+            # ═══ Media Managment ═══
+    path('media/', views.media_library, name='media_library'),
+    path('media/<int:pk>/delete/', views.media_file_delete, name='media_file_delete'),    
+            # ═══ User Managment ═══
+    path('users/', views.user_list, name='user_list'),
+    path('users/add/', views.user_add, name='user_add'),
+    path('users/<int:pk>/edit/', views.user_edit, name='user_edit'),
+    path('users/<int:pk>/delete/', views.user_delete, name='user_delete'),
+            # ═══ Activity Log System ═══
+    path('audit-log/', views.audit_log, name='audit_log'),
+            # ═══ Backup Managment ═══
+    path('backups/', views.backup_manager, name='backup_manager'),
+    path('backups/download/<str:filename>/', views.backup_download, name='backup_download'),
+    path('backups/delete/<str:filename>/', views.backup_delete, name='backup_delete'),
+            # ═══ Cache Managment ═══
+    path('cache/', views.cache_manager, name='cache_manager'),
+            # ═══ Maintenance Mode Managment ═══
+    path('maintenance/', views.maintenance_mode, name='maintenance_mode'),
 ]

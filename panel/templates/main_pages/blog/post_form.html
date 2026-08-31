@@ -3,749 +3,191 @@
 
 {% block title %}{% if post %}ویرایش مقاله{% else %}مقاله جدید{% endif %}{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/41.4.2/ckeditor5.css">
-<style>
-    /* ═══ Layout ═══ */
-    .post-form-wrap {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 0 10px
-    }
-
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        flex-wrap: wrap;
-        gap: 16px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid var(--line)
-    }
-
-    .page-header h1 {
-        font-size: 1.6rem;
-        font-weight: 800;
-        display: flex;
-        align-items: center;
-        gap: 12px
-    }
-
-    .page-header h1::before {
-        content: '';
-        width: 4px;
-        height: 28px;
-        background: linear-gradient(180deg, var(--primary), var(--primary-light));
-        border-radius: 2px
-    }
-
-    /* ═══ فرم کارت ═══ */
-    .post-form {
-        background: linear-gradient(135deg, rgba(20, 20, 25, .8), rgba(11, 13, 16, .9));
-        border: 1px solid var(--line);
-        border-radius: var(--radius-lg);
-        padding: 32px;
-        backdrop-filter: blur(20px)
-    }
-
-    .section-title {
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: var(--primary-light);
-        margin: 24px 0 18px;
-        padding-right: 14px;
-        border-right: 3px solid var(--primary);
-        display: flex;
-        align-items: center;
-        gap: 10px
-    }
-
-    .section-title:first-child {
-        margin-top: 0
-    }
-
-    /* ═══ فیلدها ═══ */
-    .field {
-        margin-bottom: 20px;
-        position: relative
-    }
-
-    .field label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 700;
-        margin-bottom: 10px;
-        color: #cfd6e0;
-        font-size: .9rem
-    }
-
-    .field label .icon {
-        width: 22px;
-        height: 22px;
-        border-radius: 6px;
-        background: rgba(255, 107, 0, .12);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--primary-light);
-        flex-shrink: 0
-    }
-
-    .field label .icon svg {
-        width: 14px;
-        height: 14px
-    }
-
-    .field .input-wrap {
-        position: relative
-    }
-
-    .field input[type="text"],
-    .field input[type="number"],
-    .field input[type="datetime-local"],
-    .field textarea,
-    .field select {
-        width: 100%;
-        background: rgba(255, 255, 255, .03);
-        border: 1.5px solid var(--line);
-        border-radius: 12px;
-        padding: 14px 16px;
-        color: #fff;
-        font-family: 'Vazirmatn', sans-serif;
-        font-size: .95rem;
-        outline: none;
-        transition: all .3s;
-    }
-
-    .field input:focus,
-    .field textarea:focus,
-    .field select:focus {
-        border-color: var(--primary);
-        background: rgba(255, 107, 0, .04);
-        box-shadow: 0 0 0 4px rgba(255, 107, 0, .1);
-    }
-
-    .field input::placeholder,
-    .field textarea::placeholder {
-        color: var(--text-dim)
-    }
-
-    .field textarea {
-        resize: vertical;
-        min-height: 100px;
-        line-height: 1.9
-    }
-
-    .field .hint {
-        font-size: .78rem;
-        color: var(--text-dim);
-        margin-top: 6px;
-        display: flex;
-        align-items: center;
-        gap: 6px
-    }
-
-    /* ═══ گرید ═══ */
-    .grid-2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px
-    }
-
-    .grid-3 {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 20px
-    }
-
-    @media (max-width:768px) {
-
-        .grid-2,
-        .grid-3 {
-            grid-template-columns: 1fr
-        }
-    }
-
-    /* ═══ آپلود تصویر ═══ */
-    .image-upload {
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-        flex-wrap: wrap
-    }
-
-    .image-preview {
-        width: 220px;
-        aspect-ratio: 16/10;
-        border-radius: 14px;
-        overflow: hidden;
-        border: 1px solid var(--line);
-        background: rgba(255, 255, 255, .02);
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-dim);
-        font-size: .85rem
-    }
-
-    .image-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover
-    }
-
-    .image-upload .upload-area {
-        flex: 1;
-        min-width: 200px
-    }
-
-    .image-upload input[type="file"] {
-        padding: 12px 16px
-    }
-
-    .image-upload input[type="file"]::file-selector-button {
-        padding: 8px 18px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        font-weight: 700;
-        cursor: pointer;
-        margin-left: 12px;
-        font-family: inherit;
-    }
-
-    /* ═══ Checkbox ═══ */
-    .check-field {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 16px 20px;
-        background: rgba(255, 255, 255, .02);
-        border: 1.5px solid var(--line);
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all .3s
-    }
-
-    .check-field:hover {
-        border-color: rgba(255, 107, 0, .3);
-        background: rgba(255, 107, 0, .04)
-    }
-
-    .check-field input[type="checkbox"] {
-        width: 22px;
-        height: 22px;
-        accent-color: var(--primary);
-        cursor: pointer
-    }
-
-    .check-field .check-text {
-        flex: 1
-    }
-
-    .check-field .check-text strong {
-        display: block;
-        font-size: .95rem;
-        margin-bottom: 2px
-    }
-
-    .check-field .check-text small {
-        color: var(--text-muted);
-        font-size: .78rem
-    }
-
-    /* ═══ CKEditor ═══ */
-    .ck-field .ck.ck-editor {
-        width: 100% !important;
-        margin-top: 6px
-    }
-
-    .ck-field .ck.ck-toolbar {
-        background: rgba(255, 255, 255, .04) !important;
-        border: 1.5px solid var(--line) !important;
-        border-radius: 12px 12px 0 0 !important;
-        flex-wrap: wrap;
-        padding: 6px
-    }
-
-    .ck-field .ck.ck-toolbar .ck-button {
-        color: var(--text-muted) !important;
-        border-radius: 8px !important;
-        padding: 6px 10px !important
-    }
-
-    .ck-field .ck.ck-toolbar .ck-button:hover {
-        background: rgba(255, 107, 0, .12) !important;
-        color: #fff !important
-    }
-
-    .ck-field .ck.ck-toolbar .ck-button.ck-on {
-        background: rgba(255, 107, 0, .18) !important;
-        color: var(--primary-light) !important
-    }
-
-    .ck-field .ck.ck-editor__editable.ck-editor__editable_inline {
-        background: rgba(255, 255, 255, .02) !important;
-        color: var(--text-main) !important;
-        border: 1.5px solid var(--line) !important;
-        border-top: none !important;
-        border-radius: 0 0 12px 12px !important;
-        min-height: 380px;
-        max-height: 70vh;
-        overflow-y: auto;
-        padding: 20px 24px;
-        direction: rtl;
-        font-family: 'Vazirmatn', sans-serif !important;
-        font-size: 1rem;
-        line-height: 2.1
-    }
-
-    .ck-field .ck.ck-editor__editable:focus {
-        border-color: var(--primary) !important;
-        box-shadow: 0 0 0 3px rgba(255, 107, 0, .15) !important
-    }
-
-    .ck-content h1,
-    .ck-content h2,
-    .ck-content h3,
-    .ck-content h4 {
-        color: #fff
-    }
-
-    .ck-content a {
-        color: var(--primary-light)
-    }
-
-    .ck-content blockquote {
-        border-right: 3px solid var(--primary);
-        padding: 10px 20px;
-        background: rgba(255, 107, 0, .04);
-        border-radius: 0 10px 10px 0
-    }
-
-    .ck-content pre,
-    .ck-content code {
-        background: rgba(255, 255, 255, .06);
-        color: var(--primary-light);
-        border-radius: 6px;
-        padding: 2px 6px
-    }
-
-    .ck-content pre {
-        padding: 16px;
-        direction: ltr
-    }
-
-    .ck-content table td,
-    .ck-content table th {
-        border: 1px solid var(--line) !important;
-        padding: 10px
-    }
-
-    .ck-content table th {
-        background: rgba(255, 107, 0, .08)
-    }
-
-    .ck-content img {
-        border-radius: 12px;
-        max-width: 100%
-    }
-
-    .ck.ck-dropdown__panel,
-    .ck.ck-list,
-    .ck.ck-balloon-panel {
-        background: var(--bg-card) !important;
-        border: 1px solid var(--line) !important
-    }
-
-    .ck.ck-list__item .ck-button {
-        color: var(--text-muted) !important
-    }
-
-    .ck.ck-list__item .ck-button:hover {
-        background: rgba(255, 255, 255, .08) !important;
-        color: #fff !important
-    }
-
-    .ck.ck-list__item .ck-button.ck-on {
-        color: var(--primary-light) !important;
-        background: rgba(255, 107, 0, .12) !important
-    }
-
-    .ck.ck-input {
-        background: rgba(255, 255, 255, .06) !important;
-        border: 1px solid var(--line) !important;
-        color: #fff !important
-    }
-
-    .ck.ck-placeholder:before {
-        color: var(--text-dim) !important;
-        font-style: italic
-    }
-
-    /* ═══ Action bar ═══ */
-    .action-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        padding-top: 28px;
-        margin-top: 28px;
-        border-top: 1px solid var(--line);
-        flex-wrap: wrap
-    }
-
-    .action-bar-right {
-        display: flex;
-        gap: 10px
-    }
-
-    .btn-ghost {
-        padding: 12px 24px;
-        background: rgba(255, 255, 255, .04);
-        border: 1.5px solid var(--line);
-        color: var(--text-main);
-        border-radius: 10px;
-        font-weight: 700;
-        transition: all .3s;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px
-    }
-
-    .btn-ghost:hover {
-        border-color: rgba(255, 255, 255, .2);
-        background: rgba(255, 255, 255, .08)
-    }
-
-    .btn-primary {
-        padding: 12px 28px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        font-weight: 800;
-        box-shadow: 0 8px 22px var(--primary-glow);
-        cursor: pointer;
-        font-family: inherit;
-        font-size: .95rem;
-        transition: all .3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 30px var(--primary-glow)
-    }
-
-    /* ═══ SVG Icons ═══ */
-    .icon-svg {
-        width: 18px;
-        height: 18px
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="post-form-wrap">
-
-    <div class="page-header">
-        <h1>{% if post %}✏️ ویرایش مقاله{% else %}➕ مقاله جدید{% endif %}</h1>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{% if post %}ویرایش مقاله{% else %}مقاله جدید{% endif %}</h1>
+        <p class="page-subtitle">{% if post %}{{ post.title }}{% else %}افزودن مقاله جدید به وبلاگ{% endif %}</p>
     </div>
+    <a href="{% url 'panel:blog_post_list' %}" class="btn-ghost">← بازگشت به لیست</a>
+</div>
 
-    <form method="POST" enctype="multipart/form-data" class="post-form" id="postForm">
-        {% if form.errors %}
-        <div
-            style="background:rgba(244,67,54,.1);border:1.5px solid rgba(244,67,54,.4);border-radius:12px;padding:16px 20px;margin-bottom:24px;color:#ef9a9a;font-size:.9rem">
-            <strong>⚠️ ذخیره نشد! این خطاها رو برطرف کن:</strong>
-            {% for field, errs in form.errors.items %}
-            <p style="margin-top:8px">• {{ field }}: {{ errs|first }}</p>
+<form method="POST" enctype="multipart/form-data" class="form-card" style="max-width:900px" id="postForm">
+    {% csrf_token %}
+
+    {% if form.errors %}
+    <div class="alert alert-danger" style="background:rgba(244,67,54,0.1); border:1px solid rgba(244,67,54,0.3); border-radius:12px; padding:16px 20px; margin-bottom:24px; color:#ef9a9a;">
+        <strong>⚠️ خطا در فرم:</strong>
+        <ul style="margin:10px 0 0 20px; font-size:0.9rem;">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                <li>{{ field }}: {{ error }}</li>
+                {% endfor %}
             {% endfor %}
-        </div>
-        {% endif %}
-        {% csrf_token %}
+        </ul>
+    </div>
+    {% endif %}
 
-        <!-- ═══ بخش ۱: اطلاعات اصلی ═══ -->
-        <div class="section-title">📝 اطلاعات اصلی</div>
+    <div class="form-section">
+        <h3>📝 اطلاعات اصلی</h3>
 
         <div class="field">
-            <label>
-                <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
-                        <path
-                            d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2M4 7h16M4 7v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7" />
-                    </svg></span>
-                عنوان مقاله
-            </label>
-            <div class="input-wrap">
-                <input type="text" name="title" id="id_title" value="{{ post.title|default:'' }}"
-                    placeholder="یک عنوان جذاب و کامل بنویسید..." required>
-            </div>
-            <div class="hint">💡 عنوان کوتاه و گوگل‌پسند بنویسید</div>
+            <label>عنوان مقاله *</label>
+            <input type="text" name="title" value="{{ post.title|default:'' }}" required class="form-control" placeholder="یک عنوان جذاب و کامل بنویسید...">
         </div>
 
         <div class="field">
-            <label>
-                <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <path d="M14 2v6h6M16 13H8M16 17H8" />
-                    </svg></span>
-                چکیده
-            </label>
-            <textarea name="excerpt" rows="3"
-                placeholder="یک خلاصه ۲-۳ خطی از مقاله...">{{ post.excerpt|default:'' }}</textarea>
+            <label>چکیده</label>
+            <textarea name="excerpt" rows="3" class="form-control" placeholder="یک خلاصه ۲-۳ خطی از مقاله...">{{ post.excerpt|default:'' }}</textarea>
             <div class="hint">📋 در لیست مقالات و نتایج گوگل نمایش داده می‌شود</div>
         </div>
 
-        <!-- ═══ بخش ۲: محتوای اصلی (CKEditor) ═══ -->
-        <div class="section-title">✍️ محتوای مقاله</div>
-
-        <div class="field ck-field">
-            <label>
-                <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg></span>
-                متن کامل
-            </label>
-            <textarea name="content" id="id_content" rows="10">{{ post.content|default:'' }}</textarea>
-            <div class="hint">🎨 از toolbar بالا برای فرمت متن، تصویر، جدول و... استفاده کنید</div>
-        </div>
-
-        <!-- ═══ بخش ۳: دسته‌بندی و جزئیات ═══ -->
-        <div class="section-title">🗂️ دسته‌بندی و جزئیات</div>
-
-        <div class="grid-2">
-            <div class="field">
-                <label>
-                    <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-                        </svg></span>
-                    دسته‌بندی
-                </label>
-
-                {{ categories_data|json_script:"categories-data" }}
-                <input type="hidden" name="category" id="id_category" value="{{ post.category_id|default:'' }}">
-
-                <div class="zpicker" id="catPicker">
-                    <div class="zpicker-btn" id="catBtn" tabindex="0" role="combobox" aria-expanded="false">
-                        <span class="zpicker-value is-placeholder" id="catValue">انتخاب دسته‌بندی...</span>
-                        <button type="button" class="zpicker-clear" id="catClear" title="حذف انتخاب"
-                            style="display:none">×</button>
-                        <svg class="zpicker-caret" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                    </div>
-
-                    <div class="zpicker-panel" id="catPanel">
-                        <div class="zpicker-search">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <circle cx="11" cy="11" r="8" />
-                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                            </svg>
-                            <input type="text" id="catSearch" placeholder="جستجوی دسته‌بندی...">
-                            <kbd>ESC</kbd>
-                        </div>
-                        <div class="zpicker-tree" id="catTree"></div>
-                        <div class="zpicker-footer">
-                            <span id="catPath">هنوز دسته‌ای انتخاب نشده</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="hint">📂 دسته‌های اصلی را باز کنید و دسته فرعی را انتخاب کنید؛ یا مستقیم سرچ کنید</div>
-            </div>
-            <div class="field">
-                <label>
-                    <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg></span>
-                    زمان مطالعه (دقیقه)
-                </label>
-                <input type="number" name="read_time" id="id_read_time" value="{{ post.read_time|default:3 }}" min="1"
-                    max="60">
-                <div class="hint">⏱ تخمین بزن خواندن مقاله چند دقیقه طول می‌کشه</div>
-            </div>
-        </div>
-
-
-        <!-- ═══ بخش ۴: تصویر شاخص ═══ -->
-        <div class="section-title">🖼️ تصویر شاخص</div>
-
+        <!-- ══ انتخاب‌گر پیشرفته دسته‌بندی ══ -->
         <div class="field">
-            <div class="image-upload">
-                <div class="image-preview" id="imgPreview">
-                    {% if post.featured_image %}
-                    <img src="{{ post.featured_image.url }}" alt="">
-                    {% else %}
-                    <span>بدون تصویر</span>
-                    {% endif %}
-                </div>
-                <div class="upload-area">
-                    <input type="file" name="featured_image" id="id_featured_image" accept="image/*">
-                    <div class="hint">📷 بهترین سایز: ۱۲۰۰×۷۰۰ پیکسل (نسبت ۱۶:۱۰)</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══ بخش ۵: تنظیمات انتشار ═══ -->
-        <div class="section-title">🚀 تنظیمات انتشار</div>
-
-        <div class="grid-2">
-            <div class="field">
-                <label>
-                    <span class="icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg></span>
-                    تاریخ انتشار
-                </label>
-                <input type="datetime-local" name="publish_date" id="id_publish_date"
-                    value="{{ post.publish_date|date:'Y-m-d\TH:i' }}" placeholder="اختیاری — خالی = الان">
-                <div class="hint">⏰ اگر خالی بگذارید، لحظه انتشار ثبت می‌شود</div>
-            </div>
-
-            <div class="field">
-                <label class="check-field" for="id_published">
-                    <input type="checkbox" name="published" id="id_published" {% if post.published %}checked{% endif %}>
-                    <div class="check-text">
-                        <strong>منتشر شود</strong>
-                        <small>مقاله فوراً در وبلاگ قابل مشاهده خواهد بود</small>
-                    </div>
-                </label>
-            </div>
-        </div>
-
-        <!-- ═══ دکمه‌ها ═══ -->
-        <div class="action-bar">
-            <a href="{% url 'panel:blog_post_list' %}" class="btn-ghost">
-                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l-6-6 6-6M3 12h18" />
-                </svg>
-                بازگشت
-            </a>
-            <div class="action-bar-right">
-                <button type="reset" class="btn-ghost">🗑 پاک کردن</button>
-                <button type="submit" class="btn-primary">
-                    💾 ذخیره مقاله
-                    <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M5 12l5 5L20 7" />
+            <label>
+                <span class="icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
-                </button>
+                </span>
+                دسته‌بندی
+            </label>
+
+            <input type="hidden" name="category" id="id_category" value="{{ post.category_id|default:'' }}">
+
+            <div class="zpicker" id="catPicker">
+                <div class="zpicker-btn" id="catBtn" tabindex="0" role="combobox" aria-expanded="false">
+                    <span class="zpicker-value is-placeholder" id="catValue">انتخاب دسته‌بندی...</span>
+                    <button type="button" class="zpicker-clear" id="catClear" title="حذف انتخاب" style="display:none">×</button>
+                    <svg class="zpicker-caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </div>
+                <div class="zpicker-panel" id="catPanel">
+                    <div class="zpicker-search">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" id="catSearch" placeholder="جستجوی دسته..." autocomplete="off">
+                        <kbd>ESC</kbd>
+                    </div>
+                    <div class="zpicker-tree" id="catTree"></div>
+                    <div class="zpicker-footer"><span id="catPath">هنوز دسته‌ای انتخاب نشده</span></div>
+                </div>
+            </div>
+            <div class="hint" id="catHint">📂 دسته را انتخاب کنید یا سرچ کنید</div>
+        </div>
+        <!-- ═══ پایان انتخاب‌گر ═══ -->
+
+        <div class="field-grid">
+            <div class="field">
+                <label>زمان مطالعه (دقیقه)</label>
+                <input type="number" name="read_time" value="{{ post.read_time|default:3 }}" min="1" max="60" class="form-control" placeholder="مثلاً: ۵">
+            </div>
+            <div class="field">
+                <label>تاریخ انتشار</label>
+                <input type="datetime-local" name="publish_date" value="{{ post.publish_date|date:'Y-m-d\TH:i' }}" class="form-control">
+                <div class="hint"> اگر خالی بگذارید، لحظه انتشار ثبت می‌شود</div>
             </div>
         </div>
-    </form>
-</div>
-{% endblock %}
 
-{% block extra_js %}
-<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
-<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/translations/fa.js"></script>
+        <!-- ══ فیلد توضیحات کامل (CKEditor) ═══ -->
+        <div class="field">
+            <label>محتوای مقاله</label>
+            {{ form.content }}
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>️ تصویر شاخص</h3>
+        <div class="field">
+            <label>تصویر شاخص</label>
+            <input type="file" name="featured_image" accept="image/*" class="form-control">
+        </div>
+        {% if post.featured_image %}
+        <div class="image-preview">
+            <img src="{{ post.featured_image.url }}" alt="{{ post.title }}">
+        </div>
+        {% endif %}
+
+        <label class="check-field">
+            <input type="checkbox" name="published" {% if post.published %}checked{% endif %} style="width:20px; height:20px; accent-color:#ff6b00;">
+            <span class="check-text">
+                <strong>منتشر شود</strong>
+                <small>مقاله فوراً در وبلاگ قابل مشاهده خواهد بود</small>
+            </span>
+        </label>
+    </div>
+
+    <div class="save-bar">
+        <a href="{% url 'panel:blog_post_list' %}" class="btn-ghost">انصراف</a>
+        <button type="submit" class="btn-primary">💾 ذخیره مقاله</button>
+    </div>
+</form>
+
+<!-- ═══ استایل‌ها ═══ -->
+<style>
+.zpicker { position: relative; width: 100%; }
+.zpicker-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.03); border: 1.5px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: #fff; cursor: pointer; transition: all 0.3s; font-family: inherit; font-size: 0.95rem; box-sizing: border-box; }
+.zpicker-btn:hover, .zpicker-btn.open { border-color: #ff6b00; background: rgba(255, 107, 0, 0.05); }
+.zpicker-value.is-placeholder { color: #888; }
+.zpicker-clear { background: none; border: none; color: #ff6b00; font-size: 1.2rem; cursor: pointer; padding: 0 4px; line-height: 1; }
+.zpicker-caret { transition: transform 0.3s; flex-shrink: 0; }
+.zpicker-btn.open .zpicker-caret { transform: rotate(180deg); }
+.zpicker-panel { position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: #1a1a20; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.zpicker-panel.open { opacity: 1; visibility: visible; transform: translateY(0); }
+.zpicker-search { display: flex; align-items: center; gap: 8px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.zpicker-search input { flex: 1; background: transparent; border: none; color: #fff; font-family: inherit; outline: none; font-size: 0.9rem; }
+.zpicker-search kbd { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; color: #888; }
+.zpicker-tree { max-height: 220px; overflow-y: auto; padding: 8px; }
+.zpicker-tree::-webkit-scrollbar { width: 6px; }
+.zpicker-tree::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+.zpicker-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: background 0.2s; color: #ccc; font-size: 0.9rem; }
+.zpicker-item:hover { background: rgba(255, 107, 0, 0.1); color: #fff; }
+.zpicker-item.selected { background: rgba(255, 107, 0, 0.15); color: #ff9a4d; font-weight: 700; }
+.zpicker-check { margin-right: auto; color: #ff6b00; font-weight: bold; }
+.zpicker-empty { padding: 20px; text-align: center; color: #666; font-size: 0.85rem; }
+.zpicker-footer { padding: 10px 12px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; color: #888; }
+.zpicker-footer strong { color: #ff9a4d; }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.hint { color: #888; font-size: 0.8rem; margin-top: 6px; }
+.image-preview { margin-top: 10px; }
+.image-preview img { max-width: 200px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
+.form-control { width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.03); border: 1.5px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: #fff; font-family: inherit; font-size: 0.95rem; outline: none; transition: all 0.3s; box-sizing: border-box; }
+.form-control:focus { border-color: #ff6b00; background: rgba(255, 107, 0, 0.05); }
+textarea.form-control { resize: vertical; min-height: 80px; line-height: 1.8; }
+input[type="file"].form-control { padding: 10px; border-style: dashed; cursor: pointer; }
+.check-field { display: flex; align-items: center; gap: 10px; margin-top: 20px; cursor: pointer; }
+.check-text strong { display: block; color: #fff; font-weight: 700; }
+.check-text small { display: block; color: #888; font-size: 0.8rem; margin-top: 2px; }
+</style>
+
+<!-- ═══ مدیا فرم (CKEditor) ══ -->
+{{ form.media }}
+
+<!-- ═══ داده‌های دسته‌بندی (مستقیم در JavaScript) ═══ -->
 <script>
-    (function () {
-        /* ═══ CKEditor ═══ */
-        var contentEl = document.getElementById('id_content');
-        var editorInstance = null;
+var CATEGORIES_DATA = [
+{% for cat in categories %}
+    {id: {{ cat.id }}, title: "{{ cat.title }}"},
+{% endfor %}
+];
+</script>
 
-        if (contentEl && typeof ClassicEditor !== 'undefined') {
-            ClassicEditor.create(contentEl, {
-                language: 'fa',
-                toolbar: [
-                    'heading', '|',
-                    'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', '|',
-                    'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'code', '|',
-                    'bulletedList', 'numberedList', 'todoList', '|',
-                    'outdent', 'indent', 'alignment', '|',
-                    'link', 'blockQuote', 'insertTable', 'mediaEmbed', 'codeBlock', '|',
-                    'undo', 'redo', '|',
-                    'sourceEditing'
-                ],
-                heading: {
-                    options: [
-                        { model: 'paragraph', title: 'پاراگراف' },
-                        { model: 'heading1', view: 'h1', title: 'عنوان ۱' },
-                        { model: 'heading2', view: 'h2', title: 'عنوان ۲' },
-                        { model: 'heading3', view: 'h3', title: 'عنوان ۳' }
-                    ]
-                },
-                fontFamily: { options: ['default', 'Vazirmatn, sans-serif', 'Tahoma', 'Arial', 'Georgia', 'Courier New'] },
-                fontSize: { options: ['tiny', 'small', 'default', 'big', 'huge'] },
-                fontColor: {
-                    columns: 5, colors: [
-                        { color: '#eef1f6', label: 'سفید' }, { color: '#ff6b00', label: 'نارنجی' }, { color: '#f44336', label: 'قرمز' },
-                        { color: '#4caf50', label: 'سبز' }, { color: '#2196f3', label: 'آبی' }, { color: '#ffc107', label: 'زرد' },
-                        { color: '#9c27b0', label: 'بنفش' }, { color: '#000000', label: 'مشکی' }
-                    ]
-                },
-                fontBackgroundColor: {
-                    columns: 4, colors: [
-                        { color: 'transparent', label: 'بدون رنگ' }, { color: '#ff6b00', label: 'نارنجی' },
-                        { color: '#f44336', label: 'قرمز' }, { color: '#4caf50', label: 'سبز' }, { color: '#000000', label: 'مشکی' }
-                    ]
-                },
-                list: { properties: { styles: true, startIndex: true, reversed: true } },
-                link: { addTargetToExternalLinks: true, defaultProtocol: 'https://' },
-                table: { contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells'] },
-                codeBlock: {
-                    languages: [
-                        { language: 'plaintext', label: 'متن ساده' }, { language: 'python', label: 'Python' },
-                        { language: 'javascript', label: 'JavaScript' }, { language: 'html', label: 'HTML' }, { language: 'css', label: 'CSS' }
-                    ]
-                },
-                mediaEmbed: { previewsInData: true },
-                placeholder: 'محتوای مقاله خود را اینجا بنویسید...'
-            }).then(function (ed) {
-                editorInstance = ed;
-            }).catch(function (err) { console.error('CKEditor:', err); });
-        }
-
-        /* ═══ آپلود تصویر — Preview ═══ */
-        var fileInput = document.getElementById('id_featured_image');
-        var preview = document.getElementById('imgPreview');
-        if (fileInput) {
-            fileInput.addEventListener('change', function (e) {
-                var file = e.target.files[0];
-                if (!file) return;
-                var reader = new FileReader();
-                reader.onload = function (ev) {
-                    preview.innerHTML = '<img src="' + ev.target.result + '" alt="">';
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        /* ═══ Submit — اطمینان از انتقال محتوا ═══ */
-        var form = document.getElementById('postForm');
-        if (form) {
-            form.addEventListener('submit', function () {
-                if (editorInstance) {
-                    contentEl.value = editorInstance.getData();
-                }
-            });
-        }
-    })();
-    (function () {
-        var dataEl = document.getElementById('categories-data');
+<!-- ═══ جاوااسکریپت انتخاب‌گر دسته‌بندی ══ -->
+<script>
+(function() {
+    'use strict';
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initZPicker);
+    } else {
+        initZPicker();
+    }
+    
+    function initZPicker() {
         var hidden = document.getElementById('id_category');
-        if (!dataEl || !hidden) return;
-
-        var cats = JSON.parse(dataEl.textContent);
         var btn = document.getElementById('catBtn');
         var valueEl = document.getElementById('catValue');
         var clearBtn = document.getElementById('catClear');
@@ -753,149 +195,151 @@
         var search = document.getElementById('catSearch');
         var tree = document.getElementById('catTree');
         var pathEl = document.getElementById('catPath');
+        var hint = document.getElementById('catHint');
+        
+        if (!btn || !panel || !tree) {
+            console.error('ZPicker: المان‌ها پیدا نشدن');
+            return;
+        }
+        
+        var cats = CATEGORIES_DATA || [];
+        console.log('ZPicker: دسته‌بندی‌ها:', cats);
+        
+        if (cats.length === 0) {
+            tree.innerHTML = '<div class="zpicker-empty">⚠️ هیچ دسته‌بندی‌ای وجود ندارد<br><small>ابتدا از منوی "دسته‌بندی مقاله‌ها" دسته بسازید</small></div>';
+            if (hint) hint.innerHTML = '<span style="color:#ff6b00;">⚠️ هیچ دسته‌بندی‌ای ساخته نشده!</span>';
+        }
+        
+        var selectedId = hidden && hidden.value ? parseInt(hidden.value, 10) : null;
 
-        var selectedId = hidden.value ? parseInt(hidden.value, 10) : null;
-        var expanded = {};
-
-        var SVG_FOLDER = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
-        var SVG_CHECK = '<span class="zpicker-check">✓</span>';
-
-        function byId(id) { for (var i = 0; i < cats.length; i++) { if (cats[i].id === id) return cats[i]; } return null; }
-        function childrenOf(id) { return cats.filter(function (c) { return c.parent === id; }); }
-        function parents() { return cats.filter(function (c) { return !c.parent; }); }
-        function pathOf(c) { return c.parent ? byId(c.parent).title + ' › ' + c.title : c.title; }
-
-        /* ── رندر درخت ── */
-        function renderTree() {
-            tree.innerHTML = '';
-            var ps = parents();
-            if (!ps.length) { tree.innerHTML = '<div class="zpicker-empty">هنوز دسته‌بندی تعریف نشده</div>'; return; }
-            ps.forEach(function (p) {
-                var kids = childrenOf(p.id);
-                var wrap = document.createElement('div');
-
-                var row = document.createElement('div');
-                row.className = 'zpicker-item parent' + (selectedId === p.id ? ' selected' : '');
-                row.tabIndex = 0;
-                row.innerHTML = '<span class="zpicker-item-icon">' + SVG_FOLDER + '</span>'
-                    + '<span class="zpicker-item-title">' + p.title + '</span>'
-                    + (kids.length ? '<span class="zpicker-badge">' + kids.length + ' زیردسته</span>' : '')
-                    + (selectedId === p.id ? SVG_CHECK : '');
-                row.addEventListener('click', function () { select(p.id); });
-                row.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); select(p.id); } });
-
-                if (kids.length) {
-                    var tog = document.createElement('button');
-                    tog.type = 'button';
-                    tog.className = 'zpicker-toggle' + (expanded[p.id] ? ' open' : '');
-                    tog.title = expanded[p.id] ? 'بستن' : 'نمایش زیردسته‌ها';
-                    tog.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
-                    tog.addEventListener('click', function (e) {
-                        e.stopPropagation();
-                        expanded[p.id] = !expanded[p.id];
-                        renderTree();
-                    });
-                    row.appendChild(tog);
-                }
-                wrap.appendChild(row);
-
-                if (kids.length && expanded[p.id]) {
-                    var kidWrap = document.createElement('div');
-                    kidWrap.className = 'zpicker-kids';
-                    kids.forEach(function (k) {
-                        var krow = document.createElement('div');
-                        krow.className = 'zpicker-item child' + (selectedId === k.id ? ' selected' : '');
-                        krow.tabIndex = 0;
-                        krow.innerHTML = '<span class="zpicker-item-title">' + k.title + '</span>' + (selectedId === k.id ? SVG_CHECK : '');
-                        krow.addEventListener('click', function () { select(k.id); });
-                        krow.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); select(k.id); } });
-                        kidWrap.appendChild(krow);
-                    });
-                    wrap.appendChild(kidWrap);
-                }
-                tree.appendChild(wrap);
-            });
+        function byId(id) {
+            for (var i = 0; i < cats.length; i++) {
+                if (cats[i].id === id) return cats[i];
+            }
+            return null;
         }
 
-        /* ── حالت جستجو ── */
-        function renderSearch(q) {
+        function renderTree(filterText) {
+            filterText = (filterText || '').toLowerCase();
             tree.innerHTML = '';
-            var matches = cats.filter(function (c) { return c.title.indexOf(q) > -1; });
-            if (!matches.length) { tree.innerHTML = '<div class="zpicker-empty">موردی برای «' + q + '» یافت نشد</div>'; return; }
-            matches.forEach(function (c) {
-                var row = document.createElement('div');
-                row.className = 'zpicker-item search' + (selectedId === c.id ? ' selected' : '');
-                row.tabIndex = 0;
-                row.innerHTML = '<span class="zpicker-item-title">' + c.title + '</span>'
-                    + '<span class="zpicker-path">' + (c.parent ? byId(c.parent).title : 'دسته اصلی') + '</span>'
-                    + (selectedId === c.id ? SVG_CHECK : '');
-                row.addEventListener('click', function () { select(c.id); });
-                row.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); select(c.id); } });
-                tree.appendChild(row);
-            });
+            
+            if (cats.length === 0) {
+                tree.innerHTML = '<div class="zpicker-empty">️ هیچ دسته‌بندی‌ای وجود ندارد</div>';
+                return;
+            }
+            
+            var filtered = [];
+            for (var i = 0; i < cats.length; i++) {
+                if (cats[i].title.toLowerCase().indexOf(filterText) !== -1) {
+                    filtered.push(cats[i]);
+                }
+            }
+            
+            if (filtered.length === 0) {
+                tree.innerHTML = '<div class="zpicker-empty">موردی یافت نشد</div>';
+                return;
+            }
+
+            for (var j = 0; j < filtered.length; j++) {
+                (function(c) {
+                    var row = document.createElement('div');
+                    row.className = 'zpicker-item' + (selectedId === c.id ? ' selected' : '');
+                    row.innerHTML = '<span>' + c.title + '</span>' + (selectedId === c.id ? '<span class="zpicker-check">✓</span>' : '');
+                    row.addEventListener('click', function() { select(c.id); });
+                    tree.appendChild(row);
+                })(filtered[j]);
+            }
         }
 
-        /* ── انتخاب ── */
         function select(id) {
             selectedId = id;
-            hidden.value = id;
+            if (hidden) hidden.value = id;
             var c = byId(id);
-            if (c.parent) {
-                valueEl.innerHTML = '<span class="crumb">' + byId(c.parent).title + '</span><span class="crumb-sep">›</span>' + c.title;
-            } else {
+            if (c) {
                 valueEl.textContent = c.title;
+                valueEl.classList.remove('is-placeholder');
+                if (clearBtn) clearBtn.style.display = 'block';
+                if (pathEl) pathEl.innerHTML = 'انتخاب شده: <strong>' + c.title + '</strong>';
             }
-            valueEl.classList.remove('is-placeholder');
-            clearBtn.style.display = '';
-            pathEl.innerHTML = 'انتخاب شده: <strong>' + pathOf(c) + '</strong>';
             close();
             renderTree();
         }
 
-        /* ── باز/بسته ── */
         function open() {
-            panel.classList.add('open'); btn.classList.add('open');
-            btn.setAttribute('aria-expanded', 'true');
-            search.value = ''; renderTree();
-            setTimeout(function () { search.focus(); }, 80);
-        }
-        function close() {
-            panel.classList.remove('open'); btn.classList.remove('open');
-            btn.setAttribute('aria-expanded', 'false');
-        }
-
-        btn.addEventListener('click', function (e) { e.stopPropagation(); panel.classList.contains('open') ? close() : open(); });
-        btn.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); panel.classList.contains('open') ? close() : open(); } });
-        panel.addEventListener('click', function (e) { e.stopPropagation(); });
-        document.addEventListener('click', close);
-        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
-        search.addEventListener('input', function () { var q = search.value.trim(); q ? renderSearch(q) : renderTree(); });
-
-        /* ── ناوبری کیبورد ── */
-        panel.addEventListener('keydown', function (e) {
-            var items = Array.prototype.slice.call(tree.querySelectorAll('.zpicker-item'));
-            if (!items.length) return;
-            var idx = items.indexOf(document.activeElement);
-            if (e.key === 'ArrowDown') { e.preventDefault(); (items[idx + 1] || items[0]).focus(); }
-            else if (e.key === 'ArrowUp') { e.preventDefault(); (items[idx - 1] || items[items.length - 1]).focus(); }
-        });
-
-        /* ── حذف انتخاب ── */
-        clearBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            selectedId = null; hidden.value = '';
-            valueEl.textContent = 'انتخاب دسته‌بندی...';
-            valueEl.classList.add('is-placeholder');
-            clearBtn.style.display = 'none';
-            pathEl.textContent = 'هنوز دسته‌ای انتخاب نشده';
+            panel.classList.add('open');
+            btn.classList.add('open');
+            if (search) {
+                search.value = '';
+                setTimeout(function() { search.focus(); }, 100);
+            }
             renderTree();
-        });
+        }
+        
+        function close() {
+            panel.classList.remove('open');
+            btn.classList.remove('open');
+        }
 
-        /* ── پیش‌پر کردن در ویرایش ── */
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            if (panel.classList.contains('open')) {
+                close();
+            } else {
+                open();
+            }
+        });
+        
+        panel.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (!btn.contains(e.target) && !panel.contains(e.target)) {
+                close();
+            }
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') close();
+        });
+        
+        if (search) {
+            search.addEventListener('input', function() {
+                renderTree(search.value.trim());
+            });
+            search.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+        
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                selectedId = null;
+                if (hidden) hidden.value = '';
+                valueEl.textContent = 'انتخاب دسته‌بندی...';
+                valueEl.classList.add('is-placeholder');
+                clearBtn.style.display = 'none';
+                if (pathEl) pathEl.textContent = 'هنوز دسته‌ای انتخاب نشده';
+                renderTree();
+            });
+        }
+
         if (selectedId) {
             var cur = byId(selectedId);
-            if (cur) { if (cur.parent) expanded[cur.parent] = true; select(selectedId); }
+            if (cur) {
+                valueEl.textContent = cur.title;
+                valueEl.classList.remove('is-placeholder');
+                if (clearBtn) clearBtn.style.display = 'block';
+                if (pathEl) pathEl.innerHTML = 'انتخاب شده: <strong>' + cur.title + '</strong>';
+            }
         }
-    })();
+        
+        renderTree();
+    }
+})();
 </script>
+
 {% endblock %}
