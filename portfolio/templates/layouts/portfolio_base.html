@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}وبلاگ{% endblock %} | زاسکو ذوب</title>
+    <title>{% block title %}نمونه‌کارها{% endblock %} | زاسکو ذوب</title>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
@@ -15,12 +15,17 @@
 <body>
     {% include 'partials/navbar.html' %}
 
-    <main class="blog-main">{% block content %}{% endblock %}</main>
+    <main class="portfolio-main"> {# ← اینجا اصلاح شد #}
+        {% block content %}{% endblock %}
+    </main>
 
     {% include 'partials/footer.html' %}
-    {% include 'partials/portfolio_admin_fab.html' with fab_type='blog' %}
+    
     <script src="{% static 'js/portfolio.js' %}"></script>
+    
+    {# فراخوانی فایل FAB نمونه‌کارها (بدون نیاز به fab_type) #}
+    {% include 'partials/portfolio_admin_fab.html' %}
+    
     {% block extra_js %}{% endblock %}
 </body>
-
 </html>

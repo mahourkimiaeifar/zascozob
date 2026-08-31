@@ -1,6 +1,7 @@
 {% load static %}
 <!doctype html>
 <html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,15 +11,21 @@
     <link rel="stylesheet" href="{% static 'css/blog.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
     {% include 'partials/navbar.html' %}
 
-    <main class="blog-main">{% block content %}{% endblock %}</main>
+    <main class="blog-main">
+        {% block content %}{% endblock %}
+    </main>
 
     {% include 'partials/footer.html' %}
 
     <script src="{% static 'js/blog.js' %}"></script>
-    {% include 'partials/blog_admin_fab.html' with fab_type='blog' %}
+    
+    {# فراخوانی فایل FAB وبلاگ (بدون نیاز به fab_type) #}
+    {% include 'partials/blog_admin_fab.html' %}
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>
