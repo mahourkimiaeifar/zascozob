@@ -1,0 +1,41 @@
+{% extends 'layouts/panel_base.html' %}
+{% load static %}
+
+{% block title %}ویرایش تصویر{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">ویرایش تصویر</h1>
+        <p class="page-subtitle">آلبوم: {{ image.album.title }}</p>
+    </div>
+    <a href="{% url 'panel:gallery_album_images' image.album.id %}" class="btn-ghost">← بازگشت</a>
+</div>
+
+<form method="POST" class="form-card" style="max-width:800px">
+    {% csrf_token %}
+    <div class="form-section" style="display: flex; gap: 30px;">
+        <div style="flex: 1;">
+            <img src="{{ image.image.url }}" style="width: 100%; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        </div>
+        <div style="flex: 1.5;">
+            <div class="field">
+                <label>عنوان تصویر</label>
+                <input type="text" name="title" value="{{ image.title }}" class="form-control">
+            </div>
+            <div class="field">
+                <label>توضیحات (ALT سئو)</label>
+                <textarea name="description" rows="3" class="form-control">{{ image.description }}</textarea>
+            </div>
+            <div class="field">
+                <label>ترتیب نمایش (عدد)</label>
+                <input type="number" name="order" value="{{ image.order }}" class="form-control">
+            </div>
+            <div class="save-bar" style="margin-top: 20px;">
+                <a href="{% url 'panel:gallery_album_images' image.album.id %}" class="btn-ghost">انصراف</a>
+                <button type="submit" class="btn-primary">💾 ذخیره تغییرات</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

@@ -32,7 +32,15 @@ urlpatterns = [
     path('portfolio/<int:pk>/edit/', views.portfolio_edit, name='portfolio_edit'),
     path('portfolio/<int:pk>/delete/', views.portfolio_delete, name='portfolio_delete'),
     path('portfolio-categories/', views.portfolio_category_list, name='portfolio_category_list'),
-path('portfolio-categories/add/', views.portfolio_category_add, name='portfolio_category_add'),
-path('portfolio-categories/<int:pk>/edit/', views.portfolio_category_edit, name='portfolio_category_edit'),
-path('portfolio-categories/<int:pk>/delete/', views.portfolio_category_delete, name='portfolio_category_delete'),
+    path('portfolio-categories/add/', views.portfolio_category_add, name='portfolio_category_add'),
+    path('portfolio-categories/<int:pk>/edit/', views.portfolio_category_edit, name='portfolio_category_edit'),
+    path('portfolio-categories/<int:pk>/delete/', views.portfolio_category_delete, name='portfolio_category_delete'),
+        # ═══ gallery Managment ═══
+    path('gallery/', views.gallery_album_list, name='gallery_album_list'),
+    path('gallery/add/', views.gallery_album_add, name='gallery_album_add'),
+    path('gallery/<int:pk>/edit/', views.gallery_album_edit, name='gallery_album_edit'),
+    path('gallery/<int:pk>/delete/', views.gallery_album_delete, name='gallery_album_delete'),
+    path('gallery/<int:album_id>/images/', views.gallery_album_images, name='gallery_album_images'),
+    path('gallery/image/<int:pk>/edit/', views.gallery_image_edit, name='gallery_image_edit'),
+    path('gallery/image/<int:pk>/delete/', views.gallery_image_delete, name='gallery_image_delete'),    
 ]

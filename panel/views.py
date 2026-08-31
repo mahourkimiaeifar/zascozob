@@ -22,6 +22,10 @@ from django.db.models import Q,Count
 from portfolio.models import PortfolioItem, PortfolioCategory
 from portfolio.forms import PortfolioItemForm
 
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from gallery.models import GalleryAlbum, GalleryImage
+from gallery.utils import add_watermark_and_compress
+from gallery.forms import GalleryAlbumForm, MultipleImageUploadForm
 
 
 
@@ -555,3 +559,189 @@ def portfolio_category_delete(request, pk):
     cat.save()
     messages.success(request, 'دسته‌بندی حذف شد.')
     return redirect('panel:portfolio_category_list')
+
+# ═══ مدیریت گالری تصاویر ═══
+@login_required
+def gallery_album_list(request):
+    """لیست آلبوم‌های گالری"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    albums = GalleryAlbum.objects.filter(is_deleted=False).order_by('-created')
+    
+    return render(request, '/gallery/album_list.html', {
+        'albums': albums,
+    })
+
+@login_required
+def gallery_album_add(request):
+    """ایجاد آلبوم جدید"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    if request.method == 'POST':
+        form = GalleryAlbumForm(request.POST)
+        if form.is_valid():
+            album = form.save()
+            messages.success(request, f'آلبوم "{album.title}" با موفقیت ایجاد شد.')
+            return redirect('panel:gallery_album_images', album_id=album.id)
+        else:
+            messages.error(request, 'لطفاً خطاهای فرم را بررسی کنید.')
+    else:
+        form = GalleryAlbumForm()
+    
+    return render(request, 'panel/gallery/album_form.html', {
+        'form': form,
+    })
+
+@login_required
+def gallery_album_edit(request, pk):
+    """ویرایش آلبوم"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    album = get_object_or_404(GalleryAlbum, id=pk, is_deleted=False)
+    
+    if request.method == 'POST':
+        form = GalleryAlbumForm(request.POST, instance=album)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'آلبوم با موفقیت ویرایش شد.')
+            return redirect('panel:gallery_album_list')
+        else:
+            messages.error(request, 'لطفاً خطاهای فرم را بررسی کنید.')
+    else:
+        form = GalleryAlbumForm(instance=album)
+    
+    return render(request, 'panel/gallery/album_form.html', {
+        'form': form,
+        'album': album,
+    })
+
+@login_required
+def gallery_album_images(request, album_id):
+    """مدیریت تصاویر یک آلبوم"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    album = get_object_or_404(GalleryAlbum, id=album_id, is_deleted=False)
+    images = album.images.filter(is_deleted=False).order_by('order', 'uploaded_at')
+    
+    if request.method == 'POST':
+        upload_form = MultipleImageUploadForm(request.POST, request.FILES)
+        if upload_form.is_valid():
+            files = request.FILES.getlist('images')
+            count = 0
+            
+            for f in files:
+                try:
+                    # اعمال واترمارک و فشرده‌سازی
+                    processed_image = add_watermark_and_compress(f, watermark_text="ZASCO")
+                    
+                    # محاسبه ترتیب
+                    max_order = album.images.filter(is_deleted=False).count()
+                    
+                    # ایجاد تصویر جدید
+                    img = GalleryImage(
+                        album=album,
+                        order=max_order + 1,
+                    )
+                    
+                    # ذخیره تصویر پردازش شده
+                    img.image.save(
+                        f.name,
+                        InMemoryUploadedFile(
+                            processed_image,
+                            None,
+                            f.name,
+                            'image/jpeg',
+                            processed_image.getbuffer().nbytes,
+                            None
+                        ),
+                        save=False
+                    )
+                    img.save()
+                    count += 1
+                    
+                except Exception as e:
+                    print(f"Error processing {f.name}: {e}")
+                    continue
+            
+            messages.success(request, f'{count} تصویر با موفقیت آپلود شد.')
+            return redirect('panel:gallery_album_images', album_id=album.id)
+        else:
+            messages.error(request, 'لطفاً خطاهای فرم را بررسی کنید.')
+    else:
+        upload_form = MultipleImageUploadForm()
+    
+    return render(request, 'panel/gallery/album_images.html', {
+        'album': album,
+        'images': images,
+        'upload_form': upload_form,
+    })
+
+@login_required
+def gallery_image_edit(request, pk):
+    """ویرایش تصویر"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    image = get_object_or_404(GalleryImage, id=pk, is_deleted=False)
+    
+    if request.method == 'POST':
+        image.title = request.POST.get('title', '')
+        image.description = request.POST.get('description', '')
+        image.order = int(request.POST.get('order', 0))
+        image.save()
+        messages.success(request, 'تصویر با موفقیت ویرایش شد.')
+        return redirect('panel:gallery_album_images', album_id=image.album.id)
+    
+    return render(request, 'panel/gallery/image_edit.html', {
+        'image': image,
+    })
+
+@login_required
+def gallery_image_delete(request, pk):
+    """حذف تصویر"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    image = get_object_or_404(GalleryImage, id=pk, is_deleted=False)
+    album_id = image.album.id
+    
+    if request.method == 'POST':
+        image.is_deleted = True
+        image.save()
+        messages.success(request, 'تصویر حذف شد.')
+        return redirect('panel:gallery_album_images', album_id=album_id)
+    
+    return render(request, 'panel/gallery/image_delete.html', {
+        'image': image,
+    })
+
+@login_required
+def gallery_album_delete(request, pk):
+    """حذف آلبوم"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    album = get_object_or_404(GalleryAlbum, id=pk, is_deleted=False)
+    
+    if request.method == 'POST':
+        album.is_deleted = True
+        album.save()
+        messages.success(request, 'آلبوم حذف شد.')
+        return redirect('panel:gallery_album_list')
+    
+    return render(request, 'panel/gallery/album_delete.html', {
+        'album': album,
+    })
+    """لیست آلبوم‌های گالری"""
+    if not request.user.is_staff:
+        return redirect('panel:login')
+    
+    albums = GalleryAlbum.objects.filter(is_deleted=False).order_by('-created')
+    
+    return render(request, 'panel/gallery/album_list.html', {
+        'albums': albums,
+    })

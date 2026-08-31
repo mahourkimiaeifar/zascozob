@@ -1,0 +1,53 @@
+{% extends 'layouts/panel_base.html' %}
+{% load static %}
+
+{% block title %}مدیریت گالری تصاویر{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">مدیریت آلبوم‌های گالری</h1>
+        <p class="page-subtitle">لیست آلبوم‌ها و مدیریت تصاویر هر رویداد یا مجموعه</p>
+    </div>
+    <a href="{% url 'panel:gallery_album_add' %}" class="btn-primary">+ آلبوم جدید</a>
+</div>
+
+<div class="table-card">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>عنوان آلبوم</th>
+                <th>تعداد تصاویر</th>
+                <th>وضعیت</th>
+                <th>تاریخ ایجاد</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for album in albums %}
+            <tr>
+                <td><strong>{{ album.title }}</strong></td>
+                <td><span class="badge">{{ album.images_count }} تصویر</span></td>
+                <td>
+                    {% if album.published %}
+                        <span class="status-badge success">منتشر شده</span>
+                    {% else %}
+                        <span class="status-badge warning">پیش‌نویس</span>
+                    {% endif %}
+                </td>
+                <td>{{ album.created|date:"Y/m/d" }}</td>
+                <td class="actions">
+                    <a href="{% url 'panel:gallery_album_images' album.id %}" class="btn-sm btn-info" title="مدیریت تصاویر">📷 تصاویر</a>
+                    <a href="{% url 'panel:gallery_album_edit' album.id %}" class="btn-sm btn-warning" title="ویرایش">✏️</a>
+                    <a href="{% url 'panel:gallery_album_delete' album.id %}" class="btn-sm btn-danger" title="حذف">🗑️</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="empty-state">هنوز هیچ آلبومی ساخته نشده است.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
