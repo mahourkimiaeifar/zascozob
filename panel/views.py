@@ -13,7 +13,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.views.decorators.http import require_POST
 from django.core.mail.backends.smtp import EmailBackend
-from main.models import ContactMessage, ReplyAttachment, SiteSetting
+from main.models import ContactMessage, ReplyAttachment, SiteSetting, MediaFile
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from blog.models import Post, Category, Comment
 from django.utils.text import slugify
@@ -30,6 +30,7 @@ from gallery.utils import add_watermark_and_compress
 from gallery.forms import GalleryAlbumForm, MultipleImageUploadForm
 from main.models import AuditLog
 from django.core.cache import cache
+from main.utils import register_file_in_library
 
 
 def panel_login(request):
@@ -272,13 +273,24 @@ def blog_post_add(request):
             if not post.publish_date and post.published:
                 post.publish_date = timezone.now()
             post.save()
+            
+            # ثبت تصویر در Media Library
+            if post.featured_image:
+                register_file_in_library(
+                    post.featured_image.name,
+                    title=post.title,
+                    uploaded_by=request.user,
+                    used_in='blog',
+                    auto_create=True
+                )
+            
+            messages.success(request, 'مقاله با موفقیت اضافه شد.')
             return redirect('panel:blog_post_list')
         else:
             messages.error(request, 'لطفاً خطاهای فرم را بررسی کنید.')
     else:
         form = PostForm()
     
-    # ✅ اصلاح شده: حذف is_deleted
     categories = Category.objects.all()
     categories_data = [{'id': c.id, 'title': c.title, 'parent': c.parent_id} for c in categories]
     
@@ -422,7 +434,6 @@ def portfolio_list(request):
     items = paginator.get_page(request.GET.get('page'))
     return render(request, 'main_pages/portfolio/portfolio_list.html', {'items': items})
 
-
 @login_required
 def portfolio_add(request):
     if not request.user.is_staff:
@@ -430,11 +441,6 @@ def portfolio_add(request):
 
     categories_qs = PortfolioCategory.objects.filter(is_deleted=False).order_by('order', 'title')
     categories_data = [{'id': c.id, 'title': c.title, 'parent': None} for c in categories_qs]
-    
-    # دیباگ: چاپ در کنسول
-    print(f"DEBUG: {len(categories_data)} دسته‌بندی پیدا شد")
-    for c in categories_data:
-        print(f"  - {c}")
 
     if request.method == 'POST':
         form = PortfolioItemForm(request.POST, request.FILES)
@@ -444,6 +450,17 @@ def portfolio_add(request):
             if cat_id:
                 item.category = PortfolioCategory.objects.filter(id=cat_id, is_deleted=False).first()
             item.save()
+            
+            # ثبت تصویر در Media Library
+            if item.featured_image:
+                register_file_in_library(
+                    item.featured_image.name,
+                    title=item.title,
+                    uploaded_by=request.user,
+                    used_in='portfolio',
+                    auto_create=True
+                )
+            
             messages.success(request, 'نمونه‌کار با موفقیت اضافه شد.')
             return redirect('panel:portfolio_list')
         else:
@@ -454,9 +471,8 @@ def portfolio_add(request):
     return render(request, 'main_pages/portfolio/portfolio_form.html', {
         'form': form,
         'categories': categories_qs,
-        'categories_data': categories_data,  # ← این خط مهمه
+        'categories_data': categories_data,
     })
-
 
 @login_required
 def portfolio_edit(request, pk):
@@ -798,7 +814,7 @@ def media_library(request):
     page = request.GET.get('page')
     files_page = paginator.get_page(page)
     
-    return render(request, 'panel/media_library.html', {
+    return render(request, 'main_pages/panel/media/media_library.html', {
         'files': files_page,
         'file_type': file_type,
         'search': search,
@@ -818,7 +834,7 @@ def media_file_delete(request, pk):
         messages.success(request, 'فایل حذف شد.')
         return redirect('panel:media_library')
     
-    return render(request, 'panel/media_file_delete.html', {'file': file})
+    return render(request, 'main_pages/panel/media/media_file_delete.html', {'file': file})
 
 # ═══ مدیریت کاربر ═══
 @login_required
@@ -829,7 +845,7 @@ def user_list(request):
     
     users = User.objects.all().order_by('-date_joined')
     
-    return render(request, 'panel/user_list.html', {'users': users})
+    return render(request, 'main_pages/panel/user/user_list.html', {'users': users})
 
 @login_required
 def user_add(request):
@@ -859,7 +875,7 @@ def user_add(request):
             messages.success(request, f'کاربر "{username}" با موفقیت ایجاد شد.')
             return redirect('panel:user_list')
     
-    return render(request, 'panel/user_form.html')
+    return render(request, 'main_pages/panel/user/user_form.html')
 
 @login_required
 def user_edit(request, pk):
@@ -882,7 +898,7 @@ def user_edit(request, pk):
         messages.success(request, 'کاربر با موفقیت ویرایش شد.')
         return redirect('panel:user_list')
     
-    return render(request, 'panel/user_form.html', {'user_obj': user})
+    return render(request, 'main_pages/panel/user/user_form.html', {'user_obj': user})
 
 @login_required
 def user_delete(request, pk):
@@ -900,7 +916,7 @@ def user_delete(request, pk):
             messages.success(request, 'کاربر حذف شد.')
         return redirect('panel:user_list')
     
-    return render(request, 'panel/user_delete.html', {'user_obj': user})
+    return render(request, 'main_pages/panel/user/user_delete.html', {'user_obj': user})
 
 # ═══ فعالیت لاگ ها ═══
 @login_required
@@ -925,7 +941,7 @@ def audit_log(request):
     page = request.GET.get('page')
     logs_page = paginator.get_page(page)
     
-    return render(request, 'panel/audit_log.html', {
+    return render(request, 'main_pages/panel/audit_log/audit_log.html', {
         'logs': logs_page,
         'user_id': user_id,
         'action': action,
@@ -981,7 +997,7 @@ def backup_manager(request):
     
     backups.sort(key=lambda x: x['created'], reverse=True)
     
-    return render(request, 'panel/backup_manager.html', {'backups': backups})
+    return render(request, 'main_pages/panel/backup/backup_manager.html', {'backups': backups})
 
 @login_required
 def backup_download(request, filename):
@@ -1040,7 +1056,7 @@ def cache_manager(request):
         'backend': cache.__class__.__name__,
     }
     
-    return render(request, 'panel/cache_manager.html', {'cache_stats': cache_stats})
+    return render(request, 'main_pages/panel/cache/cache_manager.html', {'cache_stats': cache_stats})
 
 # ═══ مدیریت حالت تعمیر ═══
 @login_required
@@ -1063,7 +1079,93 @@ def maintenance_mode(request):
         messages.success(request, 'تنظیمات حالت تعمیر ذخیره شد.')
         return redirect('panel:maintenance_mode')
     
-    return render(request, 'panel/maintenance_mode.html', {'setting': setting})
+    return render(request, 'main_pages/panel/maintenance/maintenance_mode.html', {'setting': setting})
 
 
+# ═══ مدیریت نقش کاربر ها ═══
 
+from main.models import CustomRole, UserProfile
+from panel.decorators import permission_required
+
+
+@login_required
+@permission_required('can_manage_roles')
+def role_list(request):
+    """لیست نقش‌ها"""
+    if not request.user.is_superuser:
+        return redirect('panel:dashboard')
+    
+    roles = CustomRole.objects.filter(is_deleted=False)
+    return render(request, 'main_pages/panel/role_list.html', {'roles': roles})
+
+
+@login_required
+@permission_required('can_manage_roles')
+def role_add(request):
+    """ایجاد نقش جدید"""
+    if not request.user.is_superuser:
+        return redirect('panel:dashboard')
+    
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        permissions = request.POST.getlist('permissions')
+        
+        if not name:
+            messages.error(request, 'نام نقش الزامی است.')
+        elif CustomRole.objects.filter(name=name).exists():
+            messages.error(request, 'این نام نقش قبلاً استفاده شده.')
+        else:
+            CustomRole.objects.create(
+                name=name,
+                description=description,
+                permissions=permissions
+            )
+            messages.success(request, f'نقش "{name}" با موفقیت ایجاد شد.')
+            return redirect('panel:role_list')
+    
+    return render(request, 'main_pages/panel/role_form.html', {
+        'all_permissions': CustomRole.ALL_PERMISSIONS
+    })
+
+
+@login_required
+@permission_required('can_manage_roles')
+def role_edit(request, pk):
+    """ویرایش نقش"""
+    if not request.user.is_superuser:
+        return redirect('panel:dashboard')
+    
+    role = get_object_or_404(CustomRole, id=pk, is_deleted=False)
+    
+    if request.method == 'POST':
+        role.name = request.POST.get('name', '').strip()
+        role.description = request.POST.get('description', '').strip()
+        role.permissions = request.POST.getlist('permissions')
+        role.save()
+        
+        messages.success(request, 'نقش با موفقیت ویرایش شد.')
+        return redirect('panel:role_list')
+    
+    return render(request, 'main_pages/panel/role_form.html', {
+        'role': role,
+        'all_permissions': CustomRole.ALL_PERMISSIONS
+    })
+
+
+@login_required
+@permission_required('can_manage_roles')
+def role_delete(request, pk):
+    """حذف نقش"""
+    if not request.user.is_superuser:
+        return redirect('panel:dashboard')
+    
+    role = get_object_or_404(CustomRole, id=pk, is_deleted=False)
+    
+    if request.method == 'POST':
+        role.is_deleted = True
+        role.save()
+        messages.success(request, 'نقش حذف شد.')
+        return redirect('panel:role_list')
+    
+    return render(request, 'main_pages/panel/role_delete.html', {'role': role})

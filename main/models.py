@@ -155,10 +155,10 @@ class ReplyAttachment(models.Model):
         return self.file.name
     
 class MediaFile(SoftDeleteModel):
-    """کتابخانه فایل‌ها (Media Library)"""
+    """کتابخانه مرکزی فایل‌ها"""
     FILE_TYPE_CHOICES = [
         ('image', 'تصویر'),
-        ('document', 'سند (PDF, Word)'),
+        ('document', 'سند'),
         ('video', 'ویدیو'),
         ('audio', 'صدا'),
         ('other', 'سایر'),
@@ -168,8 +168,11 @@ class MediaFile(SoftDeleteModel):
     file = models.FileField('فایل', upload_to='media_library/%Y/%m/')
     file_type = models.CharField('نوع فایل', max_length=20, choices=FILE_TYPE_CHOICES, default='other')
     file_size = models.PositiveBigIntegerField('حجم فایل (بایت)', default=0)
+    alt_text = models.CharField('متن جایگزین (ALT)', max_length=255, blank=True)
+    description = models.TextField('توضیحات', blank=True)
     uploaded_by = models.ForeignKey('auth.User', verbose_name='آپلود کننده', on_delete=models.SET_NULL, null=True, blank=True)
     uploaded_at = models.DateTimeField('تاریخ آپلود', auto_now_add=True)
+    used_in = models.CharField('استفاده شده در', max_length=100, blank=True, help_text='مثلاً: portfolio, blog, gallery')
 
     class Meta:
         verbose_name = 'فایل'
@@ -196,7 +199,17 @@ class MediaFile(SoftDeleteModel):
                 self.file_type = 'audio'
                 
         super().save(*args, **kwargs)
-        
+
+    def get_url(self):
+        """دریافت URL فایل"""
+        return self.file.url if self.file else ''
+
+    def get_thumbnail_url(self):
+        """دریافت URL تصویر بندانگشتی (برای تصاویر)"""
+        if self.file_type == 'image':
+            return self.file.url
+        return None
+    
 class AuditLog(models.Model):
     """لاگ فعالیت‌های کاربران"""
     user = models.ForeignKey(
@@ -251,3 +264,70 @@ class SiteSetting(SoftDeleteModel):
             }
         )
         return setting
+    
+class CustomRole(SoftDeleteModel):
+    """نقش‌های سفارشی برای مدیریت دسترسی‌ها"""
+    name = models.CharField('نام نقش', max_length=100, unique=True)
+    description = models.TextField('توضیحات', blank=True)
+    permissions = models.JSONField('دسترسی‌ها', default=list, blank=True)
+    created_at = models.DateTimeField('تاریخ ایجاد', auto_now_add=True)
+    
+    # دسترسی‌های پیش‌فرض
+    ALL_PERMISSIONS = [
+        ('can_add_article', 'افزودن مقاله'),
+        ('can_edit_article', 'ویرایش مقاله'),
+        ('can_delete_article', 'حذف مقاله'),
+        ('can_publish_article', 'انتشار مقاله'),
+        
+        ('can_add_portfolio', 'افزودن نمونه‌کار'),
+        ('can_edit_portfolio', 'ویرایش نمونه‌کار'),
+        ('can_delete_portfolio', 'حذف نمونه‌کار'),
+        
+        ('can_add_gallery', 'افزودن گالری'),
+        ('can_edit_gallery', 'ویرایش گالری'),
+        ('can_delete_gallery', 'حذف گالری'),
+        
+        ('can_approve_comments', 'تایید/رد کامنت‌ها'),
+        ('can_delete_comments', 'حذف کامنت‌ها'),
+        
+        ('can_reply_messages', 'پاسخ به پیام‌ها'),
+        ('can_send_email', 'ارسال ایمیل'),
+        
+        ('can_manage_media', 'مدیریت کتابخانه فایل‌ها'),
+        ('can_manage_users', 'مدیریت کاربران'),
+        ('can_manage_roles', 'مدیریت نقش‌ها'),
+        
+        ('can_view_analytics', 'مشاهده آمار و تحلیل‌ها'),
+        ('can_manage_settings', 'مدیریت تنظیمات سایت'),
+    ]
+    
+    class Meta:
+        verbose_name = 'نقش'
+        verbose_name_plural = 'نقش‌ها'
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+
+
+class UserProfile(models.Model):
+    """پروفایل کاربری با نقش سفارشی"""
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE, related_name='profile')
+    role = models.ForeignKey(CustomRole, verbose_name='نقش', on_delete=models.SET_NULL, null=True, blank=True)
+    phone = models.CharField('شماره تماس', max_length=20, blank=True)
+    avatar = models.ImageField('آواتار', upload_to='avatars/', blank=True, null=True)
+    
+    class Meta:
+        verbose_name = 'پروفایل کاربری'
+        verbose_name_plural = 'پروفایل‌های کاربری'
+    
+    def __str__(self):
+        return f'پروفایل {self.user.username}'
+    
+    def has_permission(self, permission_code):
+        """بررسی دسترسی کاربر"""
+        if self.user.is_superuser:
+            return True
+        if self.role and permission_code in self.role.permissions:
+            return True
+        return False

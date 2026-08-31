@@ -1,0 +1,18 @@
+{% extends 'layouts/panel_base.html' %}
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title" style="color: #ef4444;">⚠️ حذف کاربر</h1>
+</div>
+<div class="form-card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+    <p style="font-size: 1.1rem; margin-bottom: 10px;">آیا از حذف کاربر "<strong>{{ user_obj.username }}</strong>" اطمینان دارید؟</p>
+    <p style="color: #888; font-size: 0.85rem; margin-bottom: 25px;">تمام دسترسی‌های این کاربر به پنل مدیریت لغو خواهد شد.</p>
+    
+    <div style="display: flex; gap: 15px; justify-content: center;">
+        <a href="{% url 'panel:user_list' %}" class="btn-ghost">انصراف</a>
+        <form method="POST" style="margin: 0;">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary" style="background: #ef4444; box-shadow: 0 8px 22px rgba(239,68,68,0.3);">بله، حذف شود</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
