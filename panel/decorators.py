@@ -5,22 +5,20 @@ from django.contrib import messages
 
 def permission_required(permission_code):
     """
-    Decorator برای بررسی دسترسی بر اساس نقش
+    دکوراتور بررسی دسترسی بر اساس نقش
     
-    Usage:
+    استفاده:
     @permission_required('can_add_article')
-    def my_view(request):
-        ...
+    def my_view(request): ...
     """
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
-            if not request.user.is_authenticated:
-                return redirect('panel:login')
-            
+            # سوپریوزر همه دسترسی‌ها رو داره
             if request.user.is_superuser:
                 return view_func(request, *args, **kwargs)
             
+            # بررسی نقش کاربر
             if hasattr(request.user, 'profile') and request.user.profile.has_permission(permission_code):
                 return view_func(request, *args, **kwargs)
             

@@ -7,12 +7,17 @@ from django.conf import settings
 from .models import ContactMessage
 from blog.models import Post
 from portfolio.models import PortfolioItem, PortfolioCategory
-
+from main.models import SiteSetting
 
 def home(request):
+    # ← این خط حیاتی است: دریافت تنظیمات از دیتابیس
+    site = SiteSetting.load() 
+    
     latest_posts = Post.objects.filter(published=True)[:3]
     latest_works = PortfolioItem.objects.filter(published=True)[:4]
+    
     return render(request, 'main_pages/home.html', {
+        'site': site,  # ← این خط حیاتی است: ارسال به تمپلیت
         'latest_posts': latest_posts,
         'latest_works': latest_works,
     })

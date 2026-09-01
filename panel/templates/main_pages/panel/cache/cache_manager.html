@@ -1,0 +1,336 @@
+{% extends 'layouts/panel_base.html' %}
+{% block title %}مدیریت کش{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cache-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+    }
+
+    .cache-card:hover {
+        border-color: rgba(255, 107, 0, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .cache-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .cache-stat {
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .cache-stat-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .cache-stat-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ff9a4d, #ff6b00);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 4px;
+    }
+
+    .cache-stat-label {
+        font-size: 0.8rem;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .cache-action-btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 18px 22px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1.5px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: inherit;
+        color: #fff;
+        text-align: right;
+        margin-bottom: 12px;
+    }
+
+    .cache-action-btn:hover {
+        border-color: rgba(255, 107, 0, 0.5);
+        background: rgba(255, 107, 0, 0.05);
+        transform: translateX(-4px);
+    }
+
+    .cache-action-btn.danger:hover {
+        border-color: rgba(239, 68, 68, 0.5);
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .cache-action-btn.success:hover {
+        border-color: rgba(16, 185, 129, 0.5);
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .cache-action-icon {
+        font-size: 1.8rem;
+        flex-shrink: 0;
+    }
+
+    .cache-action-text {
+        flex: 1;
+    }
+
+    .cache-action-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .cache-action-desc {
+        font-size: 0.8rem;
+        color: #888;
+    }
+
+    .cache-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        background: linear-gradient(135deg, #ff6b00, #ff9a4d);
+        color: #fff;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .cache-badge.info {
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    }
+
+    .cache-badge.warn {
+        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">⚡ مدیریت کش</h1>
+        <p class="page-subtitle">پاک‌سازی و بهینه‌سازی حافظه نهان سایت برای سرعت بیشتر</p>
+    </div>
+</div>
+
+<!-- ═══ کارت‌های آماری ═══ -->
+<div class="cache-stat-grid">
+    <div class="cache-stat">
+        <div class="cache-stat-icon">🧠</div>
+        <div class="cache-stat-value">{{ cache_stats.backend|truncatechars:20 }}</div>
+        <div class="cache-stat-label">Backend فعلی</div>
+    </div>
+    <div class="cache-stat">
+        <div class="cache-stat-icon">🔑</div>
+        <div class="cache-stat-value">{{ cache_stats.total_keys|default:"—" }}</div>
+        <div class="cache-stat-label">تعداد کلیدها</div>
+    </div>
+    <div class="cache-stat">
+        <div class="cache-stat-icon">💾</div>
+        <div class="cache-stat-value">{% if cache_stats.total_size %}{{ cache_stats.total_size|filesizeformat }}{% else
+            %}—{% endif %}</div>
+        <div class="cache-stat-label">حجم استفاده شده</div>
+    </div>
+    {% if cache_stats.test_write_ms %}
+    <div class="cache-stat">
+        <div class="cache-stat-icon">⏱️</div>
+        <div class="cache-stat-value">{{ cache_stats.test_write_ms }}ms</div>
+        <div class="cache-stat-label">سرعت نوشتن</div>
+    </div>
+    <div class="cache-stat">
+        <div class="cache-stat-icon">⚡</div>
+        <div class="cache-stat-value">{{ cache_stats.test_read_ms }}ms</div>
+        <div class="cache-stat-label">سرعت خواندن</div>
+    </div>
+    {% endif %}
+</div>
+<!-- ═══ نتایج تست سرعت کش ═══ -->
+{% if cache_stats.test_write_ms %}
+<div class="cache-card"
+    style="border-color: rgba(16,185,129,0.3); background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02));">
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+        <h3 style="color: #10b981; margin: 0;">🧪 نتایج تست سرعت کش</h3>
+        <span style="font-size: 0.75rem; color: #888;">آخرین تست: {{ cache_stats.tested_at }}</span>
+    </div>
+
+    <div class="cache-stat-grid" style="margin-bottom: 0;">
+        <div class="cache-stat">
+            <div class="cache-stat-icon">✍️</div>
+            <div class="cache-stat-value">{{ cache_stats.test_write_ms }}<small style="font-size: 0.9rem;"> ms</small>
+            </div>
+            <div class="cache-stat-label">سرعت نوشتن</div>
+        </div>
+        <div class="cache-stat">
+            <div class="cache-stat-icon">📖</div>
+            <div class="cache-stat-value">{{ cache_stats.test_read_ms }}<small style="font-size: 0.9rem;"> ms</small>
+            </div>
+            <div class="cache-stat-label">سرعت خواندن</div>
+        </div>
+        <div class="cache-stat">
+            <div class="cache-stat-icon">⚡</div>
+            <div class="cache-stat-value">{{ cache_stats.test_avg_ms }}<small style="font-size: 0.9rem;"> ms</small>
+            </div>
+            <div class="cache-stat-label">میانگین</div>
+        </div>
+        <div class="cache-stat">
+            <div class="cache-stat-icon">{{ cache_stats.verdict_icon }}</div>
+            <div class="cache-stat-value">{{ cache_stats.verdict }}</div>
+            <div class="cache-stat-label">ارزیابی کلی</div>
+        </div>
+    </div>
+
+    <!-- نوار سرعت‌سنج -->
+    <div style="margin-top: 24px;">
+        <div
+            style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-bottom: 6px;">
+            <span>🔴 کند</span>
+            <span>🟡 متوسط</span>
+            <span>🟢 خوب</span>
+            <span>🚀 عالی</span>
+        </div>
+        <div style="height: 10px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden;">
+            <div
+                style="height: 100%; width: {% if cache_stats.verdict_class == 'excellent' %}95{% elif cache_stats.verdict_class == 'good' %}70{% elif cache_stats.verdict_class == 'medium' %}40{% else %}12{% endif %}%; background: linear-gradient(to left, #ef4444, #f59e0b, #10b981); border-radius: 10px; transition: width 1s ease;">
+            </div>
+        </div>
+    </div>
+
+    <!-- توضیح ارزیابی -->
+    <div
+        style="margin-top: 16px; padding: 14px 18px; background: rgba(0,0,0,0.25); border-radius: 10px; display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.4rem;">{{ cache_stats.verdict_icon }}</span>
+        <p style="margin: 0; color: #ccc; font-size: 0.9rem;">{{ cache_stats.verdict_desc }}</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- ═══ اطلاعات Backend ═══ -->
+<div class="cache-card">
+    <h3 style="margin-bottom: 16px; color: #fff;">📋 اطلاعات سیستم کش</h3>
+    <div style="display: grid; gap: 12px;">
+        <div
+            style="display: flex; justify-content: space-between; padding: 10px 16px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+            <span style="color: #888;">Backend:</span>
+            <span class="cache-badge info">{{ cache_stats.backend }}</span>
+        </div>
+        <div
+            style="display: flex; justify-content: space-between; padding: 10px 16px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+            <span style="color: #888;">Module:</span>
+            <code style="color: #ff9a4d; font-size: 0.85rem;">{{ cache_stats.backend_module }}</code>
+        </div>
+        {% if cache_stats.cache_dir %}
+        <div
+            style="display: flex; justify-content: space-between; padding: 10px 16px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+            <span style="color: #888;">پوشه کش:</span>
+            <code style="color: #ff9a4d; font-size: 0.85rem;">{{ cache_stats.cache_dir }}</code>
+        </div>
+        {% endif %}
+        {% if cache_stats.table %}
+        <div
+            style="display: flex; justify-content: space-between; padding: 10px 16px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+            <span style="color: #888;">جدول دیتابیس:</span>
+            <code style="color: #ff9a4d; font-size: 0.85rem;">{{ cache_stats.table }}</code>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- ═══ دکمه‌های پاک‌سازی ═══ -->
+<div class="cache-card">
+    <h3 style="margin-bottom: 16px; color: #fff;">🛠️ عملیات پاک‌سازی</h3>
+
+    <!-- تست عملکرد -->
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="test_cache">
+        <button type="submit" class="cache-action-btn success">
+            <span class="cache-action-icon">🧪</span>
+            <div class="cache-action-text">
+                <div class="cache-action-title">تست عملکرد کش</div>
+                <div class="cache-action-desc">نوشتن و خواندن یک کلید تستی برای اندازه‌گیری سرعت</div>
+            </div>
+            <span class="cache-badge info">آزمایش</span>
+        </button>
+    </form>
+
+    <!-- پاک کردن کش صفحات -->
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="clear_page">
+        <button type="submit" class="cache-action-btn">
+            <span class="cache-action-icon">📄</span>
+            <div class="cache-action-text">
+                <div class="cache-action-title">پاک کردن کش صفحات</div>
+                <div class="cache-action-desc">پاکسازی کش تمام صفحات وبسایت (بدون تاثیر بر تمپلیت‌ها)</div>
+            </div>
+            <span class="cache-badge warn">حافظه</span>
+        </button>
+    </form>
+
+    <!-- پاک کردن کش تمپلیت‌ها -->
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="clear_templates">
+        <button type="submit" class="cache-action-btn">
+            <span class="cache-action-icon">🎨</span>
+            <div class="cache-action-text">
+                <div class="cache-action-title">پاک کردن کش تمپلیت‌ها</div>
+                <div class="cache-action-desc">ریست کردن تمام template loader ها برای بارگذاری مجدد</div>
+            </div>
+            <span class="cache-badge warn">تمپلیت</span>
+        </button>
+    </form>
+
+    <!-- پاک کردن همه چیز -->
+    <form method="POST"
+        onsubmit="return confirm('⚠️ آیا مطمئن هستید؟ تمام کش سایت پاک خواهد شد و سایت موقتاً کندتر می‌شود.');">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="clear_all">
+        <button type="submit" class="cache-action-btn danger">
+            <span class="cache-action-icon">🧹</span>
+            <div class="cache-action-text">
+                <div class="cache-action-title">پاک کردن تمام کش</div>
+                <div class="cache-action-desc">⚠️ پاکسازی کامل: کش صفحات، تمپلیت‌ها، داده‌ها و همه چیز</div>
+            </div>
+            <span class="cache-badge" style="background: linear-gradient(135deg, #ef4444, #f87171);">خطرناک</span>
+        </button>
+    </form>
+</div>
+
+<!-- ═══ راهنما ═══ -->
+<div class="cache-card"
+    style="background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(59,130,246,0.02)); border-color: rgba(59,130,246,0.3);">
+    <h3 style="margin-bottom: 16px; color: #3b82f6;">📖 راهنمای استفاده</h3>
+    <ul style="line-height: 2; padding-right: 20px; color: #ccc; font-size: 0.9rem;">
+        <li>🧪 <strong>تست عملکرد:</strong> برای بررسی سرعت خواندن/نوشتن کش استفاده می‌شود</li>
+        <li>📄 <strong>کش صفحات:</strong> کش HTML صفحات برای کاربران مهمان (با cache_page)</li>
+        <li>🎨 <strong>کش تمپلیت:</strong> تمپلیت‌های کامپایل شده (بعد از تغییر تمپلیت)</li>
+        <li>🧹 <strong>پاک کامل:</strong> پس از تغییرات بزرگ در کد یا تنظیمات</li>
+        <li>⚠️ <strong>توجه:</strong> پاک کردن کش باعث می‌شود درخواست‌های بعدی کمی کندتر باشند</li>
+    </ul>
+</div>
+{% endblock %}

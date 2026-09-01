@@ -1,0 +1,135 @@
+{% extends 'layouts/panel_base.html' %}
+{% block title %}مدیریت بک‌آپ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">💾 مدیریت بک‌آپ</h1>
+        <p class="page-subtitle">پشتیبان‌گیری کامل از دیتابیس و تمام فایل‌ها</p>
+    </div>
+</div>
+
+<!-- آمار فعلی -->
+<div
+    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+    <div class="form-card"
+        style="padding: 20px; text-align: center; background: linear-gradient(135deg, rgba(255,107,0,0.1), rgba(255,107,0,0.05));">
+        <div style="font-size: 2.5rem; margin-bottom: 10px;"></div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #ff9a4d;">{{ total_articles }}</div>
+        <div style="font-size: 0.9rem; color: #888;">مقاله</div>
+    </div>
+    <div class="form-card"
+        style="padding: 20px; text-align: center; background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.05));">
+        <div style="font-size: 2.5rem; margin-bottom: 10px;">🎨</div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #3b82f6;">{{ total_portfolio }}</div>
+        <div style="font-size: 0.9rem; color: #888;">نمونه‌کار</div>
+    </div>
+    <div class="form-card"
+        style="padding: 20px; text-align: center; background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(139,92,246,0.05));">
+        <div style="font-size: 2.5rem; margin-bottom: 10px;">📸</div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #8b5cf6;">{{ total_gallery }}</div>
+        <div style="font-size: 0.9rem; color: #888;">آلبوم گالری</div>
+    </div>
+</div>
+
+<!-- ایجاد بک‌آپ جدید -->
+<div class="form-card"
+    style="margin-bottom: 30px; border: 2px dashed rgba(255,107,0,0.4); background: linear-gradient(135deg, rgba(255,107,0,0.05), rgba(255,107,0,0.02));">
+    <h3 style="margin-bottom: 15px; color: #ff9a4d;">️ ایجاد بک‌آپ جدید</h3>
+    <p style="color: #888; margin-bottom: 20px; font-size: 0.9rem;">
+        این بک‌آپ شامل <strong>همه چیز</strong> است: تمام مقالات، نمونه‌کارها، گالری، تنظیمات و تمام تصاویر آپلود شده.
+    </p>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create">
+        <button type="submit" class="btn-primary" style="padding: 14px 32px; font-size: 1rem;">
+            📦 ایجاد بک‌آپ کامل
+        </button>
+    </form>
+</div>
+
+<!-- آپلود و بازگردانی فایل بک‌آپ -->
+<div class="form-card"
+    style="margin-bottom: 30px; border: 2px dashed rgba(16,185,129,0.4); background: linear-gradient(135deg, rgba(16,185,129,0.05), rgba(16,185,129,0.02));">
+    <h3 style="margin-bottom: 15px; color: #10b981;">📤 آپلود و بازگردانی فایل بک‌آپ</h3>
+    <p style="color: #888; margin-bottom: 20px; font-size: 0.9rem;">
+        فایل <strong>.zip</strong> بک‌آپ خود را آپلود کنید تا اطلاعات سایت بازگردانی شود. پس از آپلود، می‌توانید از لیست
+        پایین دکمه "بازگردانی" را بزنید.
+    </p>
+    <form method="POST" action="{% url 'panel:backup_upload' %}" enctype="multipart/form-data" id="uploadBackupForm">
+        {% csrf_token %}
+        <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 250px;">
+                <label style="display: block; margin-bottom: 8px; color: #ccc; font-size: 0.9rem; font-weight: 600;">
+                    انتخاب فایل بک‌آپ (ZIP):
+                </label>
+                <input type="file" name="backup_file" accept=".zip" required
+                    style="width: 100%; padding: 12px 16px; background: rgba(16,185,129,0.05); border: 1.5px dashed rgba(16,185,129,0.4); border-radius: 12px; color: #fff; cursor: pointer;">
+            </div>
+            <button type="submit" class="btn-primary"
+                style="padding: 12px 24px; background: linear-gradient(135deg, #10b981, #34d399);">
+                📤 آپلود فایل
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- لیست بک‌آپ‌ها -->
+<h3 style="margin-bottom: 20px; color: #fff;">📚 بک‌آپ‌های موجود</h3>
+
+{% if backups %}
+<div style="display: grid; gap: 15px;">
+    {% for backup in backups %}
+    <div class="form-card"
+        style="padding: 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+            <div style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 5px;">
+                📄 {{ backup.name }}
+            </div>
+            <div style="font-size: 0.85rem; color: #888;">
+                {{ backup.created|date:"Y/m/d H:i" }} •
+                💾 {{ backup.size|filesizeformat }}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'panel:backup_download' backup.name %}" class="btn-ghost" style="padding: 10px 16px;"
+                title="دانلود">
+                ⬇️ دانلود
+            </a>
+            <a href="{% url 'panel:backup_restore' backup.name %}" class="btn-primary"
+                style="padding: 10px 16px; background: linear-gradient(135deg, #10b981, #34d399);" title="بازگردانی">
+                ↩️ بازگردانی
+            </a>
+            <form method="POST" action="{% url 'panel:backup_delete' backup.name %}" style="display: inline;"
+                onsubmit="return confirm('آیا از حذف این بک‌آپ اطمینان دارید؟');">
+                {% csrf_token %}
+                <button type="submit" class="btn-ghost"
+                    style="padding: 10px 16px; color: #ef4444; border-color: rgba(239,68,68,0.3);" title="حذف">
+                    🗑️
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="form-card" style="padding: 40px; text-align: center; color: #888;">
+    <div style="font-size: 3rem; margin-bottom: 15px;">📭</div>
+    <p>هنوز هیچ بک‌آپی ایجاد نشده است.</p>
+    <p style="font-size: 0.9rem;">اولین بک‌آپ خود را با دکمه بالا ایجاد کنید.</p>
+</div>
+{% endif %}
+
+<!-- راهنما -->
+<div class="form-card"
+    style="margin-top: 30px; padding: 20px; background: rgba(59,130,246,0.05); border: 1px solid rgba(59,130,246,0.2);">
+    <h4 style="margin-bottom: 15px; color: #3b82f6;">📖 راهنمای استفاده:</h4>
+    <ul style="color: #ccc; line-height: 2; padding-right: 20px; font-size: 0.9rem;">
+        <li>✅ <strong>بک‌آپ کامل:</strong> شامل دیتابیس (JSON + SQLite) + تمام فایل‌های آپلود شده</li>
+        <li>✅ <strong>بازگردانی:</strong> تمام داده‌ها و فایل‌ها به حالت قبل برمی‌گردند</li>
+        <li>✅ <strong>دانلود:</strong> بک‌آپ را دانلود و در جای امن نگه دارید</li>
+        <li>⚠️ <strong>هشدار:</strong> بازگردانی بک‌آپ، تمام داده‌های فعلی را جایگزین می‌کند!</li>
+    </ul>
+</div>
+{% endblock %}

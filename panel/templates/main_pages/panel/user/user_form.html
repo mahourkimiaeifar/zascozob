@@ -1,34 +1,71 @@
 {% extends 'layouts/panel_base.html' %}
-{% block title %}{% if user_obj %}ویرایش کاربر{% else %}کاربر جدید{% endif %}{% endblock %}
+{% block title %}{% if user_obj %}ویرایش کاربر: {{ user_obj.username }}{% else %}کاربر جدید{% endif %}{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">{% if user_obj %}ویرایش کاربر: {{ user_obj.username }}{% else %}افزودن کاربر جدید{% endif %}</h1>
+        <h1 class="page-title">{% if user_obj %}✏️ ویرایش کاربر: {{ user_obj.username }}{% else %}➕ افزودن کاربر جدید{% endif %}</h1>
+        <p class="page-subtitle">{% if user_obj %}تغییر اطلاعات و دسترسی‌های کاربر{% else %}ساخت یک حساب کاربری جدید برای پنل مدیریت{% endif %}</p>
     </div>
     <a href="{% url 'panel:user_list' %}" class="btn-ghost">← بازگشت</a>
 </div>
 
-<form method="POST" class="form-card" style="max-width: 600px;">
+{% if messages %}
+<div style="margin-bottom: 20px;">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:16px 20px; color:#ef9a9a;">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<form method="POST" class="form-card" style="max-width: 700px;">
     {% csrf_token %}
     
+    <!-- ═══ نام کاربری ═══ -->
     <div class="field">
         <label>نام کاربری {% if user_obj %}(غیرقابل تغییر){% else %}*{% endif %}</label>
-        <input type="text" name="username" value="{{ user_obj.username|default:'' }}" class="form-control" {% if user_obj %}readonly style="opacity:0.6; cursor:not-allowed;"{% else %}required{% endif %}>
+        <input type="text" name="username" value="{{ user_obj.username|default:'' }}" class="form-control" 
+               {% if user_obj %}readonly style="opacity:0.6; cursor:not-allowed;"{% else %}required{% endif %}>
+        {% if not user_obj %}
+        <div class="hint">نام کاربری منحصر به فرد برای ورود به پنل</div>
+        {% endif %}
     </div>
 
+    <!-- ═══ ایمیل ═══ -->
     <div class="field">
         <label>آدرس ایمیل</label>
-        <input type="email" name="email" value="{{ user_obj.email|default:'' }}" class="form-control">
+        <input type="email" name="email" value="{{ user_obj.email|default:'' }}" class="form-control" placeholder="example@email.com">
     </div>
 
+    <!-- ═══ رمز عبور ═══ -->
     <div class="field">
         <label>{% if user_obj %}تغییر رمز عبور (اختیاری){% else %}رمز عبور *{% endif %}</label>
-        <input type="password" name="{% if user_obj %}new_password{% else %}password{% endif %}" class="form-control" {% if not user_obj %}required{% endif %}>
-        {% if user_obj %}<div class="hint">اگر خالی بگذارید، رمز عبور تغییر نمی‌کند.</div>{% endif %}
+        <input type="password" name="{% if user_obj %}new_password{% else %}password{% endif %}" class="form-control" 
+               {% if not user_obj %}required{% endif %}
+               placeholder="{% if user_obj %}برای تغییر رمز، رمز جدید را وارد کنید{% else %}حداقل ۸ کاراکتر{% endif %}">
+        {% if user_obj %}
+        <div class="hint">⚠️ اگر این فیلد را خالی بگذارید، رمز عبور تغییر نمی‌کند.</div>
+        {% endif %}
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+    <!-- ═══ انتخاب نقش ═══ -->
+    <div class="field">
+        <label>🎭 نقش (سطح دسترسی)</label>
+        <select name="role" class="form-control">
+            <option value="">— بدون نقش (فقط دسترسی به داشبورد) —</option>
+            {% for r in roles %}
+            <option value="{{ r.id }}" {% if current_role_id == r.id %}selected{% endif %}>
+                {{ r.name }} ({{ r.permissions|length }} دسترسی)
+            </option>
+            {% endfor %}
+        </select>
+        <div class="hint">نقش تعیین می‌کند این کاربر چه کارهایی می‌تواند در پنل انجام دهد</div>
+    </div>
+
+    <!-- ═══ چک‌باکس‌های دسترسی ═══ -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px;">
         <label class="check-field" style="margin:0;">
             <input type="checkbox" name="is_staff" {% if user_obj and user_obj.is_staff %}checked{% endif %} style="width:20px; height:20px; accent-color:#ff6b00;">
             <span class="check-text">
@@ -36,6 +73,8 @@
                 <small>کاربر می‌تواند وارد این پنل شود</small>
             </span>
         </label>
+        
+        {% if request.user.is_superuser %}
         <label class="check-field" style="margin:0;">
             <input type="checkbox" name="is_superuser" {% if user_obj and user_obj.is_superuser %}checked{% endif %} style="width:20px; height:20px; accent-color:#ef4444;">
             <span class="check-text">
@@ -43,11 +82,48 @@
                 <small>دسترسی به تمام بخش‌ها و مدیریت سایر ادمین‌ها</small>
             </span>
         </label>
+        {% else %}
+        <div style="padding: 16px 20px; background: rgba(239,68,68,0.05); border: 1px dashed rgba(239,68,68,0.3); border-radius: 12px; display: flex; align-items: center; gap: 10px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <small style="color: #ef9a9a;">فقط سوپریوزر می‌تواند دسترسی سوپریوزر بدهد</small>
+        </div>
+        {% endif %}
     </div>
 
+    <!-- ═══ دکمه‌ها ═══ -->
     <div class="save-bar" style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
         <a href="{% url 'panel:user_list' %}" class="btn-ghost">انصراف</a>
         <button type="submit" class="btn-primary">💾 ذخیره کاربر</button>
     </div>
 </form>
+
+<!-- ═══ راهنمای نقش‌ها ═══ -->
+{% if roles %}
+<div class="form-card" style="margin-top: 30px; padding: 20px; background: rgba(59,130,246,0.05); border: 1px solid rgba(59,130,246,0.2);">
+    <h4 style="margin-bottom: 15px; color: #3b82f6;">📖 راهنمای نقش‌های موجود:</h4>
+    <div style="display: grid; gap: 10px;">
+        {% for r in roles %}
+        <div style="padding: 12px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+            <strong style="color: #ff9a4d;">{{ r.name }}</strong>
+            <span style="color: #888; font-size: 0.85rem;">({{ r.permissions|length }} دسترسی)</span>
+            {% if r.description %}
+            <div style="color: #ccc; font-size: 0.85rem; margin-top: 5px;">{{ r.description }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="form-card" style="margin-top: 30px; padding: 20px; background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2);">
+    <p style="color: #fbbf24; margin: 0;">
+        ⚠️ هیچ نقشی تعریف نشده است. برای دادن دسترسی به کاربر، ابتدا از بخش 
+        <a href="{% url 'panel:role_list' %}" style="color: #ff9a4d; font-weight: bold;">نقش‌ها و دسترسی‌ها</a> 
+        یک نقش بسازید.
+    </p>
+</div>
+{% endif %}
 {% endblock %}

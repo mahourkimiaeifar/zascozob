@@ -1,0 +1,131 @@
+{% extends 'layouts/panel_base.html' %}
+{% load static %}
+{% block title %}لاگ فعالیت‌ها{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">🕵️ لاگ فعالیت‌ها</h1>
+        <p class="page-subtitle">ثبت تمام عملیات انجام‌شده در پنل مدیریت</p>
+    </div>
+</div>
+
+<!-- ═══ فیلترها ═══ -->
+<div class="form-card" style="margin-bottom: 25px; padding: 20px;">
+    <form method="GET" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: end;">
+        <div>
+            <label style="display:block; margin-bottom:8px; font-size:0.85rem; color:#ccc;">فیلتر بر اساس کاربر</label>
+            <select name="user" class="form-control" style="padding: 10px;">
+                <option value="">— همه کاربران —</option>
+                {% for u in users %}
+                <option value="{{ u.id }}" {% if user_id == u.id|stringformat:"s" %}selected{% endif %}>
+                    {{ u.username }} {% if u.is_superuser %}(سوپر ادمین){% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label style="display:block; margin-bottom:8px; font-size:0.85rem; color:#ccc;">جستجو در عملیات</label>
+            <input type="text" name="action" value="{{ action_filter }}" class="form-control" style="padding: 10px;" placeholder="مثلاً: مقاله، حذف، ورود...">
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button type="submit" class="btn-primary" style="padding: 10px 20px;">🔍 فیلتر</button>
+            <a href="{% url 'panel:audit_log' %}" class="btn-ghost" style="padding: 10px 16px;">پاک کردن</a>
+        </div>
+    </form>
+</div>
+
+<!-- ═══ لیست لاگ‌ها ═══ -->
+<div class="form-card" style="padding: 0; overflow: hidden;">
+    {% if logs %}
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.08);">
+                    <th style="padding: 14px 16px; text-align: right; font-size: 0.85rem; color: #888; font-weight: 600;">زمان</th>
+                    <th style="padding: 14px 16px; text-align: right; font-size: 0.85rem; color: #888; font-weight: 600;">کاربر</th>
+                    <th style="padding: 14px 16px; text-align: right; font-size: 0.85rem; color: #888; font-weight: 600;">عملیات</th>
+                    <th style="padding: 14px 16px; text-align: right; font-size: 0.85rem; color: #888; font-weight: 600;">IP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
+                    <td style="padding: 14px 16px;">
+                        <div style="font-size: 0.85rem; color: #fff; font-weight: 600;">{{ log.created_at|date:"Y/m/d" }}</div>
+                        <div style="font-size: 0.75rem; color: #666;">{{ log.created_at|time:"H:i:s" }}</div>
+                    </td>
+                    <td style="padding: 14px 16px;">
+                        {% if log.user %}
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #ff6b00, #ff9a4d); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; font-size: 0.85rem;">
+                                    {{ log.user.username|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.9rem; color: #fff; font-weight: 600;">{{ log.user.username }}</div>
+                                    {% if log.user.is_superuser %}<small style="color: #ef4444; font-size: 0.7rem;">سوپر ادمین</small>{% endif %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <span style="color: #666; font-size: 0.85rem;">سیستم</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 14px 16px;">
+                        <div style="font-size: 0.9rem; color: #fff;">
+                            {% if 'ورود' in log.action %}
+                                <span style="color: #10b981;">✅</span>
+                            {% elif 'خروج' in log.action %}
+                                <span style="color: #6b7280;">👋</span>
+                            {% elif 'حذف' in log.action %}
+                                <span style="color: #ef4444;">🗑️</span>
+                            {% elif 'ایجاد' in log.action or 'اضافه' in log.action or 'آپلود' in log.action %}
+                                <span style="color: #3b82f6;">➕</span>
+                            {% elif 'ویرایش' in log.action or 'تغییر' in log.action %}
+                                <span style="color: #f59e0b;">✏️</span>
+                            {% elif 'بک‌آپ' in log.action %}
+                                <span style="color: #8b5cf6;">💾</span>
+                            {% else %}
+                                <span style="color: #6b7280;">📝</span>
+                            {% endif %}
+                            {{ log.action }}
+                        </div>
+                        {% if log.description %}
+                        <div style="font-size: 0.8rem; color: #888; margin-top: 4px;">{{ log.description|truncatechars:80 }}</div>
+                        {% endif %}
+                        {% if log.model_name %}
+                        <span style="display: inline-block; padding: 2px 8px; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 0.7rem; color: #888; margin-top: 4px;">
+                            {{ log.model_name }}{% if log.object_id %} #{{ log.object_id }}{% endif %}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 14px 16px;">
+                        <code style="font-size: 0.8rem; color: #6b7280; background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 4px;">
+                            {{ log.ip_address|default:"—" }}
+                        </code>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- صفحه‌بندی -->
+    {% if logs.has_other_pages %}
+    <div style="display: flex; justify-content: center; gap: 10px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.05);">
+        {% if logs.has_previous %}
+            <a href="?page={{ logs.previous_page_number }}{% if user_id %}&user={{ user_id }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}" class="btn-ghost">← قبلی</a>
+        {% endif %}
+        <span class="btn-ghost" style="cursor: default;">صفحه {{ logs.number }} از {{ logs.paginator.num_pages }}</span>
+        {% if logs.has_next %}
+            <a href="?page={{ logs.next_page_number }}{% if user_id %}&user={{ user_id }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}" class="btn-ghost">بعدی →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div style="text-align: center; padding: 60px 20px; color: #666;">
+        <div style="font-size: 4rem; margin-bottom: 15px;">📭</div>
+        <p>هیچ فعالیتی ثبت نشده است.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

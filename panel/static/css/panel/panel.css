@@ -2818,3 +2818,77 @@ textarea {
 .panel-sidebar:hover::-webkit-scrollbar-thumb {
     background: rgba(255, 107, 0, 0.5);
 }
+
+/* ═══ تایتل‌های بخش‌ها: برجسته‌تر ═══ */
+.sidebar-nav .nav-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 12px 10px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    color: #a7b0c0;
+}
+
+.sidebar-nav .nav-title::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 2.5px;
+    background: linear-gradient(135deg, #ff6b00, #ff9a4d);
+    box-shadow: 0 0 12px rgba(255, 107, 0, 0.55);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+}
+
+.sidebar-nav .nav-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.16), transparent);
+}
+
+/* ═══ آیتم‌های منو: نرم‌تر ═══ */
+.sidebar-nav .nav-item,
+.sidebar-nav .nav-group-toggle {
+    border-radius: 12px;
+    transition: all 0.25s ease;
+}
+
+.sidebar-nav .nav-item:hover,
+.sidebar-nav .nav-group-toggle:hover {
+    background: rgba(255, 107, 0, 0.08);
+    padding-right: 20px;
+}
+
+.sidebar-nav .nav-item svg,
+.sidebar-nav .nav-group-toggle svg {
+    color: #7d8698;
+    transition: color 0.25s ease;
+    flex-shrink: 0;
+}
+
+.sidebar-nav .nav-item:hover svg,
+.sidebar-nav .nav-item.active svg,
+.sidebar-nav .nav-group-toggle:hover svg {
+    color: #ff9a4d;
+}
+
+.sidebar-nav .nav-item.active {
+    background: linear-gradient(to left, rgba(255, 107, 0, 0.18), rgba(255, 107, 0, 0.05));
+    box-shadow: inset -3px 0 0 #ff6b00;
+    color: #fff;
+}
+
+/* ═══ لوگو: گرادیان ═══ */
+.sidebar-logo .logo-text strong {
+    background: linear-gradient(135deg, #ffffff, #ffb37a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.sidebar-nav .nav-section+.nav-section {
+    margin-top: 8px;
+}

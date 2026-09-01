@@ -1,6 +1,7 @@
+import os
 from main.models import MediaFile
 from django.core.files.storage import default_storage
-import os
+from main.models import AuditLog
 
 
 def register_file_in_library(file_path, title=None, uploaded_by=None, used_in='', auto_create=True):
@@ -75,3 +76,23 @@ def sync_existing_files_to_library(app_label='', used_in=''):
                     count += 1
     
     return count
+
+def log_activity(request, action, model_name='', object_id=None, description=''):
+    """
+    ثبت فعالیت کاربر در لاگ سیستم
+    
+    استفاده:
+        log_activity(request, 'مقاله جدید ایجاد شد', 'Post', post.id, post.title)
+    """
+    try:
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            action=action,
+            model_name=model_name,
+            object_id=object_id,
+            description=description,
+            ip_address=request.META.get('REMOTE_ADDR'),
+        )
+    except Exception as e:
+        # اگر ثبت لاگ خطا داد، سایت نباید متوقف بشه
+        print(f'⚠️ Audit Log Error: {e}')

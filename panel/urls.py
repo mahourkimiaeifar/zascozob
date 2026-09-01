@@ -54,6 +54,8 @@ urlpatterns = [
     path('audit-log/', views.audit_log, name='audit_log'),
             # ═══ Backup Managment ═══
     path('backups/', views.backup_manager, name='backup_manager'),
+    path('backups/upload/', views.backup_upload, name='backup_upload'),
+    path('backups/restore/<str:filename>/', views.backup_restore, name='backup_restore'),
     path('backups/download/<str:filename>/', views.backup_download, name='backup_download'),
     path('backups/delete/<str:filename>/', views.backup_delete, name='backup_delete'),
             # ═══ Cache Managment ═══

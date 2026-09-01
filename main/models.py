@@ -40,25 +40,19 @@ class SoftDeleteModel(models.Model):
         self.save(update_fields=['is_deleted', 'deleted_at'])
 
 
-# ═══ تنظیمات سایت — فقط ویرایش، هرگز حذف ═══
-class SiteSetting(models.Model):
-    # ═══ عمومی ═══
-    site_title = models.CharField('عنوان اصلی سایت', max_length=100, default='زاسکو ذوب',
-        help_text='در هر صفحه جلوی آن می‌آید؛ مثل «زاسکو ذوب - درباره ما»')
-    subtitle = models.CharField('زیرعنوان سایت', max_length=150, default='قطعه ریزان ذوب آرای سپاهان',
-        help_text='در هدر یا هیرو نمایش داده می‌شود')
-    about_text = models.TextField('متن توضیح کلی شرکت',
-        default='کارخانه ریخته‌گری زاسکو ذوب فعال در زمینه‌های ریخته‌گری آلیاژهای آهنی و غیرآهنی...')
+class SiteSetting(SoftDeleteModel):
+    # ═══ عمومی ══
+    site_title = models.CharField('عنوان اصلی سایت', max_length=100, default='زاسکو ذوب')
+    subtitle = models.CharField('زیرعنوان سایت', max_length=150, default='قطعه ریزان ذوب آرای سپاهان')
+    about_text = models.TextField('متن توضیح کلی شرکت', default='کارخانه ریخته‌گری زاسکو ذوب فعال در زمینه‌های ریخته‌گری آلیاژهای آهنی و غیرآهنی...')
 
     # ═══ اطلاعات شرکت (ستون اول فوتر) ═══
     footer_title_company = models.CharField('سرعنوان: اطلاعات شرکت', max_length=100, default='اطلاعات شرکت')
     phone_mobile = models.CharField('شماره موبایل شرکت', max_length=20, default='+989134302591')
     phone_office = models.CharField('شماره تلفن ثابت شرکت', max_length=20, default='031-42318530')
     email = models.EmailField('ایمیل شرکت', default='zascozob@gmail.com')
-    address_factory = models.TextField('آدرس کارخانه',
-        default='اصفهان، نجف‌آباد، شهرک صنعتی منتظریه، ابتدای خیابان قادری شمالی، ضلع غربی، پلاک ۲، کد ۱۳۰')
-    address_rd = models.TextField('آدرس واحد تحقیقات و فناوری',
-        default='اصفهان، نجف‌آباد، دانشگاه آزاد اسلامی، ساختمان علم و فناوری، اتاق ۳۰۲')
+    address_factory = models.TextField('آدرس کارخانه', default='اصفهان، نجف‌آباد، شهرک صنعتی منتظریه، ابتدای خیابان قادری شمالی، ضلع غربی، پلاک ۲، کد ۱۳۰')
+    address_rd = models.TextField('آدرس واحد تحقیقات و فناوری', default='اصفهان، نجف‌آباد، دانشگاه آزاد اسلامی، ساختمان علم و فناوری، اتاق ۳۰۲')
 
     # ═══ دیگر صفحات (ستون دوم فوتر) ═══
     footer_title_pages = models.CharField('سرعنوان: دیگر صفحات', max_length=100, default='دیگر صفحات')
@@ -68,11 +62,10 @@ class SiteSetting(models.Model):
 
     # ═══ خبرنامه (ستون سوم فوتر) ═══
     footer_title_newsletter = models.CharField('سرعنوان: خبرنامه', max_length=100, default='خبرنامه')
-    newsletter_text = models.CharField('متن خبرنامه', max_length=200,
-        default='با عضویت در خبرنامه سریع‌تر در جریان اخبار قرار بگیرید')
+    newsletter_text = models.CharField('متن خبرنامه', max_length=200, default='با عضویت در خبرنامه سریع‌تر در جریان اخبار قرار بگیرید')
     newsletter_button_text = models.CharField('متن دکمه خبرنامه', max_length=50, default='مشترک شدن')
 
-    # ═══ شبکه‌های اجتماعی (۶ لینک) ═══
+    # ═══ شبکه‌های اجتماعی ═══
     link_whatsapp = models.URLField('لینک واتساپ', blank=True)
     link_instagram = models.URLField('لینک اینستاگرام', blank=True)
     link_telegram = models.URLField('لینک تلگرام', blank=True)
@@ -81,8 +74,11 @@ class SiteSetting(models.Model):
     link_youtube = models.URLField('لینک یوتیوب', blank=True)
 
     # ═══ کپی‌رایت ═══
-    copyright_text = models.TextField('متن کپی‌رایت',
-        default='تمامی منابع، تصاویر، حقوق و مطالب موجود در این وبسایت متعلق به قطعه ریزان ذوب آرای سپاهان است و هرگونه کپی‌برداری از آن پیگرد قانونی دارد © ۱۴۰۵')
+    copyright_text = models.TextField('متن کپی‌رایت', default='تمامی منابع، تصاویر، حقوق و مطالب موجود در این وبسایت متعلق به قطعه ریزان ذوب آرای سپاهان است و هرگونه کپی‌برداری از آن پیگرد قانونی دارد © ۱۴۰')
+
+    # ═══ حالت تعمیر ═══
+    maintenance_mode = models.BooleanField('حالت تعمیر', default=False)
+    maintenance_message = models.TextField('پیام حالت تعمیر', default='سایت در حال بروزرسانی است. لطفاً بعداً مراجعه کنید.', blank=True)
 
     class Meta:
         verbose_name = 'تنظیمات سایت'
@@ -101,7 +97,6 @@ class SiteSetting(models.Model):
         return obj
 
     def social_links(self):
-        """لیست شبکه‌های اجتماعی پر شده"""
         items = [
             ('واتساپ', self.link_whatsapp, 'whatsapp'),
             ('اینستاگرام', self.link_instagram, 'instagram'),
@@ -234,36 +229,6 @@ class AuditLog(models.Model):
     def __str__(self):
         return f'{self.user} - {self.action} - {self.created_at}'
     
-class SiteSetting(SoftDeleteModel):
-    # ... فیلدهای موجود ...
-    
-    maintenance_mode = models.BooleanField('حالت تعمیر', default=False)
-    maintenance_message = models.TextField(
-        'پیام حالت تعمیر',
-        default='سایت در حال بروزرسانی است. لطفاً بعداً مراجعه کنید.',
-        blank=True
-    )
-    
-    class Meta:
-        verbose_name = 'تنظیمات سایت'
-        verbose_name_plural = 'تنظیمات سایت'
-
-    def __str__(self):
-        return 'تنظیمات اصلی سایت'
-
-    # ═══ این متد را اضافه کنید ═══
-    @classmethod
-    def load(cls):
-        # اگر تنظیماتی وجود داشت آن را برمی‌گرداند، در غیر این صورت یک رکورد جدید می‌سازد
-        setting, created = cls.objects.get_or_create(
-            id=1,
-            defaults={
-                # اگر فیلد اجباری (required=True) دارید که مقدار پیش‌فرض ندارد، 
-                # نام آن را اینجا با یک مقدار خالی یا پیش‌فرض بنویسید تا خطا ندهد.
-                # مثال: 'site_name': 'زاسکو ذوب'
-            }
-        )
-        return setting
     
 class CustomRole(SoftDeleteModel):
     """نقش‌های سفارشی برای مدیریت دسترسی‌ها"""
@@ -299,6 +264,12 @@ class CustomRole(SoftDeleteModel):
         
         ('can_view_analytics', 'مشاهده آمار و تحلیل‌ها'),
         ('can_manage_settings', 'مدیریت تنظیمات سایت'),
+        
+        ('can_manage_backup', 'مدیریت بک‌آپ'),
+        
+        ('can_view_audit_log', 'مشاهده لاگ فعالیت‌ها'),
+        
+        ('can_manage_cache', 'مدیریت کش سایت'),
     ]
     
     class Meta:

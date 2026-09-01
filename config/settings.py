@@ -68,6 +68,7 @@ TEMPLATES = [
                 'main.context_processors.site_settings',
                 'main.context_processors.site_settings',
                 'panel.context_processors.panel_badges', 
+                'panel.context_processors.user_permissions',
             ],
         },
     },
@@ -162,3 +163,5 @@ CKEDITOR_CONFIGS = {
         'width': '100%',
     },
 }
+
+LOGIN_URL = '/zasco-admin-x9k2p/login/'
