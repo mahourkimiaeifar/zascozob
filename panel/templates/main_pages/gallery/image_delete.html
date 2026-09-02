@@ -1,13 +1,21 @@
 {% extends 'layouts/panel_base.html' %}
+{% block title %}حذف آلبوم{% endblock %}
+
 {% block content %}
-<div class="page-header"><h1 class="page-title" style="color: #ef4444;">⚠️ حذف تصویر</h1></div>
-<div class="form-card" style="max-width: 600px; text-align: center;">
-    <p>آیا از حذف این تصویر از آلبوم "<strong>{{ image.album.title }}</strong>" اطمینان دارید؟</p>
-    <img src="{{ image.image.url }}" style="max-width: 300px; border-radius: 8px; margin: 20px 0;">
-    <form method="POST">
+<div class="card confirm-card">
+    <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <h2>حذف آلبوم «{{ album.title }}»</h2>
+    <p>آیا از حذف این آلبوم و تمام تصاویر داخل آن اطمینان دارید؟<br>این عملیات قابل بازگشت نیست.</p>
+    <form method="POST" class="confirm-actions">
         {% csrf_token %}
-        <a href="{% url 'panel:gallery_album_images' image.album.id %}" class="btn-ghost">انصراف</a>
-        <button type="submit" class="btn-danger">بله، حذف شود</button>
+        <a href="{% url 'panel:gallery_album_list' %}" class="btn btn-ghost">انصراف</a>
+        <button type="submit" class="btn btn-danger">
+            <i class="fa-solid fa-trash-can"></i> بله، آلبوم حذف شود
+        </button>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>document.getElementById('pageTitle').textContent = 'حذف آلبوم';</script>
 {% endblock %}

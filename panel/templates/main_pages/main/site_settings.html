@@ -3,288 +3,153 @@
 
 {% block title %}تنظیمات سایت{% endblock %}
 
-{% block extra_css %}
-<style>
-    /* ── فیلد آپلود فایل (QR) ── */
-    .settings-form input[type="file"] {
-        width: 100%;
-        padding: 14px;
-        background: rgba(255, 107, 0, .03);
-        border: 1.5px dashed rgba(255, 107, 0, .35);
-        border-radius: 14px;
-        color: #9aa3b2;
-        font-size: .85rem;
-        cursor: pointer;
-        transition: all .3s
-    }
-
-    .settings-form input[type="file"]:hover {
-        border-color: #ff6b00;
-        background: rgba(255, 107, 0, .06)
-    }
-
-    .settings-form input[type="file"]::file-selector-button {
-        padding: 10px 22px;
-        margin-left: 14px;
-        background: linear-gradient(135deg, #ff6b00, #ff9a4d);
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        font-weight: 800;
-        font-family: inherit;
-        cursor: pointer;
-        box-shadow: 0 6px 16px rgba(255, 107, 0, .3);
-        transition: all .3s
-    }
-
-    .settings-form input[type="file"]::file-selector-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 24px rgba(255, 107, 0, .4)
-    }
-
-    /* ── چک‌باکس «پاک کردن» ── */
-    .settings-form input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
-        accent-color: #f44336;
-        cursor: pointer;
-        vertical-align: middle
-    }
-
-    /* ── پیش‌نمایش QR فعلی ── */
-    .qr-current-wrap {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        margin-bottom: 14px;
-        padding: 12px 16px;
-        background: rgba(255, 255, 255, .03);
-        border: 1px solid rgba(255, 255, 255, .08);
-        border-radius: 12px;
-        width: fit-content
-    }
-
-    .qr-current {
-        width: 90px;
-        height: 90px;
-        object-fit: contain;
-        background: #fff;
-        border-radius: 10px;
-        padding: 6px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, .4)
-    }
-
-    .qr-current-wrap span {
-        font-size: .8rem;
-        color: #9aa3b2;
-        font-weight: 600
-    }
-
-    /* ── باکس QR فعلی ── */
-    .qr-current-wrap {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 14px 18px;
-        background: rgba(255, 255, 255, .03);
-        border: 1px solid rgba(255, 255, 255, .08);
-        border-radius: 14px;
-        margin-bottom: 14px;
-        width: fit-content
-    }
-
-    .qr-current {
-        width: 84px;
-        height: 84px;
-        object-fit: contain;
-        background: #fff;
-        border-radius: 10px;
-        padding: 6px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, .4)
-    }
-
-    .qr-current-info {
-        display: flex;
-        flex-direction: column;
-        gap: 6px
-    }
-
-    .qr-title {
-        font-weight: 800;
-        font-size: .9rem;
-        color: #7cc47f
-    }
-
-    .qr-clear {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        color: #ef9a9a;
-        font-size: .8rem;
-        cursor: pointer;
-        transition: color .2s
-    }
-
-    .qr-clear input {
-        width: 16px;
-        height: 16px;
-        accent-color: #f44336;
-        cursor: pointer
-    }
-
-    .qr-clear svg {
-        width: 14px;
-        height: 14px
-    }
-
-    .qr-clear:hover {
-        color: #f44336
-    }
-
-    /* ── آپلودباکس جدید ── */
-    .qr-upload {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 26px 20px;
-        background: rgba(255, 107, 0, .03);
-        border: 1.5px dashed rgba(255, 107, 0, .35);
-        border-radius: 14px;
-        cursor: pointer;
-        text-align: center;
-        transition: all .3s
-    }
-
-    .qr-upload:hover {
-        border-color: #ff6b00;
-        background: rgba(255, 107, 0, .07)
-    }
-
-    .qr-upload svg {
-        width: 30px;
-        height: 30px;
-        color: #ff9a4d
-    }
-
-    .qr-upload span {
-        font-weight: 800;
-        color: #eef1f6;
-        font-size: .92rem
-    }
-
-    .qr-upload small {
-        color: #6b7482;
-        font-size: .75rem
-    }
-
-    .qr-hidden-input {
-        display: none
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<form method="POST" enctype="multipart/form-data" class="settings-form">
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="fa-solid fa-gear"></i>
+            تنظیمات سایت
+        </h1>
+        <p class="page-subtitle">مدیریت اطلاعات عمومی، فوتر و شبکه‌های اجتماعی</p>
+    </div>
+</div>
+
+<form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
 
     <div class="form-section">
-        <h3>🎯 عمومی</h3>
-        <div class="field-row">{{ form.site_title.label_tag }}{{ form.site_title }}<small>{{ form.site_title.help_text }}</small></div>
-        <div class="field-row">{{ form.subtitle.label_tag }}{{ form.subtitle }}</div>
-        <div class="field-row">{{ form.about_text.label_tag }}{{ form.about_text }}</div>
-    </div>
-
-    <div class="form-section">
-        <h3>🏢 اطلاعات شرکت</h3>
-        <div class="field-row">{{ form.footer_title_company.label_tag }}{{ form.footer_title_company }}</div>
-        <div class="field-grid">
-            <div class="field-row">{{ form.phone_mobile.label_tag }}{{ form.phone_mobile }}</div>
-            <div class="field-row">{{ form.phone_office.label_tag }}{{ form.phone_office }}</div>
+        <h3><i class="fa-solid fa-bullseye"></i> عمومی</h3>
+        <div class="field">
+            <label><i class="fa-solid fa-heading"></i> {{ form.site_title.label }}</label>
+            {{ form.site_title }}
+            <div class="hint"><i class="fa-solid fa-circle-info"></i> {{ form.site_title.help_text }}</div>
         </div>
-        <div class="field-row">{{ form.email.label_tag }}{{ form.email }}</div>
-        <div class="field-row">{{ form.address_factory.label_tag }}{{ form.address_factory }}</div>
-        <div class="field-row">{{ form.address_rd.label_tag }}{{ form.address_rd }}</div>
+        <div class="field">
+            <label><i class="fa-solid fa-quote-left"></i> {{ form.subtitle.label }}</label>
+            {{ form.subtitle }}
+        </div>
+        <div class="field">
+            <label><i class="fa-solid fa-align-right"></i> {{ form.about_text.label }}</label>
+            {{ form.about_text }}
+        </div>
     </div>
 
     <div class="form-section">
-        <h3>📄 دیگر صفحات</h3>
-        <div class="field-row">{{ form.footer_title_pages.label_tag }}{{ form.footer_title_pages }}</div>
-        <div class="field-row">{{ form.footer_description.label_tag }}{{ form.footer_description }}</div>
-        <div class="field-row">
-            <label>تصویر QR کاتالوگ</label>
+        <h3><i class="fa-solid fa-building"></i> اطلاعات شرکت</h3>
+        <div class="field">
+            <label><i class="fa-solid fa-tag"></i> {{ form.footer_title_company.label }}</label>
+            {{ form.footer_title_company }}
+        </div>
+        <div class="field-grid">
+            <div class="field">
+                <label><i class="fa-solid fa-mobile-screen"></i> {{ form.phone_mobile.label }}</label>
+                {{ form.phone_mobile }}
+            </div>
+            <div class="field">
+                <label><i class="fa-solid fa-phone"></i> {{ form.phone_office.label }}</label>
+                {{ form.phone_office }}
+            </div>
+        </div>
+        <div class="field">
+            <label><i class="fa-solid fa-envelope"></i> {{ form.email.label }}</label>
+            {{ form.email }}
+        </div>
+        <div class="field">
+            <label><i class="fa-solid fa-industry"></i> {{ form.address_factory.label }}</label>
+            {{ form.address_factory }}
+        </div>
+        <div class="field">
+            <label><i class="fa-solid fa-flask"></i> {{ form.address_rd.label }}</label>
+            {{ form.address_rd }}
+        </div>
+    </div>
 
+    <div class="form-section">
+        <h3><i class="fa-solid fa-file-lines"></i> دیگر صفحات</h3>
+        <div class="field">
+            <label><i class="fa-solid fa-tag"></i> {{ form.footer_title_pages.label }}</label>
+            {{ form.footer_title_pages }}
+        </div>
+        <div class="field">
+            <label><i class="fa-solid fa-align-right"></i> {{ form.footer_description.label }}</label>
+            {{ form.footer_description }}
+        </div>
+        <div class="field">
+            <label><i class="fa-solid fa-qrcode"></i> تصویر QR کاتالوگ</label>
             {% if form.instance.catalog_qr %}
             <div class="qr-current-wrap">
-                <img src="{{ form.instance.catalog_qr.url }}" alt="QR فعلی" class="qr-current">
+                <img src="{{ form.instance.catalog_qr.url }}" alt="QR" class="qr-current">
                 <div class="qr-current-info">
-                    <span class="qr-title">✅ QR فعلی فعال است</span>
+                    <span class="qr-title"><i class="fa-solid fa-circle-check"></i> QR فعلی فعال است</span>
                     <label class="qr-clear">
-                        <input type="checkbox" name="catalog_qr-clear" id="catalog_qr-clear_id">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        </svg>
-                        حذف تصویر فعلی
+                        <input type="checkbox" name="catalog_qr-clear">
+                        <i class="fa-solid fa-trash-can"></i> حذف تصویر فعلی
                     </label>
                 </div>
             </div>
             {% endif %}
-
             <label class="qr-upload" for="id_catalog_qr">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                </svg>
+                <i class="fa-solid fa-cloud-arrow-up"></i>
                 <span id="qrFileName">انتخاب تصویر QR جدید</span>
                 <small>PNG یا JPG — مربع و با پس‌زمینه سفید</small>
             </label>
             <input type="file" name="catalog_qr" id="id_catalog_qr" class="qr-hidden-input" accept="image/*">
-            {{ form.catalog_qr.errors }}
         </div>
     </div>
 
     <div class="form-section">
-        <h3>📧 خبرنامه</h3>
-        <div class="field-row">{{ form.footer_title_newsletter.label_tag }}{{ form.footer_title_newsletter }}</div>
-        <div class="field-row">{{ form.newsletter_text.label_tag }}{{ form.newsletter_text }}</div>
-        <div class="field-row">{{ form.newsletter_button_text.label_tag }}{{ form.newsletter_button_text }}</div>
+        <h3><i class="fa-solid fa-envelope-open-text"></i> خبرنامه</h3>
+        <div class="field">
+            <label><i class="fa-solid fa-tag"></i> {{ form.footer_title_newsletter.label }}</label>
+            {{ form.footer_title_newsletter }}
+        </div>
+        <div class="field">
+            <label><i class="fa-solid fa-align-right"></i> {{ form.newsletter_text.label }}</label>
+            {{ form.newsletter_text }}
+        </div>
+        <div class="field">
+            <label><i class="fa-solid fa-square-check"></i> {{ form.newsletter_button_text.label }}</label>
+            {{ form.newsletter_button_text }}
+        </div>
     </div>
 
     <div class="form-section">
-        <h3>🌐 شبکه‌های اجتماعی</h3>
+        <h3><i class="fa-solid fa-share-nodes"></i> شبکه‌های اجتماعی</h3>
         <div class="field-grid">
-            <div class="field-row">{{ form.link_whatsapp.label_tag }}{{ form.link_whatsapp }}</div>
-            <div class="field-row">{{ form.link_instagram.label_tag }}{{ form.link_instagram }}</div>
-            <div class="field-row">{{ form.link_telegram.label_tag }}{{ form.link_telegram }}</div>
-            <div class="field-row">{{ form.link_linkedin.label_tag }}{{ form.link_linkedin }}</div>
-            <div class="field-row">{{ form.link_aparat.label_tag }}{{ form.link_aparat }}</div>
-            <div class="field-row">{{ form.link_youtube.label_tag }}{{ form.link_youtube }}</div>
+            <div class="field"><label><i class="fa-brands fa-whatsapp"></i> {{ form.link_whatsapp.label }}</label>{{ form.link_whatsapp }}</div>
+            <div class="field"><label><i class="fa-brands fa-instagram"></i> {{ form.link_instagram.label }}</label>{{ form.link_instagram }}</div>
+            <div class="field"><label><i class="fa-brands fa-telegram"></i> {{ form.link_telegram.label }}</label>{{ form.link_telegram }}</div>
+            <div class="field"><label><i class="fa-brands fa-linkedin"></i> {{ form.link_linkedin.label }}</label>{{ form.link_linkedin }}</div>
+            <div class="field"><label><i class="fa-solid fa-play"></i> {{ form.link_aparat.label }}</label>{{ form.link_aparat }}</div>
+            <div class="field"><label><i class="fa-brands fa-youtube"></i> {{ form.link_youtube.label }}</label>{{ form.link_youtube }}</div>
         </div>
     </div>
 
     <div class="form-section">
-        <h3>© کپی‌رایت</h3>
-        <div class="field-row">{{ form.copyright_text.label_tag }}{{ form.copyright_text }}</div>
+        <h3><i class="fa-regular fa-copyright"></i> کپی‌رایت</h3>
+        <div class="field">
+            <label><i class="fa-solid fa-align-right"></i> {{ form.copyright_text.label }}</label>
+            {{ form.copyright_text }}
+        </div>
     </div>
 
     <div class="save-bar">
-        <button type="submit" class="btn-primary">💾 ذخیره تنظیمات</button>
+        <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-floppy-disk"></i> ذخیره تنظیمات
+        </button>
     </div>
 </form>
 {% endblock %}
 
 {% block extra_js %}
-<script>document.getElementById('pageTitle').textContent = 'تنظیمات سایت';
-    /* ── نشون دادن اسم فایل انتخاب‌شده ── */
-    var qrFile = document.getElementById('id_catalog_qr');
-    var qrName = document.getElementById('qrFileName');
-    if (qrFile && qrName) {
-        qrFile.addEventListener('change', function () {
-            if (qrFile.files[0]) qrName.textContent = '✓ ' + qrFile.files[0].name;
-        });
-    }
+<script>
+document.getElementById('pageTitle').textContent = 'تنظیمات سایت';
+var qrFile = document.getElementById('id_catalog_qr');
+var qrName = document.getElementById('qrFileName');
+if (qrFile && qrName) {
+    qrFile.addEventListener('change', function () {
+        if (qrFile.files[0]) qrName.textContent = '✓ ' + qrFile.files[0].name;
+    });
+}
 </script>
 {% endblock %}

@@ -1,14 +1,21 @@
 {% extends 'layouts/panel_base.html' %}
+{% load static %}
 
-{% block title %}دسته‌بندی‌ها{% endblock %}
+{% block title %}دسته‌بندی‌های بلاگ{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">دسته‌بندی‌ها</h1>
+        <h1 class="page-title">
+            <i class="fa-solid fa-folder-tree"></i>
+            دسته‌بندی‌ها
+        </h1>
         <p class="page-subtitle">مدیریت دسته‌بندی‌های وبلاگ</p>
     </div>
-    <a href="{% url 'panel:blog_category_add' %}" class="btn-primary">+ دسته‌بندی جدید</a>
+    <a href="{% url 'panel:blog_category_add' %}" class="btn btn-primary">
+        <i class="fa-solid fa-folder-plus"></i>
+        دسته‌بندی جدید
+    </a>
 </div>
 
 <div class="card">
@@ -16,39 +23,70 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>عنوان</th>
-                    <th>اسلاگ</th>
-                    <th>دسته مادر</th>
-                    <th>تعداد مقاله</th>
-                    <th>عملیات</th>
+                    <th><i class="fa-solid fa-tag"></i> عنوان</th>
+                    <th><i class="fa-solid fa-link"></i> اسلاگ</th>
+                    <th><i class="fa-solid fa-sitemap"></i> دسته مادر</th>
+                    <th><i class="fa-solid fa-newspaper"></i> تعداد مقاله</th>
+                    <th style="text-align:center;"><i class="fa-solid fa-bolt"></i> عملیات</th>
                 </tr>
             </thead>
             <tbody>
                 {% for cat in categories %}
                 <tr>
-                    <td><strong>{{ cat.title }}</strong></td>
-                    <td><code>{{ cat.slug }}</code></td>
-                    <td>{{ cat.parent|default:"—" }}</td>
-                    <td>{{ cat.posts.count }}</td>
                     <td>
-                        <a href="{% url 'panel:blog_category_edit' cat.id %}" class="btn-icon" title="ویرایش">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                            </svg>
-                        </a>
-                        <button class="btn-icon danger delete-cat-btn" data-id="{{ cat.id }}" title="حذف">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="3 6 5 6 21 6" />
-                                <path
-                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                        </button>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div class="cat-avatar">
+                                <i class="fa-solid fa-folder"></i>
+                            </div>
+                            <strong>{{ cat.title }}</strong>
+                        </div>
+                    </td>
+                    <td>
+                        <code class="slug-code" dir="ltr">{{ cat.slug }}</code>
+                    </td>
+                    <td>
+                        {% if cat.parent %}
+                        <div class="cat-cell">
+                            <span class="cat-parent">
+                                <i class="fa-solid fa-folder"></i> {{ cat.parent.title }}
+                            </span>
+                            <i class="fa-solid fa-chevron-left cat-arrow"></i>
+                            <span class="cat-child">{{ cat.title }}</span>
+                        </div>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="count-badge-sm">
+                            <i class="fa-solid fa-newspaper"></i>
+                            {{ cat.posts.count }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions" style="justify-content:center;">
+                            <a href="{% url 'panel:blog_category_edit' cat.id %}" class="btn-icon success" title="ویرایش">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <form method="POST" action="{% url 'panel:blog_category_delete' cat.id %}" style="display:inline;"
+                                  onsubmit="return confirm('آیا از حذف دسته‌بندی «{{ cat.title }}» مطمئن هستید؟');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-icon danger" title="حذف">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center">هنوز دسته‌بندی ایجاد نشده</td>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-folder-open"></i>
+                            <h3>هنوز دسته‌بندی ایجاد نشده</h3>
+                            <p>برای شروع، روی دکمه «دسته‌بندی جدید» کلیک کنید</p>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -58,16 +96,42 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+.cat-avatar {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--primary-subtle);
+    color: var(--primary-light);
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.cat-avatar i { font-size: 16px; }
+.slug-code {
+    font-family: 'Courier New', monospace;
+    background: var(--glass);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    border: 1px solid var(--line);
+}
+.count-badge-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--info-glow);
+    color: var(--info);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
-    document.querySelectorAll('.delete-cat-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            if (!confirm('آیا از حذف این دسته‌بندی مطمئن هستید؟')) return;
-            fetch('/zasco-admin-x9k2p/blog/category/' + btn.dataset.id + '/delete/', { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } })
-                .then(function (r) { return r.json() })
-                .then(function (d) { if (d.success) location.reload() });
-        });
-    });
-    function getCookie(n) { var v = '; ' + document.cookie; var p = v.split('; ' + n + '='); if (p.length === 2) return p.pop().split(';').shift(); return ''; }
+document.getElementById('pageTitle').textContent = 'دسته‌بندی‌ها';
 </script>
 {% endblock %}

@@ -1,0 +1,187 @@
+{% extends 'layouts/panel_base.html' %}
+{% block title %}کتابخانه فایل‌ها{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title"><i class="fa-solid fa-photo-film"></i> کتابخانه فایل‌ها</h1>
+        <p class="page-subtitle">مدیریت متمرکز تمام تصاویر، ویدیوها و اسناد سایت</p>
+    </div>
+</div>
+
+<!-- آپلود با Drag & Drop -->
+<form method="POST" enctype="multipart/form-data" id="uploadForm" class="upload-zone">
+    {% csrf_token %}
+    <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+    <h3>فایل‌ها را اینجا رها کنید</h3>
+    <p>یا <em>کلیک کنید</em> و فایل انتخاب کنید</p>
+    <input type="file" name="files" multiple id="fileInput" style="display:none;"
+           accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.zip,.rar">
+    <div style="margin-top:14px;">
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-folder-open"></i> انتخاب فایل‌ها
+        </button>
+    </div>
+    <button type="submit" id="uploadBtn" class="btn btn-primary" style="display:none; margin-top:14px;">
+        <i class="fa-solid fa-upload"></i> آپلود فایل‌ها
+    </button>
+    <div id="fileList" style="margin-top:14px; font-size:.88rem; color:var(--primary-light);"></div>
+</form>
+
+<!-- فیلتر و جستجو -->
+<div class="filter-bar">
+    <a href="{% url 'panel:media_library' %}" class="filter-chip {% if not file_type %}active{% endif %}">
+        <i class="fa-solid fa-layer-group"></i> همه فایل‌ها
+    </a>
+    <a href="?type=image" class="filter-chip {% if file_type == 'image' %}active{% endif %}">
+        <i class="fa-solid fa-image"></i> تصاویر
+    </a>
+    <a href="?type=document" class="filter-chip {% if file_type == 'document' %}active{% endif %}">
+        <i class="fa-solid fa-file-lines"></i> اسناد
+    </a>
+    <a href="?type=video" class="filter-chip {% if file_type == 'video' %}active{% endif %}">
+        <i class="fa-solid fa-video"></i> ویدیوها
+    </a>
+    <a href="?type=audio" class="filter-chip {% if file_type == 'audio' %}active{% endif %}">
+        <i class="fa-solid fa-music"></i> صداها
+    </a>
+
+    <form method="GET" class="filter-search">
+        <input type="text" name="q" value="{{ search }}" placeholder="جستجو در نام فایل...">
+        <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+    </form>
+</div>
+
+<!-- آمار -->
+<div class="media-stats">
+    <div class="media-stat">
+        <i class="fa-solid fa-chart-simple"></i>
+        <div>
+            <div class="ms-value">{{ files.paginator.count|default:files|length }}</div>
+            <div class="ms-label">کل فایل‌ها</div>
+        </div>
+    </div>
+    <div class="media-stat">
+        <i class="fa-solid fa-hard-drive"></i>
+        <div>
+            <div class="ms-value">{% widthratio files.paginator.count 1 10 %} MB</div>
+            <div class="ms-label">حجم تقریبی</div>
+        </div>
+    </div>
+</div>
+
+<!-- گرید فایل‌ها -->
+<div class="media-grid">
+    {% for f in files %}
+    <div class="media-card">
+        <div class="media-preview">
+            {% if f.file_type == 'image' %}
+                <img src="{{ f.file.url }}" alt="{{ f.title }}" loading="lazy">
+            {% else %}
+                {% if f.file_type == 'video' %}
+                    <i class="fa-solid fa-video placeholder-icon"></i>
+                {% elif f.file_type == 'audio' %}
+                    <i class="fa-solid fa-music placeholder-icon"></i>
+                {% else %}
+                    <i class="fa-solid fa-file-lines placeholder-icon"></i>
+                {% endif %}
+            {% endif %}
+            <div class="media-type-badge">
+                {% if f.file_type == 'image' %}<i class="fa-solid fa-image"></i>
+                {% elif f.file_type == 'video' %}<i class="fa-solid fa-video"></i>
+                {% elif f.file_type == 'audio' %}<i class="fa-solid fa-music"></i>
+                {% else %}<i class="fa-solid fa-file"></i>{% endif %}
+                {{ f.get_file_type_display }}
+            </div>
+        </div>
+        <div class="media-info">
+            <div class="media-title" title="{{ f.title }}">{{ f.title }}</div>
+            <div class="media-meta">
+                <span><i class="fa-solid fa-weight-hanging"></i> {{ f.file.size|filesizeformat }}</span>
+                <span><i class="fa-regular fa-calendar"></i> {{ f.uploaded_at|date:"Y/m/d" }}</span>
+            </div>
+            <div class="media-actions">
+                <button type="button" class="btn-copy" data-url="{{ f.file.url }}">
+                    <i class="fa-solid fa-copy"></i> کپی لینک
+                </button>
+                <a href="{% url 'panel:media_file_delete' f.id %}" class="btn-delete">
+                    <i class="fa-solid fa-trash-can"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state" style="grid-column:1/-1;">
+        <i class="fa-solid fa-inbox"></i>
+        <h3>هیچ فایلی یافت نشد</h3>
+        <p>اولین فایل خود را آپلود کنید!</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- صفحه‌بندی -->
+{% if files.has_other_pages %}
+<div style="display:flex; justify-content:center; gap:10px; margin-top:30px;">
+    {% if files.has_previous %}
+    <a href="?page={{ files.previous_page_number }}{% if file_type %}&type={{ file_type }}{% endif %}{% if search %}&q={{ search }}{% endif %}"
+       class="btn btn-ghost"><i class="fa-solid fa-chevron-right"></i> صفحه قبل</a>
+    {% endif %}
+    <span class="btn btn-ghost" style="cursor:default;">
+        صفحه {{ files.number }} از {{ files.paginator.num_pages }}
+    </span>
+    {% if files.has_next %}
+    <a href="?page={{ files.next_page_number }}{% if file_type %}&type={{ file_type }}{% endif %}{% if search %}&q={{ search }}{% endif %}"
+       class="btn btn-ghost">صفحه بعد <i class="fa-solid fa-chevron-left"></i></a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('pageTitle').textContent = 'کتابخانه فایل‌ها';
+
+(function () {
+    var uploadZone = document.getElementById('uploadZone');
+    var fileInput = document.getElementById('fileInput');
+    var uploadBtn = document.getElementById('uploadBtn');
+    var fileList = document.getElementById('fileList');
+
+    function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function (ev) {
+        uploadZone.addEventListener(ev, preventDefaults, false);
+    });
+    ['dragenter', 'dragover'].forEach(function (ev) {
+        uploadZone.addEventListener(ev, function () { uploadZone.classList.add('dragover'); });
+    });
+    ['dragleave', 'drop'].forEach(function (ev) {
+        uploadZone.addEventListener(ev, function () { uploadZone.classList.remove('dragover'); });
+    });
+    uploadZone.addEventListener('drop', function (e) {
+        fileInput.files = e.dataTransfer.files;
+        handleFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', function () { handleFiles(this.files); });
+
+    function handleFiles(files) {
+        if (files && files.length > 0) {
+            uploadBtn.style.display = 'inline-flex';
+            fileList.textContent = files.length + ' فایل انتخاب شد. برای آپلود کلیک کنید.';
+        }
+    }
+
+    // کپی لینک
+    document.querySelectorAll('.btn-copy').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var url = window.location.origin + btn.dataset.url;
+            navigator.clipboard.writeText(url).then(function () {
+                if (window.showToast) showToast('لینک در کلیپ‌بورد کپی شد', 'success');
+                else alert('لینک کپی شد!');
+            });
+        });
+    });
+})();
+</script>
+{% endblock %}

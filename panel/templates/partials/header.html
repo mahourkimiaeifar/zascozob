@@ -1,9 +1,7 @@
 <header class="panel-header">
     <div class="header-right">
         <button class="menu-toggle" id="menuToggle" aria-label="منو">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 12h18M3 6h18M3 18h18" />
-            </svg>
+            <i class="fa-solid fa-bars"></i>
         </button>
         <div class="page-title-wrap">
             <h1 class="page-title" id="pageTitle">داشبورد</h1>
@@ -14,27 +12,29 @@
             <div class="datetime-date" id="jalaliDate"></div>
             <div class="datetime-time" id="liveTime">--:--</div>
         </div>
+        
+        <!-- دکمه Theme Toggle (مهم) -->
+        <button class="theme-toggle" id="themeToggle" aria-label="تغییر تم" title="تغییر تم روشن/تیره">
+            <i class="fa-solid fa-sun"></i>
+            <i class="fa-solid fa-moon"></i>
+        </button>
+        
         <a href="/" target="_blank" class="header-icon-btn" title="مشاهده سایت">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
-            </svg>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
         </a>
+        
         <div class="user-menu" id="userMenu">
             <button class="user-btn">
-                <div class="user-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                    </svg></div>
-                <div class="user-info"><strong>{{ request.user.username }}</strong><small>مدیر سیستم</small></div>
-                <svg class="user-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 9l6 6 6-6" />
-                </svg>
+                <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="user-info">
+                    <strong>{{ request.user.username }}</strong>
+                    <small>مدیر سیستم</small>
+                </div>
+                <i class="fa-solid fa-chevron-down user-chevron"></i>
             </button>
             <div class="user-dropdown">
                 <a href="{% url 'panel:logout' %}" class="dropdown-item logout">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-                    </svg>
+                    <i class="fa-solid fa-right-from-bracket"></i>
                     خروج از حساب
                 </a>
             </div>

@@ -4,43 +4,72 @@
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">مدیریت آلبوم‌های گالری</h1>
-        <p class="page-subtitle">لیست آلبوم‌ها و مدیریت تصاویر هر رویداد یا مجموعه</p>
+        <h1 class="page-title"><i class="fa-solid fa-images"></i> مدیریت آلبوم‌های گالری</h1>
+        <p class="page-subtitle">لیست آلبوم‌ها و مدیریت تصاویر هر مجموعه</p>
     </div>
-    <a href="{% url 'panel:gallery_album_add' %}" class="btn-primary">+ آلبوم جدید</a>
+    <a href="{% url 'panel:gallery_album_add' %}" class="btn btn-primary">
+        <i class="fa-solid fa-folder-plus"></i> آلبوم جدید
+    </a>
 </div>
 
-<div class="table-card">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>عنوان آلبوم</th>
-                <th>تعداد تصاویر</th>
-                <th>وضعیت</th>
-                <th>تاریخ ایجاد</th>
-                <th>عملیات</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for album in albums %}
-            <tr>
-                <td><strong>{{ album.title }}</strong></td>
-                <td><span class="badge">{{ album.images.count }} تصویر</span></td>
-                <td>
-                    {% if album.published %}<span class="status-badge success">منتشر شده</span>
-                    {% else %}<span class="status-badge warning">پیش‌نویس</span>{% endif %}
-                </td>
-                <td>{{ album.created|date:"Y/m/d" }}</td>
-                <td class="actions">
-                    <a href="{% url 'panel:gallery_album_images' album.id %}" class="btn-sm btn-info">📷 تصاویر</a>
-                    <a href="{% url 'panel:gallery_album_edit' album.id %}" class="btn-sm btn-warning">✏️</a>
-                    <a href="{% url 'panel:gallery_album_delete' album.id %}" class="btn-sm btn-danger">🗑️</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5" class="empty-state">هنوز هیچ آلبومی ساخته نشده است.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th><i class="fa-solid fa-images"></i> عنوان آلبوم</th>
+                    <th><i class="fa-solid fa-photo-film"></i> تعداد تصاویر</th>
+                    <th><i class="fa-solid fa-circle-check"></i> وضعیت</th>
+                    <th><i class="fa-regular fa-calendar"></i> تاریخ ایجاد</th>
+                    <th style="text-align:center;"><i class="fa-solid fa-bolt"></i> عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for album in albums %}
+                <tr>
+                    <td>
+                        <div class="post-title-cell">
+                            <div class="post-thumb"><i class="fa-solid fa-images"></i></div>
+                            <div class="post-info">
+                                <strong>{{ album.title }}</strong>
+                                {% if album.description %}<span class="post-excerpt">{{ album.description|truncatechars:50 }}</span>{% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="metric-cell"><i class="fa-solid fa-photo-film"></i> {{ album.images.count }} تصویر</span></td>
+                    <td>
+                        {% if album.published %}
+                        <span class="badge badge-success"><i class="fa-solid fa-check"></i> منتشر شده</span>
+                        {% else %}
+                        <span class="badge badge-warning"><i class="fa-solid fa-pen"></i> پیش‌نویس</span>
+                        {% endif %}
+                    </td>
+                    <td><div class="date-cell"><i class="fa-regular fa-calendar"></i> {{ album.created|date:"Y/m/d" }}</div></td>
+                    <td>
+                        <div class="actions" style="justify-content:center;">
+                            <a href="{% url 'panel:gallery_album_images' album.id %}" class="btn-icon" title="مدیریت تصاویر"><i class="fa-solid fa-camera"></i></a>
+                            <a href="{% url 'panel:gallery_album_edit' album.id %}" class="btn-icon success" title="ویرایش"><i class="fa-solid fa-pen"></i></a>
+                            <a href="{% url 'panel:gallery_album_delete' album.id %}" class="btn-icon danger" title="حذف"><i class="fa-solid fa-trash-can"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-images"></i>
+                            <h3>هنوز آلبومی ساخته نشده</h3>
+                            <p>اولین آلبوم را با دکمه بالا بسازید</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>document.getElementById('pageTitle').textContent = 'گالری تصاویر';</script>
 {% endblock %}

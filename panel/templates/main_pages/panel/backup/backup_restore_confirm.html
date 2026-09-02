@@ -4,41 +4,46 @@
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title" style="color: #f59e0b;">⚠️ بازگردانی بک‌آپ</h1>
+        <h1 class="page-title"><i class="fa-solid fa-rotate-left"></i> بازگردانی بک‌آپ</h1>
         <p class="page-subtitle">تأیید نهایی بازگردانی اطلاعات</p>
     </div>
-    <a href="{% url 'panel:backup_manager' %}" class="btn-ghost">← بازگشت</a>
+    <a href="{% url 'panel:backup_manager' %}" class="btn btn-ghost">
+        <i class="fa-solid fa-arrow-right"></i> بازگشت
+    </a>
 </div>
 
-<div class="form-card" style="max-width: 700px; margin: 0 auto; border: 2px solid rgba(245,158,11,0.3); background: linear-gradient(135deg, rgba(245,158,11,0.05), rgba(245,158,11,0.02));">
-    <div style="text-align: center; margin-bottom: 30px;">
-        <div style="font-size: 4rem; margin-bottom: 15px;">🔄</div>
-        <h2 style="color: #f59e0b; margin-bottom: 10px;">آیا از بازگردانی این بک‌آپ اطمینان دارید؟</h2>
-        <p style="color: #ef4444; font-weight: 700; font-size: 1.1rem;">
-            ⚠️ این عملیات تمام داده‌های فعلی را پاک کرده و با داده‌های بک‌آپ جایگزین می‌کند!
-        </p>
+<div class="confirm-card" style="max-width:640px;">
+    <div class="confirm-icon warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <h2>آیا از بازگردانی این بک‌آپ اطمینان دارید؟</h2>
+    <div class="confirm-warning">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>این عملیات تمام داده‌های فعلی را پاک کرده و با داده‌های بک‌آپ جایگزین می‌کند!</span>
+    </div>
+    <div class="confirm-target">
+        <i class="fa-solid fa-file-zipper"></i>
+        <span>{{ filename }}</span>
     </div>
 
-    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 25px; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; color: #ccc;">
-        {{ info_content }}
-    </div>
+    {% if info_content %}
+    <div class="restore-info">{{ info_content }}</div>
+    {% endif %}
 
-    <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); padding: 15px; border-radius: 10px; margin-bottom: 25px;">
-        <p style="color: #ef9a9a; font-size: 0.9rem; margin: 0;">
-            <strong>توجه:</strong> پس از بازگردانی، تمام مقالات، نمونه‌کارها و تصاویری که بعد از این بک‌آپ اضافه کرده‌اید از بین خواهند رفت.
-        </p>
-    </div>
+    <p style="color:var(--text-muted); font-size:.88rem;">
+        توجه: پس از بازگردانی، تمام مقالات، نمونه‌کارها و تصاویری که <strong>بعد</strong> از این بک‌آپ اضافه کرده‌اید از بین خواهند رفت.
+    </p>
 
-    <div style="display: flex; gap: 15px; justify-content: center;">
-        <a href="{% url 'panel:backup_manager' %}" class="btn-ghost" style="padding: 12px 24px;">
-            ❌ انصراف
+    <form method="POST" class="confirm-actions">
+        {% csrf_token %}
+        <a href="{% url 'panel:backup_manager' %}" class="btn btn-ghost">
+            <i class="fa-solid fa-xmark"></i> انصراف
         </a>
-        <form method="POST" style="display: inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn-primary" style="padding: 12px 32px; background: linear-gradient(135deg, #f59e0b, #fbbf24); font-weight: 800;">
-                ✅ بله، بازگردانی شود
-            </button>
-        </form>
-    </div>
+        <button type="submit" class="btn btn-danger">
+            <i class="fa-solid fa-rotate-left"></i> بله، بازگردانی شود
+        </button>
+    </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>document.getElementById('pageTitle').textContent = 'بازگردانی بک‌آپ';</script>
 {% endblock %}

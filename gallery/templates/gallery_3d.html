@@ -1,0 +1,1182 @@
+{% extends 'layouts/main_base.html' %}
+{% load static %}
+
+{% block title %}گالری تصاویر | زاسکو ذوب{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ═══════════════════════════════════════════
+       گالری مدرن زاسکو ذوب
+    ═══════════════════════════════════════════ */
+
+    .gallery-hero {
+        position: relative;
+        padding: 80px 20px 60px;
+        text-align: center;
+        background: radial-gradient(ellipse at top, rgba(255, 107, 0, 0.08), transparent 60%),
+            linear-gradient(180deg, #0a0b0f 0%, #14151c 100%);
+        overflow: hidden;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .gallery-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background:
+            radial-gradient(circle at 20% 30%, rgba(255, 107, 0, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(255, 154, 77, 0.1) 0%, transparent 40%);
+        animation: heroFloat 20s ease-in-out infinite;
+    }
+
+    @keyframes heroFloat {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(-20px, 20px); }
+    }
+
+    .gallery-hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .gallery-hero h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 900;
+        margin: 0 0 16px;
+        background: linear-gradient(135deg, #fff 0%, #ff9a4d 50%, #ff6b00 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -1px;
+    }
+
+    .gallery-hero p {
+        color: #a5a8c8;
+        font-size: 1.1rem;
+        margin: 0 0 24px;
+        line-height: 1.7;
+    }
+
+    .gallery-hero-stats {
+        display: inline-flex;
+        gap: 30px;
+        padding: 14px 28px;
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        margin-top: 20px;
+    }
+
+    .hero-stat {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #fff;
+        font-size: 0.9rem;
+    }
+
+    .hero-stat .z-icon {
+        width: 22px;
+        height: 22px;
+        color: #ff6b00;
+        flex-shrink: 0;
+    }
+
+    .hero-stat strong {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #ff9a4d;
+        font-variant-numeric: tabular-nums;
+        display: block;
+        line-height: 1;
+    }
+
+    .hero-stat div {
+        text-align: right;
+    }
+
+    /* ═══ فیلترها ═══ */
+    .gallery-controls {
+        max-width: 1400px;
+        margin: 40px auto 30px;
+        padding: 0 20px;
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .gallery-search {
+        flex: 1;
+        min-width: 280px;
+        position: relative;
+    }
+
+    .gallery-search input {
+        width: 100%;
+        padding: 14px 20px 14px 50px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1.5px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        color: #fff;
+        font-size: 0.95rem;
+        font-family: inherit;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .gallery-search input:focus {
+        border-color: #ff6b00;
+        background: rgba(255, 107, 0, 0.05);
+        box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.1);
+    }
+
+    .gallery-search .z-icon {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9aa3b2;
+        width: 18px;
+        height: 18px;
+    }
+
+    .gallery-view-toggle {
+        display: flex;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1.5px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 4px;
+    }
+
+    .view-btn {
+        padding: 10px 16px;
+        background: none;
+        border: none;
+        border-radius: 8px;
+        color: #9aa3b2;
+        cursor: pointer;
+        transition: all 0.25s;
+        font-family: inherit;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .view-btn .z-icon {
+        width: 15px;
+        height: 15px;
+    }
+
+    .view-btn.active {
+        background: linear-gradient(135deg, #ff6b00, #ff9a4d);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(255, 107, 0, 0.3);
+    }
+
+    /* ═══ گرید آلبوم‌ها ═══ */
+    .gallery-grid {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px 80px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
+    }
+
+    .gallery-grid.view-list {
+        grid-template-columns: 1fr;
+        max-width: 1000px;
+    }
+
+    .album-card {
+        position: relative;
+        background: linear-gradient(135deg, rgba(20, 20, 28, 0.9), rgba(14, 14, 20, 0.95));
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 20px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        animation: cardIn 0.5s backwards;
+    }
+
+    @keyframes cardIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .album-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(255, 107, 0, 0.4);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 60px rgba(255, 107, 0, 0.15);
+    }
+
+    .album-thumb {
+        position: relative;
+        aspect-ratio: 4/3;
+        overflow: hidden;
+        background: #1a1a22;
+    }
+
+    .album-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .album-card:hover .album-thumb img {
+        transform: scale(1.08);
+    }
+
+    .album-thumb-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ff9a4d;
+    }
+
+    .album-thumb-placeholder .z-icon {
+        width: 64px;
+        height: 64px;
+        opacity: 0.5;
+    }
+
+    .album-thumb-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 60%);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 20px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .album-card:hover .album-thumb-overlay {
+        opacity: 1;
+    }
+
+    .album-view-btn {
+        padding: 10px 22px;
+        background: linear-gradient(135deg, #ff6b00, #ff9a4d);
+        color: #fff;
+        border: none;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: inherit;
+        transform: translateY(20px);
+        transition: transform 0.4s;
+        box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
+    }
+
+    .album-view-btn .z-icon {
+        width: 15px;
+        height: 15px;
+    }
+
+    .album-card:hover .album-view-btn {
+        transform: translateY(0);
+    }
+
+    .album-badge {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        padding: 6px 14px;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 999px;
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        z-index: 2;
+    }
+
+    .album-badge .z-icon {
+        width: 13px;
+        height: 13px;
+        color: #ff9a4d;
+    }
+
+    .album-info {
+        padding: 20px 22px 22px;
+    }
+
+    .album-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 8px;
+        line-height: 1.4;
+    }
+
+    .album-desc {
+        color: #9aa3b2;
+        font-size: 0.88rem;
+        line-height: 1.7;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* حالت list */
+    .gallery-grid.view-list .album-card {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        align-items: center;
+    }
+
+    .gallery-grid.view-list .album-thumb {
+        aspect-ratio: 16/10;
+    }
+
+    .gallery-grid.view-list .album-info {
+        padding: 24px;
+    }
+
+    /* Empty state */
+    .gallery-empty {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 80px 20px;
+        color: #6b7482;
+    }
+
+    .gallery-empty .z-icon {
+        width: 80px;
+        height: 80px;
+        color: #ff6b00;
+        opacity: 0.3;
+        margin-bottom: 20px;
+    }
+
+    .gallery-empty h3 {
+        color: #fff;
+        font-size: 1.3rem;
+        margin: 0 0 8px;
+    }
+
+    /* ═══ Viewer Overlay ═══ */
+    .viewer-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.96);
+        backdrop-filter: blur(30px);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .viewer-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .viewer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 30px;
+        background: rgba(10, 10, 15, 0.8);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(20px);
+    }
+
+    .viewer-title {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .viewer-title h2 {
+        font-size: 1.2rem;
+        font-weight: 800;
+        margin: 0 0 4px;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .viewer-title p {
+        font-size: 0.82rem;
+        color: #9aa3b2;
+        margin: 0;
+    }
+
+    .viewer-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .viewer-action-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.25s;
+    }
+
+    .viewer-action-btn .z-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .viewer-action-btn:hover {
+        background: rgba(255, 107, 0, 0.15);
+        border-color: #ff6b00;
+        color: #ff9a4d;
+    }
+
+    .viewer-action-btn.close:hover {
+        background: rgba(239, 68, 68, 0.15);
+        border-color: #ef4444;
+        color: #ef9a9a;
+    }
+
+    .viewer-body {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+        position: relative;
+    }
+
+    .viewer-main {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        min-width: 0;
+        padding: 20px;
+    }
+
+    .viewer-image-wrap {
+        max-width: 100%;
+        max-height: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .viewer-image {
+        max-width: 100%;
+        max-height: calc(100vh - 200px);
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        animation: imageZoom 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes imageZoom {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .viewer-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 107, 0, 0.4);
+        color: #ff9a4d;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        z-index: 5;
+    }
+
+    .viewer-nav-btn .z-icon {
+        width: 22px;
+        height: 22px;
+    }
+
+    .viewer-nav-btn:hover {
+        background: #ff6b00;
+        color: #fff;
+        border-color: #ff6b00;
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 10px 30px rgba(255, 107, 0, 0.5);
+    }
+
+    .viewer-nav-btn.prev { left: 30px; }
+    .viewer-nav-btn.next { right: 30px; }
+
+    .viewer-counter {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 8px 20px;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 999px;
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.88rem;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .viewer-info-badge {
+        position: absolute;
+        top: 20px;
+        left: 30px;
+        padding: 10px 18px;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        color: #fff;
+        font-size: 0.85rem;
+        max-width: 350px;
+    }
+
+    .viewer-info-badge strong {
+        display: block;
+        margin-bottom: 4px;
+        color: #ff9a4d;
+        font-size: 0.92rem;
+    }
+
+    /* Sidebar آلبوم‌ها */
+    .viewer-sidebar {
+        width: 320px;
+        background: rgba(10, 10, 15, 0.95);
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .sidebar-section h3 {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #ff9a4d;
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        letter-spacing: 0.5px;
+    }
+
+    .sidebar-section h3 .z-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .thumbs-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .thumb-item {
+        aspect-ratio: 1;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.25s;
+    }
+
+    .thumb-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+
+    .thumb-item:hover {
+        border-color: #ff6b00;
+        transform: scale(1.05);
+    }
+
+    .thumb-item:hover img {
+        transform: scale(1.1);
+    }
+
+    .thumb-item.active {
+        border-color: #ff9a4d;
+        box-shadow: 0 0 20px rgba(255, 154, 77, 0.5);
+    }
+
+    .albums-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .album-item {
+        padding: 12px 14px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .album-item:hover {
+        background: rgba(255, 107, 0, 0.08);
+        border-color: rgba(255, 107, 0, 0.3);
+        transform: translateX(-4px);
+    }
+
+    .album-item.active {
+        background: linear-gradient(135deg, rgba(255, 107, 0, 0.15), rgba(255, 107, 0, 0.05));
+        border-color: #ff6b00;
+    }
+
+    .album-item-thumb {
+        width: 50px;
+        height: 40px;
+        border-radius: 6px;
+        overflow: hidden;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .album-item-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .album-item-thumb .z-icon {
+        width: 20px;
+        height: 20px;
+        color: #ff9a4d;
+    }
+
+    .album-item-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .album-item-info strong {
+        display: block;
+        font-size: 0.88rem;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 2px;
+    }
+
+    .album-item-info small {
+        font-size: 0.72rem;
+        color: #9aa3b2;
+    }
+
+    /* ═══ SVG Icon System ═══ */
+    .z-icon {
+        display: inline-block;
+        vertical-align: -0.125em;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex-shrink: 0;
+    }
+
+    /* ═══ Responsive ═══ */
+    @media (max-width: 1024px) {
+        .viewer-sidebar { width: 280px; }
+        .viewer-info-badge { max-width: 250px; font-size: 0.78rem; }
+    }
+
+    @media (max-width: 768px) {
+        .gallery-hero { padding: 60px 20px 40px; }
+        .gallery-hero-stats { flex-wrap: wrap; gap: 16px; padding: 12px 20px; }
+        .hero-stat { font-size: 0.82rem; }
+        .hero-stat strong { font-size: 1.1rem; }
+        .gallery-grid {
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            padding: 0 16px 60px;
+        }
+        .gallery-grid.view-list .album-card { grid-template-columns: 1fr; }
+        .viewer-body { flex-direction: column-reverse; }
+        .viewer-sidebar {
+            width: 100%;
+            max-height: 200px;
+            border-right: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 14px;
+        }
+        .viewer-nav-btn { width: 44px; height: 44px; }
+        .viewer-nav-btn.prev { left: 12px; }
+        .viewer-nav-btn.next { right: 12px; }
+        .viewer-header { padding: 14px 16px; }
+        .viewer-title h2 { font-size: 1rem; }
+        .viewer-counter { bottom: 220px; }
+    }
+
+    @media (max-width: 480px) {
+        .gallery-grid { grid-template-columns: 1fr; }
+        .viewer-info-badge { display: none; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="gallery-hero">
+    <div class="gallery-hero-content">
+        <h1>گالری تصاویر زاسکو ذوب</h1>
+        <p>مجموعه‌ای از تصاویر محصولات، پروژه‌ها و لحظات ماندگار کارخانه ریخته‌گری</p>
+
+        <div class="gallery-hero-stats">
+            <div class="hero-stat">
+                <span data-z-icon="images"></span>
+                <div>
+                    <strong>{{ albums_data|length }}</strong>
+                    <div style="font-size: 0.72rem; color: #9aa3b2;">آلبوم</div>
+                </div>
+            </div>
+            <div class="hero-stat">
+                <span data-z-icon="photo-film"></span>
+                <div>
+                    <strong id="totalImagesCount">0</strong>
+                    <div style="font-size: 0.72rem; color: #9aa3b2;">تصویر</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Controls -->
+<div class="gallery-controls">
+    <div class="gallery-search">
+        <span data-z-icon="search"></span>
+        <input type="text" id="albumSearch" placeholder="جستجو در آلبوم‌ها...">
+    </div>
+    <div class="gallery-view-toggle">
+        <button class="view-btn active" data-view="grid">
+            <span data-z-icon="grid"></span> گرید
+        </button>
+        <button class="view-btn" data-view="list">
+            <span data-z-icon="list"></span> لیست
+        </button>
+    </div>
+</div>
+
+<!-- Albums Grid -->
+<div class="gallery-grid" id="galleryGrid">
+    {% for album in albums_data %}
+    <div class="album-card" data-index="{{ forloop.counter0 }}" data-title="{{ album.title }}"
+        data-desc="{{ album.description|default:'' }}">
+        <div class="album-thumb">
+            {% if album.cover %}
+            <img src="{{ album.cover }}" alt="{{ album.title }}" loading="lazy">
+            {% else %}
+            <div class="album-thumb-placeholder">
+                <span data-z-icon="images"></span>
+            </div>
+            {% endif %}
+            <span class="album-badge">
+                <span data-z-icon="photo-film"></span>
+                {{ album.images_count }} تصویر
+            </span>
+            <div class="album-thumb-overlay">
+                <span class="album-view-btn">
+                    <span data-z-icon="eye"></span>
+                    مشاهده آلبوم
+                </span>
+            </div>
+        </div>
+        <div class="album-info">
+            <h3 class="album-title">{{ album.title }}</h3>
+            {% if album.description %}
+            <p class="album-desc">{{ album.description }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="gallery-empty">
+        <span data-z-icon="image"></span>
+        <h3>هنوز آلبومی ثبت نشده است</h3>
+        <p>آلبوم‌های جدید به زودی اضافه خواهند شد</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Viewer Overlay -->
+<div class="viewer-overlay" id="viewerOverlay">
+    <div class="viewer-header">
+        <div class="viewer-title">
+            <h2 id="viewerAlbumTitle"></h2>
+            <p id="viewerAlbumDesc"></p>
+        </div>
+        <div class="viewer-actions">
+            <button class="viewer-action-btn" onclick="viewerDownload()" title="دانلود">
+                <span data-z-icon="download"></span>
+            </button>
+            <button class="viewer-action-btn" onclick="viewerFullscreen()" title="تمام صفحه">
+                <span data-z-icon="expand"></span>
+            </button>
+            <button class="viewer-action-btn close" onclick="closeViewer()" title="بستن">
+                <span data-z-icon="xmark"></span>
+            </button>
+        </div>
+    </div>
+
+    <div class="viewer-body">
+        <div class="viewer-sidebar">
+            <div class="sidebar-section">
+                <h3><span data-z-icon="images"></span> تصاویر این آلبوم</h3>
+                <div class="thumbs-grid" id="viewerThumbs"></div>
+            </div>
+            <div class="sidebar-section">
+                <h3><span data-z-icon="folder-open"></span> سایر آلبوم‌ها</h3>
+                <div class="albums-list" id="albumsList"></div>
+            </div>
+        </div>
+
+        <div class="viewer-main">
+            <button class="viewer-nav-btn prev" onclick="viewerPrevImage()">
+                <span data-z-icon="chevron-left"></span>
+            </button>
+
+            <div class="viewer-info-badge" id="viewerInfoBadge">
+                <strong id="viewerImageTitle"></strong>
+                <div id="viewerImageDesc"></div>
+            </div>
+
+            <div class="viewer-image-wrap">
+                <img class="viewer-image" id="viewerImage" src="" alt="">
+            </div>
+
+            <div class="viewer-counter" id="viewerCounter"></div>
+
+            <button class="viewer-nav-btn next" onclick="viewerNextImage()">
+                <span data-z-icon="chevron-right"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Data -->
+<script type="application/json" id="galleryData">{{ albums_json|safe }}</script>
+
+<script>
+(function () {
+    'use strict';
+
+    /* ═══════════════════════════════════════════════════════
+       SVG Icon System — همه آیکون‌ها اینجا
+    ═══════════════════════════════════════════════════════ */
+    var SVG = {
+        images: '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+        
+        image: '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+        
+        'photo-film': '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8V6a2 2 0 0 1 2-2h3"/><path d="M17 4h3a2 2 0 0 1 2 2v2"/><path d="M22 16v2a2 2 0 0 1-2 2h-3"/><path d="M7 20H4a2 2 0 0 1-2-2v-2"/><rect x="6" y="8" width="12" height="8" rx="1"/><path d="m10 12 2 2 4-4"/></svg>',
+        
+        search: '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+        
+        grid: '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+        
+        list: '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
+        
+        eye: '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+        
+        download: '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+        
+        expand: '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
+        
+        xmark: '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+        
+        'chevron-left': '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+        
+        'chevron-right': '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+        
+        'folder-open': '<svg class="z-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4l2 3h9a2 2 0 0 1 2 2v1"/><path d="M2 10h20l-2.5 9a2 2 0 0 1-2 1.5H4.5a2 2 0 0 1-2-1.5L2 10z"/></svg>'
+    };
+
+    /* تابع icon() برای استفاده در JS */
+    function icon(name) {
+        return SVG[name] || '';
+    }
+
+    /* جایگزینی خودکار همه [data-z-icon] ها */
+    function renderIcons(root) {
+        root = root || document;
+        var els = root.querySelectorAll('[data-z-icon]');
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (el.hasAttribute('data-rendered')) continue;
+            var name = el.getAttribute('data-z-icon');
+            if (SVG[name]) {
+                el.innerHTML = SVG[name];
+                el.setAttribute('data-rendered', '1');
+            }
+        }
+    }
+
+    /* اجرای اولیه */
+    renderIcons(document);
+
+    /* ═══════════════════════════════════════════════════════
+       Gallery Logic
+    ═══════════════════════════════════════════════════════ */
+    var dataEl = document.getElementById('galleryData');
+    if (!dataEl) return;
+
+    var albums = JSON.parse(dataEl.textContent);
+    var grid = document.getElementById('galleryGrid');
+    var searchInput = document.getElementById('albumSearch');
+    var viewBtns = document.querySelectorAll('.view-btn');
+    var overlay = document.getElementById('viewerOverlay');
+
+    var currentIndex = 0;
+    var currentImageIndex = 0;
+
+    // شمارش کل تصاویر
+    var totalImages = 0;
+    albums.forEach(function (a) { totalImages += a.images_count; });
+    var totalEl = document.getElementById('totalImagesCount');
+    if (totalEl) totalEl.textContent = totalImages;
+
+    // ═══ جستجو ═══
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            var q = searchInput.value.toLowerCase().trim();
+            var cards = grid.querySelectorAll('.album-card');
+            cards.forEach(function (card) {
+                var title = (card.dataset.title || '').toLowerCase();
+                var desc = (card.dataset.desc || '').toLowerCase();
+                var match = !q || title.indexOf(q) > -1 || desc.indexOf(q) > -1;
+                card.style.display = match ? '' : 'none';
+            });
+        });
+    }
+
+    // ═══ Toggle view ═══
+    viewBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            viewBtns.forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            var view = btn.dataset.view;
+            if (view === 'list') grid.classList.add('view-list');
+            else grid.classList.remove('view-list');
+            try { localStorage.setItem('gallery_view', view); } catch (e) { }
+        });
+    });
+
+    // یادآوری حالت نمایش
+    try {
+        var savedView = localStorage.getItem('gallery_view');
+        if (savedView === 'list') {
+            grid.classList.add('view-list');
+            viewBtns.forEach(function (b) {
+                b.classList.toggle('active', b.dataset.view === 'list');
+            });
+        }
+    } catch (e) { }
+
+    // ═══ کلیک روی کارت آلبوم ═══
+    grid.addEventListener('click', function (e) {
+        var card = e.target.closest('.album-card');
+        if (!card) return;
+        var idx = parseInt(card.dataset.index, 10);
+        openViewer(idx);
+    });
+
+    // ═══ Viewer ═══
+    window.openViewer = function (idx) {
+        currentIndex = idx;
+        currentImageIndex = 0;
+        updateViewer();
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        renderAlbumsList();
+    };
+
+    window.closeViewer = function () {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    function updateViewer() {
+        var album = albums[currentIndex];
+        if (!album) return;
+        var image = album.images[currentImageIndex];
+        if (!image) return;
+
+        document.getElementById('viewerAlbumTitle').textContent = album.title;
+        document.getElementById('viewerAlbumDesc').textContent = album.description || (album.images_count + ' تصویر');
+
+        var img = document.getElementById('viewerImage');
+        img.src = image.url;
+        img.alt = image.title || album.title;
+
+        document.getElementById('viewerImageTitle').textContent = image.title || 'بدون عنوان';
+        document.getElementById('viewerImageDesc').textContent = image.description || '';
+        document.getElementById('viewerCounter').textContent = (currentImageIndex + 1) + ' / ' + album.images.length;
+
+        renderThumbs();
+        highlightAlbum();
+    }
+
+    function renderThumbs() {
+        var album = albums[currentIndex];
+        var thumbsContainer = document.getElementById('viewerThumbs');
+        thumbsContainer.innerHTML = '';
+        album.images.forEach(function (img, idx) {
+            var thumb = document.createElement('div');
+            thumb.className = 'thumb-item' + (idx === currentImageIndex ? ' active' : '');
+            var imgEl = document.createElement('img');
+            imgEl.src = img.url;
+            imgEl.alt = img.title || '';
+            imgEl.loading = 'lazy';
+            thumb.appendChild(imgEl);
+            thumb.addEventListener('click', function () {
+                currentImageIndex = idx;
+                updateViewer();
+            });
+            thumbsContainer.appendChild(thumb);
+        });
+    }
+
+    function renderAlbumsList() {
+        var list = document.getElementById('albumsList');
+        list.innerHTML = '';
+        albums.forEach(function (album, idx) {
+            var item = document.createElement('div');
+            item.className = 'album-item' + (idx === currentIndex ? ' active' : '');
+            
+            // ساخت HTML با SVG به جای i fa
+            var thumbHTML;
+            if (album.cover) {
+                thumbHTML = '<img src="' + album.cover + '" alt="">';
+            } else {
+                thumbHTML = icon('images');
+            }
+            
+            item.innerHTML =
+                '<div class="album-item-thumb">' + thumbHTML + '</div>' +
+                '<div class="album-item-info">' +
+                '<strong>' + album.title + '</strong>' +
+                '<small>' + album.images_count + ' تصویر</small>' +
+                '</div>';
+            
+            item.addEventListener('click', function () {
+                currentIndex = idx;
+                currentImageIndex = 0;
+                updateViewer();
+            });
+            list.appendChild(item);
+        });
+    }
+
+    function highlightAlbum() {
+        document.querySelectorAll('.album-item').forEach(function (el, idx) {
+            el.classList.toggle('active', idx === currentIndex);
+        });
+    }
+
+    window.viewerPrevImage = function () {
+        var album = albums[currentIndex];
+        currentImageIndex = (currentImageIndex - 1 + album.images.length) % album.images.length;
+        updateViewer();
+    };
+
+    window.viewerNextImage = function () {
+        var album = albums[currentIndex];
+        currentImageIndex = (currentImageIndex + 1) % album.images.length;
+        updateViewer();
+    };
+
+    window.viewerDownload = function () {
+        var album = albums[currentIndex];
+        var image = album.images[currentImageIndex];
+        if (!image) return;
+        var a = document.createElement('a');
+        a.href = image.url;
+        a.download = (image.title || album.title) + '.jpg';
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    window.viewerFullscreen = function () {
+        var img = document.getElementById('viewerImage');
+        if (img.requestFullscreen) img.requestFullscreen();
+        else if (img.webkitRequestFullscreen) img.webkitRequestFullscreen();
+    };
+
+    // ═══ Keyboard ═══
+    document.addEventListener('keydown', function (e) {
+        if (!overlay.classList.contains('active')) return;
+        if (e.key === 'ArrowLeft') viewerNextImage();
+        else if (e.key === 'ArrowRight') viewerPrevImage();
+        else if (e.key === 'Escape') closeViewer();
+    });
+
+    // ═══ Swipe برای موبایل ═══
+    var touchStartX = 0;
+    var viewerMain = document.querySelector('.viewer-main');
+    if (viewerMain) {
+        viewerMain.addEventListener('touchstart', function (e) {
+            touchStartX = e.touches[0].clientX;
+        });
+        viewerMain.addEventListener('touchend', function (e) {
+            var diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) viewerNextImage();
+                else viewerPrevImage();
+            }
+        });
+    }
+
+    console.log('✨ Modern Gallery (with SVG icons) initialized:', albums.length, 'albums');
+})();
+</script>
+{% endblock %}

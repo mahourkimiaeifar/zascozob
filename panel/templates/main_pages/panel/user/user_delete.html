@@ -1,18 +1,40 @@
 {% extends 'layouts/panel_base.html' %}
+{% block title %}حذف کاربر{% endblock %}
+
 {% block content %}
 <div class="page-header">
-    <h1 class="page-title" style="color: #ef4444;">⚠️ حذف کاربر</h1>
-</div>
-<div class="form-card" style="max-width: 500px; margin: 0 auto; text-align: center;">
-    <p style="font-size: 1.1rem; margin-bottom: 10px;">آیا از حذف کاربر "<strong>{{ user_obj.username }}</strong>" اطمینان دارید؟</p>
-    <p style="color: #888; font-size: 0.85rem; margin-bottom: 25px;">تمام دسترسی‌های این کاربر به پنل مدیریت لغو خواهد شد.</p>
-    
-    <div style="display: flex; gap: 15px; justify-content: center;">
-        <a href="{% url 'panel:user_list' %}" class="btn-ghost">انصراف</a>
-        <form method="POST" style="margin: 0;">
-            {% csrf_token %}
-            <button type="submit" class="btn-primary" style="background: #ef4444; box-shadow: 0 8px 22px rgba(239,68,68,0.3);">بله، حذف شود</button>
-        </form>
+    <div>
+        <h1 class="page-title"><i class="fa-solid fa-user-xmark"></i> حذف کاربر</h1>
+        <p class="page-subtitle">تأیید نهایی حذف حساب کاربری</p>
     </div>
+    <a href="{% url 'panel:user_list' %}" class="btn btn-ghost">
+        <i class="fa-solid fa-arrow-right"></i> بازگشت
+    </a>
 </div>
+
+<div class="confirm-card">
+    <div class="confirm-icon danger"><i class="fa-solid fa-user-xmark"></i></div>
+    <h2>حذف کاربر «{{ user_obj.username }}»</h2>
+    <div class="confirm-target">
+        <div class="u-avatar" style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--primary-light)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800;">
+            {{ user_obj.username|slice:":1"|upper }}
+        </div>
+        <span>{{ user_obj.username }}</span>
+    </div>
+    <p>آیا از حذف این کاربر اطمینان دارید؟<br>تمام دسترسی‌های این کاربر به پنل مدیریت لغو خواهد شد.</p>
+
+    <form method="POST" class="confirm-actions">
+        {% csrf_token %}
+        <a href="{% url 'panel:user_list' %}" class="btn btn-ghost">
+            <i class="fa-solid fa-xmark"></i> انصراف
+        </a>
+        <button type="submit" class="btn btn-danger">
+            <i class="fa-solid fa-trash-can"></i> بله، حذف شود
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>document.getElementById('pageTitle').textContent = 'حذف کاربر';</script>
 {% endblock %}

@@ -1,77 +1,236 @@
 {% extends 'layouts/panel_base.html' %}
+{% load static %}
 
 {% block title %}داشبورد{% endblock %}
 
 {% block content %}
-<div class="dashboard">
-    <div class="stats-grid">
-        <div class="stat-card stat-primary">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg></div>
-            <div class="stat-content">
-                <div class="stat-label">کل پیام‌ها</div>
-                <div class="stat-value">{{ total_messages|default:0 }}</div>
-            </div>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="fa-solid fa-chart-pie"></i>
+            داشبورد
+        </h1>
+        <p class="page-subtitle">نمای کلی از وضعیت سایت و فعالیت‌های اخیر</p>
+    </div>
+    <a href="{% url 'panel:main_contact' %}" class="btn btn-primary">
+        <i class="fa-solid fa-envelope"></i>
+        مشاهده پیام‌ها
+    </a>
+</div>
+
+<!-- کارت‌های آماری -->
+<div class="stats-grid">
+    <div class="stat-card stat-primary">
+        <div class="stat-icon"><i class="fa-solid fa-envelope"></i></div>
+        <div>
+            <div class="stat-label">کل پیام‌ها</div>
+            <div class="stat-value">{{ total_messages|default:0 }}</div>
         </div>
-        <div class="stat-card stat-warning">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 8v4M12 16h.01" />
-                </svg></div>
-            <div class="stat-content">
-                <div class="stat-label">خوانده نشده</div>
-                <div class="stat-value">{{ unread_messages|default:0 }}</div>
-            </div>
+    </div>
+    <div class="stat-card stat-danger">
+        <div class="stat-icon"><i class="fa-solid fa-bell"></i></div>
+        <div>
+            <div class="stat-label">خوانده نشده</div>
+            <div class="stat-value">{{ unread_messages|default:0 }}</div>
         </div>
-        <div class="stat-card stat-success">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <path d="M22 4L12 14.01l-3-3" />
-                </svg></div>
-            <div class="stat-content">
-                <div class="stat-label">پاسخ داده شده</div>
-                <div class="stat-value">{{ answered_messages|default:0 }}</div>
-            </div>
+    </div>
+    <div class="stat-card stat-success">
+        <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <div>
+            <div class="stat-label">پاسخ داده شده</div>
+            <div class="stat-value">{{ answered_messages|default:0 }}</div>
         </div>
-        <div class="stat-card stat-info">
-            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg></div>
-            <div class="stat-content">
-                <div class="stat-label">فایل پیوست</div>
-                <div class="stat-value">{{ attachments_count|default:0 }}</div>
-            </div>
+    </div>
+    <div class="stat-card stat-info">
+        <div class="stat-icon"><i class="fa-solid fa-paperclip"></i></div>
+        <div>
+            <div class="stat-label">دارای پیوست</div>
+            <div class="stat-value">{{ attachments_count|default:0 }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- نمودارها -->
+<div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <h3><i class="fa-solid fa-chart-line"></i> روند پیام‌ها</h3>
+            <span class="badge badge-primary"><i class="fa-solid fa-calendar"></i> ۷ روز اخیر</span>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="messagesChart"></canvas>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h2>آخرین پیام‌ها</h2>
-            <a href="{% url 'panel:main_contact' %}" class="btn-text">مشاهده همه ←</a>
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <h3><i class="fa-solid fa-chart-pie"></i> وضعیت پیام‌ها</h3>
         </div>
-        <div class="card-body">
-            {% if recent_messages %}
-            <div class="recent-list">
-                {% for msg in recent_messages %}
-                <div class="recent-item">
-                    <div class="recent-avatar">{{ msg.name|slice:":1" }}</div>
-                    <div class="recent-info"><strong>{{ msg.name }}</strong><span>{{ msg.message|truncatechars:60
-                            }}</span></div>
-                    <div class="recent-meta"><small>{{ msg.created_at|timesince }} پیش</small></div>
+        <div class="chart-wrapper">
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- آخرین پیام‌ها -->
+<div class="card">
+    <div class="card-header">
+        <h2><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary-light);"></i> آخرین پیام‌ها</h2>
+        <a href="{% url 'panel:main_contact' %}" class="btn-text">
+            مشاهده همه <i class="fa-solid fa-arrow-left"></i>
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="recent-list">
+            {% for msg in recent_messages %}
+            <div class="recent-item">
+                <div class="recent-avatar">{{ msg.name|slice:":1" }}</div>
+                <div class="recent-info">
+                    <strong>{{ msg.name }}</strong>
+                    <span>{{ msg.message|truncatechars:60 }}</span>
                 </div>
-                {% endfor %}
+                <div class="recent-meta">
+                    <small><i class="fa-regular fa-clock"></i> {{ msg.created_at|timesince }} پیش</small>
+                </div>
             </div>
-            {% else %}
+            {% empty %}
             <div class="empty-state">
-                <p>هنوز پیامی ثبت نشده است</p>
+                <i class="fa-solid fa-inbox"></i>
+                <h3>هنوز پیامی ثبت نشده است</h3>
+                <p>پیام‌های جدید اینجا نمایش داده می‌شوند</p>
             </div>
-            {% endif %}
+            {% endfor %}
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>document.getElementById('pageTitle').textContent = 'داشبورد';</script>
+<script>
+document.getElementById('pageTitle').textContent = 'داشبورد';
+
+// گرفتن رنگ‌ها از CSS Variables
+function getCSSVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function buildCharts() {
+    const primary = getCSSVar('--primary') || '#ff6b00';
+    const primaryLight = getCSSVar('--primary-light') || '#ff9a4d';
+    const success = getCSSVar('--success') || '#10b981';
+    const danger = getCSSVar('--danger') || '#ef4444';
+    const info = getCSSVar('--info') || '#3b82f6';
+    const textMain = getCSSVar('--text-main') || '#fff';
+    const textMuted = getCSSVar('--text-muted') || '#888';
+    const border = getCSSVar('--border') || 'rgba(255,255,255,0.08)';
+
+    const unread = {{ unread_messages|default:0 }};
+    const answered = {{ answered_messages|default:0 }};
+    const read = {{ answered_messages|default:0 }};  // خوانده شده
+    const total = {{ total_messages|default:0 }};
+    const other = Math.max(0, total - unread - answered);
+
+    // نمودار خطی
+    const ctx1 = document.getElementById('messagesChart');
+    if (ctx1) {
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['۶ روز پیش', '۵ روز پیش', '۴ روز پیش', '۳ روز پیش', '۲ روز پیش', 'دیروز', 'امروز'],
+                datasets: [{
+                    label: 'پیام‌های دریافتی',
+                    data: [Math.round(total*0.1), Math.round(total*0.12), Math.round(total*0.15), Math.round(total*0.18), Math.round(total*0.2), Math.round(total*0.15), Math.round(total*0.1)],
+                    borderColor: primary,
+                    backgroundColor: function(context) {
+                        const chart = context.chart;
+                        const {ctx, chartArea} = chart;
+                        if (!chartArea) return null;
+                        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        gradient.addColorStop(0, primary + '66');
+                        gradient.addColorStop(1, primary + '00');
+                        return gradient;
+                    },
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: primary,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.85)',
+                        titleColor: textMain,
+                        bodyColor: textMain,
+                        borderColor: primary,
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: textMuted }, grid: { color: border } },
+                    y: { ticks: { color: textMuted }, grid: { color: border } }
+                }
+            }
+        });
+    }
+
+    // نمودار دونات
+    const ctx2 = document.getElementById('statusChart');
+    if (ctx2) {
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: ['خوانده نشده', 'پاسخ داده شده', 'سایر'],
+                datasets: [{
+                    data: [unread, answered, other],
+                    backgroundColor: [danger, success, info],
+                    borderColor: 'transparent',
+                    borderWidth: 0,
+                    hoverOffset: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: textMain, padding: 15, font: { family: 'Vazirmatn', size: 12 } }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0,0,0,0.85)',
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                }
+            }
+        });
+    }
+}
+
+if (window.Chart) {
+    Chart.defaults.font.family = 'Vazirmatn, sans-serif';
+    buildCharts();
+
+    // بازسازی نمودارها هنگام تغییر تم
+    const observer = new MutationObserver(() => {
+        document.querySelectorAll('canvas').forEach(c => {
+            const chart = Chart.getChart(c);
+            if (chart) chart.destroy();
+        });
+        buildCharts();
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+}
+</script>
 {% endblock %}

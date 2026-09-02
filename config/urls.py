@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('main.urls')),
     path('blog/', include('blog.urls', namespace='blog')),
     path('portfolio/', include('portfolio.urls', namespace='port')),
+    path('gallery/', include('gallery.urls', namespace='gallery')),
     path('zasco-admin-x9k2p/', include('panel.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('accounts/', include('django.contrib.auth.urls')),

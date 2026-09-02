@@ -6,10 +6,41 @@
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">مقاله‌ها</h1>
+        <h1 class="page-title">
+            <i class="fa-solid fa-newspaper"></i>
+            مقاله‌ها
+        </h1>
         <p class="page-subtitle">مدیریت مقالات وبلاگ</p>
     </div>
-    <a href="{% url 'panel:blog_post_add' %}" class="btn-primary">+ مقاله جدید</a>
+    <a href="{% url 'panel:blog_post_add' %}" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i>
+        مقاله جدید
+    </a>
+</div>
+
+<!-- آمار سریع -->
+<div class="quick-stats">
+    <div class="quick-stat">
+        <i class="fa-solid fa-newspaper"></i>
+        <div>
+            <div class="qs-value">{{ posts.paginator.count|default:posts|length }}</div>
+            <div class="qs-label">کل مقاله‌ها</div>
+        </div>
+    </div>
+    <div class="quick-stat">
+        <i class="fa-solid fa-circle-check" style="color:var(--success);"></i>
+        <div>
+            <div class="qs-value">{{ published_count|default:"—" }}</div>
+            <div class="qs-label">منتشر شده</div>
+        </div>
+    </div>
+    <div class="quick-stat">
+        <i class="fa-solid fa-file-pen" style="color:var(--warning);"></i>
+        <div>
+            <div class="qs-value">{{ draft_count|default:"—" }}</div>
+            <div class="qs-label">پیش‌نویس</div>
+        </div>
+    </div>
 </div>
 
 <div class="card">
@@ -17,68 +48,104 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>عنوان</th>
-                    <th>دسته‌بندی</th>
-                    <th>وضعیت</th>
-                    <th>بازدید</th>
-                    <th>لایک</th>
-                    <th>تاریخ</th>
-                    <th>عملیات</th>
+                    <th><i class="fa-solid fa-heading"></i> عنوان</th>
+                    <th><i class="fa-solid fa-folder"></i> دسته‌بندی</th>
+                    <th><i class="fa-solid fa-circle-check"></i> وضعیت</th>
+                    <th><i class="fa-solid fa-eye"></i> بازدید</th>
+                    <th><i class="fa-solid fa-heart"></i> لایک</th>
+                    <th><i class="fa-regular fa-calendar"></i> تاریخ</th>
+                    <th style="text-align:center;"><i class="fa-solid fa-bolt"></i> عملیات</th>
                 </tr>
             </thead>
             <tbody>
                 {% for post in posts %}
                 <tr>
-                    <td><strong>{{ post.title }}</strong></td>
+                    <td>
+                        <div class="post-title-cell">
+                            <div class="post-thumb">
+                                {% if post.featured_image %}
+                                <img src="{{ post.featured_image.url }}" alt="{{ post.title }}">
+                                {% else %}
+                                <i class="fa-solid fa-newspaper"></i>
+                                {% endif %}
+                            </div>
+                            <div class="post-info">
+                                <strong>{{ post.title }}</strong>
+                                {% if post.excerpt %}
+                                <span class="post-excerpt">{{ post.excerpt|truncatechars:60 }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
                     <td>
                         {% if post.category %}
-                        {% if post.category.parent %}
-                        <div class="cat-cell">
-                            <span class="cat-parent">{{ post.category.parent.title }}</span>
-                            <svg class="cat-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5">
-                                <polyline points="15 18 9 12 15 6" />
-                            </svg>
-                            <span class="cat-child">{{ post.category.title }}</span>
-                        </div>
+                            {% if post.category.parent %}
+                            <div class="cat-cell">
+                                <span class="cat-parent"><i class="fa-solid fa-folder"></i> {{ post.category.parent.title }}</span>
+                                <i class="fa-solid fa-chevron-left cat-arrow"></i>
+                                <span class="cat-child">{{ post.category.title }}</span>
+                            </div>
+                            {% else %}
+                            <span class="cat-child solo">
+                                <i class="fa-solid fa-folder"></i> {{ post.category.title }}
+                            </span>
+                            {% endif %}
                         {% else %}
-                        <div class="cat-cell">
-                            <span class="cat-child solo">{{ post.category.title }}</span>
-                        </div>
-                        {% endif %}
-                        {% else %}
-                        <span class="badge badge-warning">بدون دسته</span>
+                        <span class="text-muted">
+                            <i class="fa-solid fa-folder-open"></i> بدون دسته
+                        </span>
                         {% endif %}
                     </td>
                     <td>
                         {% if post.published %}
-                        <span class="badge badge-success">منتشر شده</span>
+                        <span class="badge badge-success">
+                            <i class="fa-solid fa-check"></i> منتشر شده
+                        </span>
                         {% else %}
-                        <span class="badge badge-warning">پیش‌نویس</span>
+                        <span class="badge badge-warning">
+                            <i class="fa-solid fa-pen"></i> پیش‌نویس
+                        </span>
                         {% endif %}
                     </td>
-                    <td>{{ post.views }}</td>
-                    <td>{{ post.likes }}</td>
-                    <td>{{ post.created|date:"Y/m/d" }}</td>
                     <td>
-                        <a href="{% url 'panel:blog_post_edit' post.id %}" class="btn-icon" title="ویرایش">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                            </svg>
-                        </a>
-                        <button class="btn-icon danger delete-post-btn" data-id="{{ post.id }}" title="حذف">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="3 6 5 6 21 6" />
-                                <path
-                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                        </button>
+                        <span class="metric-cell">
+                            <i class="fa-solid fa-eye"></i>
+                            {{ post.views|default:0 }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="metric-cell likes">
+                            <i class="fa-solid fa-heart"></i>
+                            {{ post.likes|default:0 }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="date-cell">
+                            <i class="fa-regular fa-calendar"></i>
+                            {{ post.created|date:"Y/m/d" }}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="actions" style="justify-content:center;">
+                            <a href="{% url 'panel:blog_post_edit' post.id %}" class="btn-icon success" title="ویرایش">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <button type="button" class="btn-icon danger delete-post-btn"
+                                    data-id="{{ post.id }}" data-title="{{ post.title }}" title="حذف">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center">هنوز مقاله‌ای ایجاد نشده</td>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-newspaper"></i>
+                            <h3>هنوز مقاله‌ای ایجاد نشده</h3>
+                            <p>اولین مقاله خود را با کلیک روی دکمه «مقاله جدید» بسازید</p>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -88,16 +155,117 @@
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+/* آمار سریع بالای جدول */
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+}
+.quick-stat {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    transition: all var(--transition);
+}
+.quick-stat:hover { border-color: var(--line-hover); transform: translateY(-2px); }
+.quick-stat i {
+    font-size: 22px;
+    color: var(--primary-light);
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--primary-subtle);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.qs-value { font-size: 1.4rem; font-weight: 900; line-height: 1; }
+.qs-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+
+/* سلول عنوان مقاله */
+.post-title-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 280px;
+}
+.post-thumb {
+    width: 56px; height: 42px;
+    border-radius: 8px;
+    background: var(--glass);
+    border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.post-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.post-thumb i { font-size: 16px; }
+.post-info { flex: 1; min-width: 0; }
+.post-info strong {
+    display: block;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    margin-bottom: 4px;
+    color: var(--text-main);
+}
+.post-excerpt {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* متریک‌ها */
+.metric-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+.metric-cell i { color: var(--text-muted); font-size: 13px; }
+.metric-cell.likes i { color: var(--danger); }
+
+@media (max-width: 768px) {
+    .quick-stats { grid-template-columns: 1fr; }
+    .post-title-cell { min-width: 200px; }
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
-    document.querySelectorAll('.delete-post-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            if (!confirm('آیا از حذف این مقاله مطمئن هستید؟')) return;
-            fetch('/zasco-admin-x9k2p/blog/post/' + btn.dataset.id + '/delete/', { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } })
-                .then(function (r) { return r.json() })
-                .then(function (d) { if (d.success) location.reload() });
+document.getElementById('pageTitle').textContent = 'مقاله‌ها';
+
+function getCookie(n) { var v = '; ' + document.cookie; var p = v.split('; ' + n + '='); if (p.length === 2) return p.pop().split(';').shift(); return ''; }
+
+// حذف مقاله با Ajax
+document.querySelectorAll('.delete-post-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var title = btn.dataset.title;
+        if (!confirm('آیا از حذف مقاله «' + title + '» مطمئن هستید؟')) return;
+        
+        fetch('/zasco-admin-x9k2p/blog/posts/' + btn.dataset.id + '/delete/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.success) {
+                var row = btn.closest('tr');
+                row.style.opacity = '0';
+                row.style.transform = 'scale(.97)';
+                setTimeout(function() { row.remove(); }, 300);
+                if (window.showToast) showToast('مقاله حذف شد', 'success');
+            }
         });
     });
-    function getCookie(n) { var v = '; ' + document.cookie; var p = v.split('; ' + n + '='); if (p.length === 2) return p.pop().split(';').shift(); return ''; }
+});
 </script>
 {% endblock %}

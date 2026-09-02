@@ -1,19 +1,38 @@
 {% load static %}
 <!doctype html>
 <html lang="fa" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>{% block title %}پنل مدیریت{% endblock %} | زاسکو ذوب</title>
+    
+    <!-- ═══ فونت وزیرمتن ═══ -->
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/panel/panel.css' %}">
-    {% block extra_css %}{% endblock %}
+    
+    <!-- ═══ FontAwesome 6 (آیکون‌های نرم و یکپارچه) ═══ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- ═══ Chart.js (برای نمودارهای داشبورد) ═══ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- ═══ CKEditor ═══ -->
     <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
     <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/translations/fa.js"></script>
+    
+    <!-- ═══ CSS اصلی ═══ -->
+    <link rel="stylesheet" href="{% static 'css/panel/panel.css' %}">
+    
+    <!-- ═══ جلوگیری از flash کردن theme ═══ -->
+    <script>
+        (function() {
+            var t = localStorage.getItem('panel_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    
+    {% block extra_css %}{% endblock %}
 </head>
-
 <body>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="panel-wrapper">
@@ -24,20 +43,10 @@
             {% include 'partials/panel_footer.html' %}
         </div>
     </div>
-
-    <a href="{% url 'panel:blog_comment_list' %}"
-        class="nav-item {% if request.resolver_match.url_name == 'blog_comment_list' %}active{% endif %}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-        <span>کامنت‌ها</span>
-        {% if pending_comments %}
-        <span class="nav-badge badge-pulse">{{ pending_comments }}</span>
-        {% endif %}
-    </a>
-
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
     <script src="{% static 'js/panel/panel.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
-
 </html>

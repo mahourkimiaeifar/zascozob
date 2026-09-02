@@ -4,36 +4,46 @@
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">ویرایش تصویر</h1>
+        <h1 class="page-title"><i class="fa-solid fa-image"></i> ویرایش تصویر</h1>
         <p class="page-subtitle">آلبوم: {{ image.album.title }}</p>
     </div>
-    <a href="{% url 'panel:gallery_album_images' image.album.id %}" class="btn-ghost">← بازگشت</a>
+    <a href="{% url 'panel:gallery_album_images' image.album.id %}" class="btn btn-ghost">
+        <i class="fa-solid fa-arrow-right"></i> بازگشت
+    </a>
 </div>
 
-<form method="POST" class="form-card" style="max-width:800px">
+<form method="POST" class="form-card">
     {% csrf_token %}
-    <div class="form-section" style="display: flex; gap: 30px; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 250px;">
-            <img src="{{ image.image.url }}" style="width: 100%; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+
+    <div class="form-section edit-split">
+        <div class="edit-preview">
+            <img src="{{ image.image.url }}" alt="">
         </div>
-        <div style="flex: 1.5; min-width: 300px;">
+        <div class="edit-fields">
             <div class="field">
-                <label>عنوان تصویر</label>
+                <label><i class="fa-solid fa-heading"></i> عنوان تصویر</label>
                 <input type="text" name="title" value="{{ image.title }}" class="form-control">
             </div>
             <div class="field">
-                <label>توضیحات (ALT سئو)</label>
+                <label><i class="fa-solid fa-font"></i> توضیحات (ALT سئو)</label>
                 <textarea name="description" rows="3" class="form-control">{{ image.description }}</textarea>
             </div>
             <div class="field">
-                <label>ترتیب نمایش (عدد)</label>
+                <label><i class="fa-solid fa-sort"></i> ترتیب نمایش (عدد)</label>
                 <input type="number" name="order" value="{{ image.order }}" class="form-control">
-            </div>
-            <div class="save-bar" style="margin-top: 20px;">
-                <a href="{% url 'panel:gallery_album_images' image.album.id %}" class="btn-ghost">انصراف</a>
-                <button type="submit" class="btn-primary">💾 ذخیره تغییرات</button>
             </div>
         </div>
     </div>
+
+    <div class="save-bar">
+        <a href="{% url 'panel:gallery_album_images' image.album.id %}" class="btn btn-ghost">انصراف</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-floppy-disk"></i> ذخیره تغییرات
+        </button>
+    </div>
 </form>
+{% endblock %}
+
+{% block extra_js %}
+<script>document.getElementById('pageTitle').textContent = 'ویرایش تصویر';</script>
 {% endblock %}

@@ -24,7 +24,7 @@
                         <li><a href="{% url 'about' %}">درباره ما</a></li>
                         <li><a href="{% url 'contact' %}">تماس با ما</a></li>
                         <li><a href="{% url 'portfolio:portfolio_list' %}">نمونه‌کارها</a></li>
-                        <li><a href="/gallery/">گالری تصاویر</a></li>
+                        <li><a href="{% url 'gallery:gallery_3d' %}">گالری تصاویر</a></li>
                         <li><a href="{% url 'blog:post_list' %}">وبلاگ</a></li>
                         {% if site.catalog_link %}
                         <li><a href="{{ site.catalog_link }}" target="_blank">کاتالوگ ما <span

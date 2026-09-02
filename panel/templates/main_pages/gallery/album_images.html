@@ -4,54 +4,57 @@
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">مدیریت تصاویر: {{ album.title }}</h1>
+        <h1 class="page-title"><i class="fa-solid fa-camera"></i> مدیریت تصاویر</h1>
+        <p class="page-subtitle">آلبوم: {{ album.title }}</p>
     </div>
-    <a href="{% url 'panel:gallery_album_list' %}" class="btn-ghost">← بازگشت به آلبوم‌ها</a>
+    <a href="{% url 'panel:gallery_album_list' %}" class="btn btn-ghost">
+        <i class="fa-solid fa-arrow-right"></i> بازگشت به آلبوم‌ها
+    </a>
 </div>
 
-<div class="form-card" style="max-width:800px; margin-bottom: 30px; border: 2px dashed rgba(255,107,0,0.3);">
-    <h3 style="margin-bottom: 20px; color: #ff9a4d;">📤 آپلود تصاویر جدید</h3>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="field">
-            <label>{{ upload_form.images.label }}</label>
-            {{ upload_form.images }}
-            <div class="hint">{{ upload_form.images.help_text }}</div>
-        </div>
-        <button type="submit" class="btn-primary" style="margin-top: 15px;">آپلود و پردازش (واترمارک + فشرده‌سازی)</button>
-    </form>
-</div>
+<!-- آپلود تصاویر -->
+<form method="POST" enctype="multipart/form-data" class="upload-card">
+    {% csrf_token %}
+    <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+    <div class="upload-text">
+        <strong>آپلود تصاویر جدید</strong>
+        <small>چند تصویر همزمان — واترمارک و فشرده‌سازی خودکار انجام می‌شود</small>
+    </div>
+    <div class="field" style="flex:2; min-width:220px; margin:0;">
+        {{ upload_form.images }}
+    </div>
+    <button type="submit" class="btn btn-primary">
+        <i class="fa-solid fa-upload"></i> آپلود و پردازش
+    </button>
+</form>
 
-<div class="grid-gallery">
+<!-- گرید تصاویر -->
+<div class="gallery-grid">
     {% for img in images %}
-    <div class="gallery-item-card">
-        <div class="gallery-img-wrap">
-            <img src="{{ img.image.url }}" alt="{{ img.title }}">
-            <span class="order-badge">#{{ img.order }}</span>
+    <div class="gallery-card">
+        <div class="gallery-thumb">
+            <img src="{{ img.image.url }}" alt="{{ img.title|default:'' }}">
+            <span class="gallery-order">#{{ img.order }}</span>
         </div>
         <div class="gallery-info">
-            <strong>{{ img.title|default:"بدون عنوان"|truncatechars:25 }}</strong>
-            <small>{{ img.uploaded_at|date:"Y/m/d" }}</small>
+            <strong>{{ img.title|default:"بدون عنوان" }}</strong>
+            <small><i class="fa-regular fa-calendar"></i> {{ img.uploaded_at|date:"Y/m/d" }}</small>
         </div>
         <div class="gallery-actions">
-            <a href="{% url 'panel:gallery_image_edit' img.id %}" class="btn-sm btn-warning">ویرایش</a>
-            <a href="{% url 'panel:gallery_image_delete' img.id %}" class="btn-sm btn-danger">حذف</a>
+            <a href="{% url 'panel:gallery_image_edit' img.id %}" class="btn-icon success" title="ویرایش"><i class="fa-solid fa-pen"></i></a>
+            <a href="{% url 'panel:gallery_image_delete' img.id %}" class="btn-icon danger" title="حذف"><i class="fa-solid fa-trash-can"></i></a>
         </div>
     </div>
     {% empty %}
-    <div class="empty-state" style="grid-column: 1/-1; padding: 40px;">هنوز تصویری در این آلبوم وجود ندارد.</div>
+    <div class="empty-state" style="grid-column:1/-1;">
+        <i class="fa-solid fa-image"></i>
+        <h3>هنوز تصویری در این آلبوم نیست</h3>
+        <p>از فرم بالا تصاویر را آپلود کنید</p>
+    </div>
     {% endfor %}
 </div>
+{% endblock %}
 
-<style>
-.grid-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-.gallery-item-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; }
-.gallery-img-wrap { position: relative; height: 150px; background: #111; }
-.gallery-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-.order-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
-.gallery-info { padding: 12px; }
-.gallery-info strong { display: block; margin-bottom: 4px; color: #fff; }
-.gallery-info small { color: #888; }
-.gallery-actions { display: flex; gap: 8px; padding: 0 12px 12px; }
-</style>
+{% block extra_js %}
+<script>document.getElementById('pageTitle').textContent = 'تصاویر: {{ album.title }}';</script>
 {% endblock %}

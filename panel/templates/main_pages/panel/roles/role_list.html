@@ -4,39 +4,62 @@
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">🔐 مدیریت نقش‌ها و دسترسی‌ها</h1>
+        <h1 class="page-title"><i class="fa-solid fa-shield-halved"></i> نقش‌ها و دسترسی‌ها</h1>
         <p class="page-subtitle">تعریف نقش‌های سفارشی با دسترسی‌های مشخص</p>
     </div>
-    <a href="{% url 'panel:role_add' %}" class="btn-primary">+ نقش جدید</a>
+    <a href="{% url 'panel:role_add' %}" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> نقش جدید
+    </a>
 </div>
 
-<div class="form-card" style="padding: 0; overflow: hidden;">
-    <table class="data-table" style="width: 100%; margin: 0;">
-        <thead>
-            <tr>
-                <th>نام نقش</th>
-                <th>توضیحات</th>
-                <th>تعداد دسترسی‌ها</th>
-                <th>کاربران</th>
-                <th>عملیات</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for role in roles %}
-            <tr>
-                <td><strong>{{ role.name }}</strong></td>
-                <td>{{ role.description|default:"-"|truncatechars:50 }}</td>
-                <td><span class="badge">{{ role.permissions|length }} دسترسی</span></td>
-                <td>{{ role.userprofile_set.count }} کاربر</td>
-                <td class="actions">
-                    <a href="{% url 'panel:role_edit' role.id %}" class="btn-sm btn-warning">✏️ ویرایش</a>
-                    <a href="{% url 'panel:role_delete' role.id %}" class="btn-sm btn-danger">🗑️ حذف</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5" style="text-align:center; padding:30px; color:#888;">هیچ نقشی تعریف نشده است.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th><i class="fa-solid fa-mask"></i> نام نقش</th>
+                    <th><i class="fa-solid fa-align-left"></i> توضیحات</th>
+                    <th><i class="fa-solid fa-key"></i> دسترسی‌ها</th>
+                    <th><i class="fa-solid fa-users"></i> کاربران</th>
+                    <th style="text-align:center;"><i class="fa-solid fa-bolt"></i> عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for role in roles %}
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="u-avatar"><i class="fa-solid fa-shield-halved"></i></div>
+                            <strong class="u-name">{{ role.name }}</strong>
+                        </div>
+                    </td>
+                    <td><span class="text-muted">{{ role.description|default:"—"|truncatechars:50 }}</span></td>
+                    <td><span class="badge badge-info"><i class="fa-solid fa-key"></i> {{ role.permissions|length }} دسترسی</span></td>
+                    <td><span class="badge badge-success"><i class="fa-solid fa-users"></i> {{ role.userprofile_set.count }} کاربر</span></td>
+                    <td>
+                        <div class="actions" style="justify-content:center;">
+                            <a href="{% url 'panel:role_edit' role.id %}" class="btn-icon success" title="ویرایش"><i class="fa-solid fa-pen"></i></a>
+                            <a href="{% url 'panel:role_delete' role.id %}" class="btn-icon danger" title="حذف"><i class="fa-solid fa-trash-can"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <h3>هیچ نقشی تعریف نشده</h3>
+                            <p>اولین نقش را با دکمه بالا بسازید</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>document.getElementById('pageTitle').textContent = 'نقش‌ها و دسترسی‌ها';</script>
 {% endblock %}
